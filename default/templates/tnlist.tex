@@ -18,6 +18,7 @@
         <<% for track in EVENT.tracks -%>>
             <<% set course = participant.tracks[track].course -%>>
             <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+            <<%- if not loop.last %>> &<<% endif %>>
         <<% endfor %>> \\
         \hline
     <<% endfor %>>
