@@ -6,9 +6,6 @@ import datetime
 from typing import Dict
 
 
-DATETIME_FORMAT = "%Y-%m-%dT%H-%M-%S.%f%z%"
-DATE_FORMAT = "%Y-%m-%d"
-
 
 def load_input_file(filename):
     with open(filename, encoding='utf-8') as f:
@@ -19,6 +16,14 @@ def load_input_file(filename):
           .format(len(event.participants), len(event.courses), len(event.lodgements), len(event.parts),
                   len(event.tracks)))
     return event
+
+
+def parse_date(value):
+    return datetime.datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def parse_datetime(value):
+    return datetime.datetime.strptime(value.replace(':', ''), "%Y-%m-%dT%H%M%S%z")
 
 
 def calculate_age(reference, born):
@@ -210,8 +215,8 @@ class EventPart:
         part.id = data['id']
         part.title = data['title']
         part.shortname = data['shortname']
-        part.begin = datetime.datetime.strptime(data['part_begin'], DATE_FORMAT).date()
-        part.end = datetime.datetime.strptime(data['part_end'], DATE_FORMAT).date()
+        part.begin = parse_date(data['part_begin'])
+        part.end = parse_date(data['part_end'])
         return part
 
 
@@ -258,10 +263,10 @@ class Course:
         for field, value in data['fields'].items():
             if field not in field_types:
                 continue
-            if field_types[field] == FieldDatatypes.datetime:
-                value = datetime.datetime.strptime(value, DATETIME_FORMAT)
-            elif field_types[field] == FieldDatatypes.date:
-                value = datetime.datetime.strptime(value, DATE_FORMAT).date()
+            if field_types[field] == FieldDatatypes.datetime and value is not None:
+                value = parse_datetime(value)
+            elif field_types[field] == FieldDatatypes.date and value is not None:
+                value = parse_date(value)
             course.fields[field] = value
         return course
 
@@ -307,10 +312,10 @@ class Lodgement:
         for field, value in data['fields'].items():
             if field not in field_types:
                 continue
-            if field_types[field] == FieldDatatypes.datetime:
-                value = datetime.datetime.strptime(value, DATETIME_FORMAT)
-            elif field_types[field] == FieldDatatypes.date:
-                value = datetime.datetime.strptime(value, DATE_FORMAT)
+            if field_types[field] == FieldDatatypes.datetime and value is not None:
+                value = parse_datetime(value)
+            elif field_types[field] == FieldDatatypes.date and value is not None:
+                value = parse_date(value)
             lodgement.fields[field] = value
         for part in event_parts:
             lodgement_part = LodgementPart()
@@ -371,7 +376,7 @@ class Participant:
         participant.cdedbid = persona_data['id']
         participant.name = Name.from_json_persona(persona_data)
         participant.gender = Genders(persona_data['gender'])
-        participant.birthday = datetime.datetime.strptime(persona_data['birthday'], DATE_FORMAT).date()
+        participant.birthday = parse_date(persona_data['birthday'])
         participant.age = calculate_age(event_begin, participant.birthday)
         participant.email = persona_data['username']
         participant.telephone = persona_data['telephone']
@@ -383,9 +388,9 @@ class Participant:
             if field not in field_types:
                 continue
             if field_types[field] == FieldDatatypes.datetime and value is not None:
-                value = datetime.datetime.strptime(value, DATETIME_FORMAT)
+                value = parse_datetime(value)
             elif field_types[field] == FieldDatatypes.date and value is not None:
-                value = datetime.datetime.strptime(value, DATE_FORMAT).date()
+                value = parse_date(value)
             participant.fields[field] = value
 
         return participant
