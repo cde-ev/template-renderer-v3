@@ -19,9 +19,9 @@
             <<% if track in participant.tracks -%>>
                 <<% with course = participant.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
-                <<% endwith -%>>
-            <<% endif -%>>
-            <<%- if not loop.last %>> &<<% endif %>>
+                <<%- endwith %>>
+            <<%- endif -%>>
+            <<% if not loop.last %>> &<<% endif %>>
         <<% endfor %>> \\
         \hline
     <<% endfor %>>
