@@ -148,16 +148,12 @@ class Event:
             for part, participant_part in participant.parts.items():
                 part.participants.append(participant)
                 if participant_part.lodgement:
-                    if participant_part.campingmat:
-                        participant_part.lodgement.parts[part].campingmat_inhabitants.append(participant)
-                    else:
-                        participant_part.lodgement.parts[part].inhabitants.append(participant)
+                    participant_part.lodgement.parts[part].inhabitants.append(
+                        (participant, participant_part.campingmat))
             for track, participant_track in participant.tracks.items():
                 if participant_track.course:
-                    if participant_track.instructor:
-                        participant_track.course.tracks[track].instructors.append(participant)
-                    else:
-                        participant_track.course.tracks[track].attendees.append(participant)
+                    participant_track.course.tracks[track].attendees.append(
+                        (participant, participant_track.instructor))
         event.participants = [p for p in participants if p.parts]
 
         return event
@@ -241,8 +237,15 @@ class CourseTrack:
         self.track = None  # type: EventTrack
         self.course = None  # type: Course
         self.active = False
-        self.attendees = []  # type: [Participant]
-        self.instructors = []    # type: [Participant]
+        self.attendees = []  # type: [(Participant, bool)]
+
+    @property
+    def regular_attendees(self):
+        return [p for p, instructor in self.attendees if not instructor]
+
+    @property
+    def instructors(self):
+        return [p for p, instructor in self.attendees if instructor]
 
     @classmethod
     def from_json(cls, data, tracks_by_id, courses_by_id):
@@ -287,8 +290,15 @@ class LodgementPart:
     def __init__(self):
         self.part = None
         self.lodgement = None
-        self.inhabitants = []  # type: [Participant]
-        self.campingmat_inhabitants = []  # type: [Participant]
+        self.inhabitants = []  # type: [(Participant, bool)]
+
+    @property
+    def regular_inhabitants(self):
+        return [p for p, campingmat in self.inhabitants if not campingmat]
+
+    @property
+    def campingmat_inhabitants(self):
+        return [p for p, campingmat in self.inhabitants if campingmat]
 
 
 class Participant:
@@ -342,6 +352,12 @@ class Name:
         self.name_supplement = ""
         self.display_name = ""
 
+    @property
+    def fullname(self):
+        return ((self.title + " ") if self.title else "") \
+               + self.given_names + " " + self.family_name \
+               + ((" " + self.name_supplement) if self.name_supplement else "")
+
     @classmethod
     def from_json_persona(cls, data):
         name = cls()
@@ -352,12 +368,6 @@ class Name:
         name.display_name = data['display_name']
         return name
 
-    @property
-    def fullname(self):
-        return ((self.title + " ") if self.title else "") \
-               + self.given_names + " " + self.family_name \
-               + ((" " + self.name_supplement) if self.name_supplement else "")
-
 
 class Address:
     def __init__(self):
@@ -366,16 +376,6 @@ class Address:
         self.postal_code = ""
         self.location = ""
         self.country = ""
-
-    @classmethod
-    def from_json_persona(cls, data):
-        address = cls()
-        address.address = data['address']
-        address.address_supplement = data['address_supplement']
-        address.postal_code = data['postal_code']
-        address.location = data['location']
-        address.country = data['country']
-        return address
 
     @property
     def full_address(self):
@@ -388,6 +388,16 @@ class Address:
         if self.country not in ("Germany", "Deutschland"):
             res += "\n" + self.country
         return res
+
+    @classmethod
+    def from_json_persona(cls, data):
+        address = cls()
+        address.address = data['address']
+        address.address_supplement = data['address_supplement']
+        address.postal_code = data['postal_code']
+        address.location = data['location']
+        address.country = data['country']
+        return address
 
 
 class ParticipantPart:
