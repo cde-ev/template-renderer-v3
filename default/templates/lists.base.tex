@@ -30,8 +30,8 @@
 <<% endblock preamble %>>
 
 <<% block content %>>
-    \thispagestyle{plain}
     <<% if not hide_header %>>
+        \thispagestyle{plain}
         <<% if CONFIG.layout.logo_file %>>
             \hspace*{\fill}\includegraphics[height=3cm]{<<< find_asset(CONFIG.layout.logo_file) >>>}\\
 
