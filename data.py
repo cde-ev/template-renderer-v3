@@ -103,6 +103,8 @@ class Event:
         self.courses = []
         self.lodgements = []
 
+        self.timestamp = datetime.datetime.now()
+
     @property
     def begin(self):
         if not self.parts:
@@ -122,6 +124,7 @@ class Event:
         event_data = data['event.events'][str(data['id'])]
         event.title = event_data['title']
         event.shortname = event_data['shortname']
+        event.timestamp = datetime.datetime.strptime(data['timestamp'].replace(':', ''), "%Y-%m-%dT%H%M%S.%f%z")
 
         # Parse parts and tracks
         event.parts = [EventPart.from_json(part_data)
