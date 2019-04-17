@@ -16,6 +16,8 @@ def escape_tex(value, linebreaks=False):
     :param linebreaks: If true, linebreaks are converted to TeX linebreaks ("\\")
     :return: The escaped string
     """
+    if value is None:
+        return ""
     latex_subs = [
         (re.compile(r'\\'), r'\\textbackslash'),
         (re.compile(r'([{}_#%&$])'), r'\\\1'),
