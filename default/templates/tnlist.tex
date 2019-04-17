@@ -16,8 +16,11 @@
         \href{mailto:<<< participant.name.fullname|e >>> <<< '<' + participant.email|e + '>' >>>}{<<< participant.email|e >>>} &
         <<< participant.address.postal_code|e >>> <<< participant.address.location|e >>> &
         <<% for track in EVENT.tracks -%>>
-            <<% set course = participant.tracks[track].course -%>>
-            <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+            <<% if track in participant.tracks -%>>
+                <<% with course = participant.tracks[track].course -%>>
+                    <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+                <<% endwith -%>>
+            <<% endif -%>>
             <<%- if not loop.last %>> &<<% endif %>>
         <<% endfor %>> \\
         \hline
