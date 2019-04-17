@@ -331,6 +331,7 @@ class Participant:
         participant.telephone = persona_data['telephone']
         participant.mobile = persona_data['mobile']
         participant.address = Address.from_json_persona(persona_data)
+        participant.list_consent = data['list_consent']
 
         for field, value in data['fields'].items():
             if field not in field_types:
