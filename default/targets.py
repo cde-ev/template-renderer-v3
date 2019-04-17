@@ -61,3 +61,9 @@ def tnlists(event, config, output_dir, match):
     return (RenderTask('tnlist.tex', 'tnlist', {}, True),
             RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True))
 
+
+@target_function
+def courselist(event, config, output_dir, match):
+    """Render the courselists"""
+
+    return RenderTask('courselist.tex', 'courselist', {}, True),

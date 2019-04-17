@@ -1,0 +1,36 @@
+<<% extends "lists.base.tex" %>>
+
+<<% set title = "Kursliste " + EVENT.title|e %>>
+<<% set num_columns = 3
+                      + (1 if CONFIG.data.course_room_field else 0)
+                      + EVENT.tracks|length %>>
+<<% set hide_header = True %>>
+
+<<% block table_head %>>
+    \head{Nr.} & \head{Name}
+    <<% if CONFIG.data.course_room_field %>>
+        & \head{Kursraum}
+    <<% endif %>>
+    & \head{Kursleiter}
+    <<% for track in EVENT.tracks -%>>
+        & \head{Teilnehmer<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
+    <<% endfor %>>
+<<% endblock %>>
+
+<<% block table_body %>>
+    <<% for course in EVENT.courses %>>
+        <<< course.nr|e >>>. & <<< course.shortname|e >>>
+        <<% if CONFIG.data.course_room_field %>>
+            & <<< course.fields[CONFIG.data.course_room_field]|e >>>
+        <<% endif %>>
+        &
+        <<% for instructor in course.instructors -%>>
+            <<% if not loop.first %>>, <<% endif -%>>
+            <<< instructor.name.given_names|e >>> <<< instructor.name.family_name|e >>>
+        <<%- endfor %>>
+        <<% for track in EVENT.tracks -%>>
+            & <<% if track in course.tracks %>><<< course.tracks[track].attendees|length >>><<% endif %>>
+        <<% endfor %>> \\
+        \hline
+    <<% endfor %>>
+<<% endblock %>>
