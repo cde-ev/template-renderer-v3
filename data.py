@@ -6,6 +6,10 @@ import datetime
 from typing import Dict
 
 
+DATETIME_FORMAT = "%Y-%m-%dT%H-%M-%S.%f%z%"
+DATE_FORMAT = "%Y-%m-%d"
+
+
 def load_input_file(filename):
     with open(filename, encoding='utf-8') as f:
         data = json.load(f)
@@ -225,9 +229,9 @@ class Course:
             if field not in field_types:
                 continue
             if field_types[field] == FieldDatatypes.datetime:
-                value = datetime.datetime.fromisoformat(value)
+                value = datetime.datetime.strptime(value, DATETIME_FORMAT)
             elif field_types[field] == FieldDatatypes.date:
-                value = datetime.date.fromisoformat(value)
+                value = datetime.datetime.strptime(value, DATE_FORMAT).date()
             course.fields[field] = value
         return course
 
@@ -274,9 +278,9 @@ class Lodgement:
             if field not in field_types:
                 continue
             if field_types[field] == FieldDatatypes.datetime:
-                value = datetime.datetime.fromisoformat(value)
+                value = datetime.datetime.strptime(value, DATETIME_FORMAT)
             elif field_types[field] == FieldDatatypes.date:
-                value = datetime.date.fromisoformat(value)
+                value = datetime.datetime.strptime(value, DATE_FORMAT)
             lodgement.fields[field] = value
         for part in event_parts:
             lodgement_part = LodgementPart()
@@ -326,7 +330,7 @@ class Participant:
         participant.cdedbid = persona_data['id']
         participant.name = Name.from_json_persona(persona_data)
         participant.gender = Genders(persona_data['gender'])
-        participant.birthday = datetime.date.fromisoformat(persona_data['birthday'])
+        participant.birthday = datetime.datetime.strptime(persona_data['birthday'], DATE_FORMAT).date()
         participant.email = persona_data['username']
         participant.telephone = persona_data['telephone']
         participant.mobile = persona_data['mobile']
@@ -337,9 +341,9 @@ class Participant:
             if field not in field_types:
                 continue
             if field_types[field] == FieldDatatypes.datetime and value is not None:
-                value = datetime.datetime.fromisoformat(value)
+                value = datetime.datetime.strptime(value, DATETIME_FORMAT)
             elif field_types[field] == FieldDatatypes.date and value is not None:
-                value = datetime.date.fromisoformat(value)
+                value = datetime.datetime.strptime(value, DATE_FORMAT).date()
             participant.fields[field] = value
 
         return participant
