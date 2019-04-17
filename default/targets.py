@@ -59,7 +59,8 @@ def tnlists(event, config, output_dir, match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
     return (RenderTask('tnlist.tex', 'tnlist', {}, True),
-            RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True))
+            RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True),
+            RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {}, True))
 
 
 @target_function

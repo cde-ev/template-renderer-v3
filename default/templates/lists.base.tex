@@ -9,6 +9,7 @@
       * num_columns: the number of table columns. Alternatively, you may override the `table_columnspec` block, to
         provide the full LaTeX table specification.
       * (optional) hide_header: Set to True to hide the heading and logo section
+      * (optional) portrait: Set to True to use portrait DIN A4 format instead of landscape
 
     The following blocks should be specified:
       * table_head: Should have a form similar to "\head{Column A} & \head{Column B}". Without trailing newline
@@ -16,6 +17,12 @@
       * table_body: The complete loop to generate table rows. Including a trailing \hline if you wish one at the bottom.
 #>>
 <<% extends "base.tex" %>>
+
+
+<<% block documentclass_options %>>
+    10pt,<<% if portrait %>>portrait<<% else %>>landscape<<% endif %>>,parskip=half+
+<<% endblock %>>
+
 
 <<% block preamble %>>
     % Set header and footer
@@ -32,14 +39,24 @@
 <<% block content %>>
     <<% if not hide_header %>>
         \thispagestyle{plain}
-        <<% if CONFIG.layout.logo_file %>>
-            \hspace*{\fill}\includegraphics[height=3cm]{<<< find_asset(CONFIG.layout.logo_file) >>>}\\
+        <<# Special header variant for portrait layout with logo #>>
+        <<% if portrait and CONFIG.layout.logo_file %>>
+            \begin{minipage}[c]{\textwidth-3cm}%
+                \headingfamily\bfseries\huge{}<<< title >>>
+            \end{minipage}%
+            \begin{minipage}[c]{3cm}%
+                \includegraphics[width=\textwidth]{<<< find_asset(CONFIG.layout.logo_file) >>>}
+            \end{minipage}
+        <<% else %>>
+            <<% if CONFIG.layout.logo_file %>>
+                \hspace*{\fill}\includegraphics[height=3cm]{<<< find_asset(CONFIG.layout.logo_file) >>>}\\
 
-            \vspace{-2cm}
+                \vspace{-2cm}
+            <<% endif %>>
+            \begin{center}
+                \headingfamily\bfseries\huge{}<<< title >>>
+            \end{center}
         <<% endif %>>
-        \begin{center}
-            \headingfamily\bfseries\huge{}<<< title >>>
-        \end{center}
     <<% endif %>>
 
     \rowcolors{2}{gray!25}{white}

@@ -1,0 +1,36 @@
+<<% extends "lists.base.tex" %>>
+
+<<% set title = "Teilnehmerliste " + EVENT.title|e %>>
+<<% set num_columns = 2 + EVENT.tracks|length + EVENT.parts|length %>>
+<<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
+
+<<% block table_head %>>
+    \head{Vorname} & \head{Nachname}
+    <<% for part in EVENT.parts -%>>
+        & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
+    <<% endfor %>>
+    <<% for track in EVENT.tracks -%>>
+        & \head{Kurs<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
+    <<% endfor %>>
+<<% endblock %>>
+
+<<% block table_body %>>
+    <<% for participant in EVENT.participants %>>
+        <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>>
+        <<% for part in EVENT.parts -%>>
+            & <<% if part in participant.parts %>>
+                <<% with lodgement = participant.parts[part].lodgement -%>>
+                    <<% if lodgement %>><<< lodgement.moniker|e >>><<% endif %>>
+                <<% endwith %>>
+            <<% endif %>>
+        <<% endfor %>>
+        <<% for track in EVENT.tracks -%>>
+            & <<% if track in participant.tracks -%>>
+                <<% with course = participant.tracks[track].course -%>>
+                    <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+                <<% endwith -%>>
+            <<% endif -%>>
+        <<% endfor %>> \\
+        \hline
+    <<% endfor %>>
+<<% endblock %>>
