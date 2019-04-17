@@ -1,0 +1,72 @@
+\documentclass[10pt,landscape,parskip=half+,]{scrartcl}
+\usepackage{fontspec}
+\usepackage[german]{babel}
+
+\usepackage{graphicx}
+\usepackage{scrlayer-scrpage}
+\usepackage{longtable}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{calc}
+\usepackage{microtype}
+\usepackage[<<< CONFIG.layout.lists_geometry >>>]{geometry}
+
+
+% Load Fonts and define colors
+\setmainfont{<<< CONFIG.layout.font >>>}
+\newfontfamily\headingfamily{<<< CONFIG.layout.heading_font >>>}
+\definecolor{design}{HTML}{<<< CONFIG.layout.design_color >>>}
+\definecolor{links}{HTML}{<<< CONFIG.layout.link_color >>>}
+
+\usepackage[
+    colorlinks=True,
+    linkcolor=links,
+    urlcolor=links,
+    pdftitle={Teilnehmerliste <<< EVENT.title|e >>>},
+    pdfauthor={<<< CONFIG.meta.pdf_author >>>},
+    unicode
+]{hyperref}
+
+% General Layout
+\arrayrulecolor{design}
+\newcommand{\head}[1]{\textcolor{white}{\textbf{#1}}}
+\ifoot[Seite \thepage]{Seite \thepage}
+\ihead[]{Teilnehmerliste <<< EVENT.title|e >>>}
+\cfoot[]{}
+\ofoot[Stand: <<< now.strftime('%d.%m.%Y') >>>]{Stand: <<< now.strftime('%d.%m.%Y') >>>}
+
+\begin{document}
+    \thispagestyle{plain}
+    <<% if CONFIG.layout.logo_file %>>
+        \hspace*{\fill}\includegraphics[height=3cm]{<<< find_asset(CONFIG.layout.logo_file) >>>}\\
+
+        \vspace{-2cm}
+    <<% endif %>>
+    \begin{center}
+        \headingfamily\bfseries\huge{}Teilnehmerliste <<< EVENT.title|e >>>
+    \end{center}
+
+    \rowcolors{2}{gray!25}{white}
+    \begin{longtable}{|llll<<% for t in EVENT.tracks %>>l<<% endfor %>>|}
+        \hline
+        \rowcolor{design} \head{Vorname} & \head{Nachname} & \head{E-Mail} &
+                           \head{PLZ \& Ort}
+                           <<% for track in EVENT.tracks -%>>
+                                & \head{Kurs<<% if EVENT.tracks|length > 1 %>><<< track.shortname|e >>><<% endif %>>}
+                           <<% endfor %>>\\
+        \hline
+        \endhead
+        
+        <<% for participant in EVENT.participants if participant.list_consent %>>
+            <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>> &
+            \href{mailto:<<< participant.name.fullname|e >>> <<< '<' + participant.email|e + '>' >>>}{<<< participant.email|e >>>} &
+            <<< participant.address.postal_code|e >>> <<< participant.address.location|e >>> &
+            <<% for track in EVENT.tracks -%>>
+                <<% set course = participant.tracks[track].course -%>>
+                <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+            <<% endfor %>> \\
+            \hline
+        <<% endfor %>>
+    
+    \end{longtable}
+\end{document}

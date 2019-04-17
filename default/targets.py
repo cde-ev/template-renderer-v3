@@ -53,3 +53,10 @@ def tnletters(event, config, output_dir, match):
     return [RenderTask('tnletter.tex', 'tnletter_{}'.format(p.id), {'participant': p}, False)
             for p in participants]
 
+
+@target_function
+def tnlists(event, config, output_dir, match):
+    """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
+
+    return RenderTask('tnlist.tex', 'tnlist', {}, True),
+
