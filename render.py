@@ -186,15 +186,7 @@ def render_template(task, output_dir, jinja_env, cleanup=True):
         exp = re.compile(r'^{}\.(.+)$'.format(re.escape(task.job_name)))
         for f in os.listdir(output_dir):
             match = re.match(exp, f)
-            if match and match.group(1) not in ('pdf', 'log', 'tex'):
+            if match and match.group(1) not in ('pdf',):
                 os.remove(os.path.join(output_dir, f))
-            elif match and match.group(1) == 'log':
-                if not os.path.exists(os.path.join(output_dir, 'log')):
-                    os.mkdir(os.path.join(output_dir, 'log'))
-                os.rename(os.path.join(output_dir, f), os.path.join(os.path.join(output_dir, 'log'), f))
-            elif match and match.group(1) == 'tex':
-                if not os.path.exists(os.path.join(output_dir, 'tex')):
-                    os.mkdir(os.path.join(output_dir, 'tex'))
-                os.rename(os.path.join(output_dir, f), os.path.join(os.path.join(output_dir, 'tex'), f))
 
     return success
