@@ -151,7 +151,7 @@ class Event:
                     participant_part.lodgement.parts[part].inhabitants.append(
                         (participant, participant_part.campingmat))
             for track, participant_track in participant.tracks.items():
-                if participant_track.course:
+                if participant_track.course and track in participant_track.course.tracks:
                     participant_track.course.tracks[track].attendees.append(
                         (participant, participant_track.instructor))
         event.participants = [p for p in participants if p.parts]
