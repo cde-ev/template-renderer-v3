@@ -1,6 +1,5 @@
-import datetime
 import enum
-import itertools
+import functools
 import json
 import datetime
 from typing import Dict
@@ -252,6 +251,12 @@ class Course:
         self.shortname = ''
         self.fields = {}  # type: Dict[str, object]
         self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
+
+    @property
+    def instructors(self):
+        return sorted(functools.reduce(lambda x,y: x|y,
+                                       (set(t.instructors) for t in self.tracks.values())),
+                      key=lambda r: (r.name.given_names, r.name.family_name))
 
     @classmethod
     def from_json(cls, data, field_types):
