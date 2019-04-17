@@ -66,12 +66,14 @@ if os.path.isfile(custom_targets_file):
     foo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(foo)
 
-# Construct Jinja environment
-jinja_env = render.get_latex_jinja_env(template_dirs, asset_dirs)
-
-
 # read input json file
 event = data.load_input_file(args.input)
+
+# Construct Jinja environment
+jinja_env = render.get_latex_jinja_env(template_dirs, asset_dirs)
+jinja_env.globals['CONFIG'] = config
+jinja_env.globals['EVENT'] = event
+
 
 # if no targets are given, show help output
 if not args.targets:
@@ -106,7 +108,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_threads) as exec
         render_tasks = globals.TARGETS[target](event, config, OUTPUT_DIR, args.match)
         for task in render_tasks:
             future = executor.submit(shutter.wrap(render.render_template),
-                                     *task, cleanup=not args.no_cleanup, jinja_env=jinja_env)
+                                     task, output_dir=OUTPUT_DIR, cleanup=not args.no_cleanup, jinja_env=jinja_env)
             futures.append(future)
         count_tasks += len(render_tasks)
 

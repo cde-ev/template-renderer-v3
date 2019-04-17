@@ -1,3 +1,4 @@
+import collections
 import datetime
 import functools
 import re
@@ -121,18 +122,21 @@ class ScheduleShutter:
         return wrapped
 
 
-def render_template(template_name, template_args, job_name, double_tex,
-                    output_dir, jinja_env, cleanup=True):
+RenderTask = collections.namedtuple('RenderTask',
+                                    ('template_name', 'job_name', 'template_args', 'double_tex'),
+                                    defaults=({}, False))
+
+
+def render_template(task, output_dir, jinja_env, cleanup=True):
     """
     Helper method to do the Jinja template rendering and LuaLaTeX execution.
 
-    :param template_name: filename of the Jinja template to be rendered
-    :type template_name: str
-    :param template_args: Dict of arguments to be passed to the template
-    :type template_args: dict
-    :param job_name: LuaLaTeX jobname; specifies names of the output files
-    :type job_name: str
-    :param double_tex: Execute LuaLaTeX twice to allow building of links, tocs, longtables etc.
+    :param task: A RenderJob tuple to define the job to be done. It contains the following fields:
+        template_name: filename of the Jinja template to render and compile
+        job_name: TeX jobname, defines filename of the output files
+        template_args: dict of arguments to be passed to the template
+        double_tex: if True, execute LuaLaTeX twice to allow building of links, tocs, longtables etc.
+    :type task: RenderJob
     :param output_dir: Output directory. Absolute or relative path from working directory.
     :type output_dir: str
     :param jinja_env: The jinja Environment to use for template rendering
@@ -142,15 +146,15 @@ def render_template(template_name, template_args, job_name, double_tex,
     :rtype: bool
     """
     # Get template
-    template = jinja_env.get_template(template_name)
+    template = jinja_env.get_template(task.template_name)
 
     # render template
-    outfile_name = job_name + '.tex'
+    outfile_name = task.job_name + '.tex'
     with open(os.path.join(output_dir, outfile_name), 'w', encoding='utf-8') as outfile:
-        outfile.write(template.render(**template_args))
+        outfile.write(template.render(**task.template_args))
 
     # Execute LuaLaTeX once
-    print('Compiling {}{} ...'.format(job_name, " once" if double_tex else ""))
+    print('Compiling {}{} ...'.format(task.job_name, " once" if task.double_tex else ""))
     process = subprocess.Popen(['lualatex', '--interaction=batchmode', outfile_name],
                                stdin=subprocess.DEVNULL,
                                stdout=subprocess.DEVNULL,
@@ -160,12 +164,12 @@ def render_template(template_name, template_args, job_name, double_tex,
     rc = process.returncode
     success = True
     if rc != 0:
-        print("Compiling '{}' failed.{}".format(job_name, " (run 1)" if double_tex else ""))
+        print("Compiling '{}' failed.{}".format(task.job_name, " (run 1)" if task.double_tex else ""))
         success = False
 
     # Execute LuaLaTeX second time
-    if success and double_tex:
-        print('Compiling {} a second time ...'.format(job_name))
+    if success and task.double_tex:
+        print('Compiling {} a second time ...'.format(task.job_name))
         process = subprocess.Popen(['lualatex', '--interaction=batchmode', outfile_name],
                                    stdin=subprocess.DEVNULL,
                                    stdout=subprocess.DEVNULL,
@@ -179,7 +183,7 @@ def render_template(template_name, template_args, job_name, double_tex,
 
     # Clean up
     if cleanup and success:
-        exp = re.compile(r'^{}\.(.+)$'.format(re.escape(job_name)))
+        exp = re.compile(r'^{}\.(.+)$'.format(re.escape(task.job_name)))
         for f in os.listdir(output_dir):
             match = re.match(exp, f)
             if match and match.group(1) not in ('pdf', 'log', 'tex'):
