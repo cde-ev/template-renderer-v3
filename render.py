@@ -123,9 +123,12 @@ class ScheduleShutter:
         return wrapped
 
 
-RenderTask = collections.namedtuple('RenderTask',
-                                    ('template_name', 'job_name', 'template_args', 'double_tex'),
-                                    defaults=({}, False))
+class RenderTask:
+    def __init__(self, template_name, job_name, template_args=None, double_tex=False):
+        self.template_name = template_name
+        self.job_name = job_name
+        self.template_args = template_args or {}
+        self.double_tex = double_tex
 
 
 def render_template(task, output_dir, jinja_env, cleanup=True):
