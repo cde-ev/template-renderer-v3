@@ -5,16 +5,6 @@ import json
 import datetime
 
 
-FIELD_KIND_MAP = {
-    1: str,
-    2: bool,
-    3: int,
-    4: float,
-    5: datetime.date,
-    6: datetime.datetime
-}
-
-
 def load_input_file(filename):
     with open(filename, encoding='utf-8') as f:
         data = json.load(f)
@@ -23,10 +13,37 @@ def load_input_file(filename):
 
 
 class Genders(enum.IntEnum):
-    unknown = 0
-    male = 1
-    female = 2
-    various = 3
+    """Spec for field gender of core.personas.
+    From Cdedb v2: cdedb.database.constants
+    """
+    female = 1  #:
+    male = 2  #:
+    #: this is a catch-all for complicated reality
+    other = 10
+    not_specified = 20  #:
+
+
+class RegistrationPartStati(enum.IntEnum):
+    """Spec for field status of event.registration_parts.
+    From Cdedb v2: cdedb.database.constants"""
+    not_applied = -1  #:
+    applied = 1  #:
+    participant = 2  #:
+    waitlist = 3  #:
+    guest = 4  #:
+    cancelled = 5  #:
+    rejected = 6  #:
+
+
+class FieldDatatypes(enum.IntEnum):
+    """Spec for the datatypes available as custom data fields.
+    From Cdedb v2: cdedb.database.constants"""
+    str = 1  #:
+    bool = 2  #:
+    int = 3  #:
+    float = 4  #:
+    date = 5  #:
+    datetime = 6  #:
 
 
 class Event:
@@ -58,7 +75,7 @@ class Event:
         tracks_by_id = {p.id: p for p in event.tracks}
 
         # Get field definitions
-        field_types = {field_data['field_name']: FIELD_KIND_MAP[field_data['kind']]
+        field_types = {field_data['field_name']: FieldDatatypes(field_data['kind'])
                        for field_data in data['event.field_definitions'].values()}
 
         # Parse courses and course_segments
@@ -154,9 +171,9 @@ class Course:
         for field, value in data['fields'].items():
             if field not in field_types:
                 continue
-            if field_types[field] == datetime.datetime:
+            if field_types[field] == FieldDatatypes.datetime:
                 value = datetime.datetime.fromisoformat(value)
-            elif field_types[field] == datetime.date:
+            elif field_types[field] == FieldDatatypes.date:
                 value = datetime.date.fromisoformat(value)
             course.fields[field] = value
         return course
@@ -193,9 +210,9 @@ class Lodgement:
         for field, value in data['fields'].items():
             if field not in field_types:
                 continue
-            if field_types[field] == datetime.datetime:
+            if field_types[field] == FieldDatatypes.datetime:
                 value = datetime.datetime.fromisoformat(value)
-            elif field_types[field] == datetime.date:
+            elif field_types[field] == FieldDatatypes.date:
                 value = datetime.date.fromisoformat(value)
             lodgement.fields[field] = value
         for part in event_parts:
