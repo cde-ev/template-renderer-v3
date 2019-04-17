@@ -96,8 +96,7 @@ def get_latex_jinja_env(template_paths, asset_paths):
         comment_end_string='#>>',
         autoescape=False,
         trim_blocks=True,
-        lstrip_blocks=False,
-        undefined=jinja2.StrictUndefined)
+        lstrip_blocks=False)
     latex_jinja2_env.filters['e'] = escape_tex
     latex_jinja2_env.filters['inverse_chunks'] = filter_inverse_chunks
     latex_jinja2_env.globals['now'] = datetime.datetime.now()
