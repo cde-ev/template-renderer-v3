@@ -21,6 +21,14 @@ def load_input_file(filename):
     return event
 
 
+def calculate_age(reference, born):
+    """Calculate age on a reference date based on birthday.
+
+    Source: https://stackoverflow.com/a/9754466
+    """
+    return reference.year - born.year - ((reference.month, reference.day) < (born.month, born.day))
+
+
 class Genders(enum.IntEnum):
     """Spec for field gender of core.personas.
     From Cdedb v2: cdedb.database.constants
@@ -57,6 +65,27 @@ class FieldDatatypes(enum.IntEnum):
     float = 4  #:
     date = 5  #:
     datetime = 6  #:
+
+
+class AgeClasses(enum.IntEnum):
+    """Abstraction for encapsulating properties like legal status changing with
+    age.
+
+    If there is any need for additional detail in differentiating this
+    can be centrally added here.
+    """
+    full = 1  #: at least 18 years old
+    u18 = 2  #: between 16 and 18 years old
+    u16 = 3  #: between 14 and 16 years old
+    u14 = 4  #: less than 14 years old
+
+    @property
+    def is_minor(self):
+        """Checks whether a legal guardian is required.
+
+        :rtype: bool
+        """
+        return self in {AgeClasses.u14, AgeClasses.u16, AgeClasses.u18}
 
 
 class Event:
@@ -129,8 +158,9 @@ class Event:
         lodgements_by_id = {l.id: l for l in event.lodgements}
 
         # Parse registrations
+        event_begin = event.begin
         # For now, the `participants` list includes all registrations. Inactive registrations are filtered later on.
-        participants = sorted((Participant.from_json(reg_data, data['core.personas'], field_types)
+        participants = sorted((Participant.from_json(reg_data, data['core.personas'], field_types, event_begin)
                                for reg_data in data['event.registrations'].values()),
                               key=(lambda r: (r.name.given_names, r.name.family_name)))
         participants_by_id = {p.id: p for p in participants}
@@ -180,8 +210,8 @@ class EventPart:
         part.id = data['id']
         part.title = data['title']
         part.shortname = data['shortname']
-        part.begin = data['part_begin']
-        part.end = data['part_end']
+        part.begin = datetime.datetime.strptime(data['part_begin'], DATE_FORMAT).date()
+        part.end = datetime.datetime.strptime(data['part_end'], DATE_FORMAT).date()
         return part
 
 
@@ -312,6 +342,7 @@ class Participant:
         self.name = Name()
         self.gender = Genders.not_specified
         self.birthday = datetime.datetime.today()
+        self.age = 0
         self.email = ""
         self.telephone = ""
         self.mobile = ""
@@ -322,8 +353,18 @@ class Participant:
         self.parts = {}  # type: Dict[EventPart, ParticipantPart]
         self.fields = {}  # type: Dict[str, object]
 
+    @property
+    def age_class(self):
+        if self.age >= 18:
+            return AgeClasses.full
+        if self.age >= 16:
+            return AgeClasses.u18
+        if self.age >= 14:
+            return AgeClasses.u16
+        return AgeClasses.u14
+
     @classmethod
-    def from_json(cls, data, persona_datasets, field_types):
+    def from_json(cls, data, persona_datasets, field_types, event_begin):
         participant = cls()
         participant.id = data['id']
         persona_data = persona_datasets[str(data['persona_id'])]
@@ -331,6 +372,7 @@ class Participant:
         participant.name = Name.from_json_persona(persona_data)
         participant.gender = Genders(persona_data['gender'])
         participant.birthday = datetime.datetime.strptime(persona_data['birthday'], DATE_FORMAT).date()
+        participant.age = calculate_age(event_begin, participant.birthday)
         participant.email = persona_data['username']
         participant.telephone = persona_data['telephone']
         participant.mobile = persona_data['mobile']
