@@ -25,7 +25,7 @@ default_output_dir = os.path.join(os.path.dirname(__file__), 'output')
 
 # parse CLI arguments
 parser = argparse.ArgumentParser(description='Template renderer for CdE Events')
-parser.add_argument('targets', metavar='TARGETS', type=str, nargs='+',
+parser.add_argument('targets', metavar='TARGETS', type=str, nargs='*',
                     help='Specifies which templates to render.')
 parser.add_argument('-c', '--custom-dir', default=os.path.join(THIS_DIR, 'custom'),
                     help="Path of custom directory to find config file, templates and assets.")
@@ -72,6 +72,23 @@ jinja_env = render.get_latex_jinja_env(template_dirs, asset_dirs)
 
 # read input json file
 event = data.load_input_file(args.input)
+
+# if no targets are given, show help output
+if not args.targets:
+    if globals.TARGETS:
+        max_name_length = max(len(name) for name in globals.TARGETS)
+        print("No targets given. Please specify one or more of the following targets:\n")
+        for name, target in globals.TARGETS.items():
+            # TODO use shutil.get_terminal_size and textwrap.fill and some fancy logic to adapt docstrings to terminal
+            print("{:{}}".format(name + ':', max_name_length+2), end='')
+            if target.__doc__:
+                print(('\n' + ' ' * (max_name_length+2))
+                      .join(l.strip() for l in target.__doc__.strip().splitlines()))
+            print()
+    else:
+        print("No targets are available. This script is pretty useless. Take a look at the documentation,"
+              " to see, how targets can be added")
+    sys.exit(1)
 
 
 # Some global variables for the rendering threads
