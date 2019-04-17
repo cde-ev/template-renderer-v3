@@ -21,7 +21,7 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for participant in EVENT.participants if participant.list_consent %>>
+    <<% for participant in EVENT.participants %>>
         <<% if participant.age_class.is_minor %>>
             \fbox{\footnotesize{}<<< participant.age_class.name >>>}
         <<% endif %>>
