@@ -35,8 +35,8 @@ def tnletters(event, config, output_dir, match):
     # Filter participants
     if match is not None:
         regex = re.compile(match)
-        participants = [p for p in event.participants if regex.search("{} {}".format(p.name.first_name,
-                                                                                     p.name.last_name))]
+        participants = [p for p in event.participants if regex.search("{} {}".format(p.name.given_names,
+                                                                                     p.name.family_name))]
     else:
         participants = event.participants
 
