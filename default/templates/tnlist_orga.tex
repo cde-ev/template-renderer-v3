@@ -1,0 +1,39 @@
+<<% extends "lists.base.tex" %>>
+
+<<% set title = "Orga-Teilnehmerliste " + EVENT.title|e %>>
+<<% set num_columns = 4
+                      + EVENT.tracks|length * (2 if CONFIG.data.course_room_field else 1)
+                      + EVENT.parts|length%>>
+<<% set hide_header = True %>>
+
+<<% block table_head %>>
+    & \head{Vorname} & \head{Nachname}
+    <<% for part in EVENT.parts -%>>
+        & \head{Unterkunft<<% if EVENT.parts|length > 1 %>><<< track.shortname|e >>><<% endif %>>}
+    <<% endfor %>>
+    <<% for track in EVENT.tracks -%>>
+        & \head{Kurs<<% if EVENT.tracks|length > 1 %>><<< track.shortname|e >>><<% endif %>>}
+        <<% if CONFIG.data.course_room_field %>>
+            & \head{Kursraum<<% if EVENT.tracks|length > 1 %>><<< track.shortname|e >>><<% endif %>>}
+        <<% endif %>>
+    <<% endfor %>>
+     & \head{Handy}
+<<% endblock %>>
+
+<<% block table_body %>>
+    <<% for participant in EVENT.participants if participant.list_consent %>>
+        & <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>> &
+        <<% for part in EVENT.parts -%>>
+            <<% set lodgement = participant.parts[part].lodgement -%>>
+            <<% if lodgement %>><<< lodgement.moniker|e >>><<% endif %>> &
+        <<% endfor %>>
+        <<% for track in EVENT.tracks -%>>
+            <<% set course = participant.tracks[track].course -%>>
+            <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>> &
+            <<% if CONFIG.data.course_room_field %>>
+                <<% if course %>><<< course.fields[CONFIG.data.course_room_field]|e >>><<% endif %>> &
+            <<% endif %>>
+        <<% endfor %>>
+        <<< participant.mobile|e >>> \\
+    <<% endfor %>>
+<<% endblock %>>

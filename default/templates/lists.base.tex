@@ -5,9 +5,10 @@
     themed `longtable`.
 
     The following variables should be set in inherited templates:
-      * title = The document's title, e.g. "Teilnehmerliste PfingstAkadmie 2019". Used as PDF metatag and in the header
-      * num_columns = the number of table columns. Alternatively, you may override the `table_columnspec` block, to
+      * title: The document's title, e.g. "Teilnehmerliste PfingstAkadmie 2019". Used as PDF metatag and in the header
+      * num_columns: the number of table columns. Alternatively, you may override the `table_columnspec` block, to
         provide the full LaTeX table specification.
+      * (optional) hide_header: Set to True to hide the heading and logo section
 
     The following blocks should be specified:
       * table_head: Should have a form similar to "\head{Column A} & \head{Column B}". Without trailing newline
