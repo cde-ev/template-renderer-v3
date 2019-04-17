@@ -2,8 +2,7 @@ import enum
 import functools
 import json
 import datetime
-from typing import Dict
-
+from typing import List, Dict, Set, Tuple
 
 
 def load_input_file(filename):
@@ -94,14 +93,14 @@ class AgeClasses(enum.IntEnum):
 
 class Event:
     def __init__(self):
-        self.title = ""
-        self.shortname = ""
-        self.parts = []
-        self.tracks = []
+        self.title = ""  # type: str
+        self.shortname = ""  # type: str
+        self.parts = []  # type: List[EventPart]
+        self.tracks = []  # type: List[CourseTrack]
 
-        self.participants = []
-        self.courses = []
-        self.lodgements = []
+        self.participants = []  # type: List[Participant]
+        self.courses = []  # type: List[Course]
+        self.lodgements = []  # type: List[Lodgement]
 
         self.timestamp = datetime.datetime.now()
 
@@ -202,14 +201,14 @@ class Event:
 
 class EventPart:
     def __init__(self):
-        self.id = 0
-        self.title = ''
-        self.shortname = ''
-        self.begin = datetime.date.today()
-        self.end = datetime.date.today()
+        self.id = 0  # type: int
+        self.title = ""  # type: str
+        self.shortname = ""  # type: str
+        self.begin = datetime.date.today()  # type: datetime.date
+        self.end = datetime.date.today()  # type: datetime.date
 
-        self.tracks = []
-        self.participants = []
+        self.tracks = []  # type: List[CourseTrack]
+        self.participants = []  # type: List[Participant]
 
     @classmethod
     def from_json(cls, data):
@@ -224,13 +223,13 @@ class EventPart:
 
 class EventTrack:
     def __init__(self):
-        self.id = 0
-        self.part = None
+        self.id = 0  # type: int
+        self.part = None  # type: EventPart
 
-        self.title = ''
-        self.shortname = ''
-        self.sortkey = 0
-        self.courses = []
+        self.title = ""  # type: str
+        self.shortname = ""  # type: str
+        self.sortkey = 0  # type: int
+        self.courses = []  # type: List[Course]
 
     @classmethod
     def from_json(cls, data, parts_by_id):
@@ -248,10 +247,10 @@ class EventTrack:
 
 class Course:
     def __init__(self):
-        self.id = 0
-        self.nr = ''
-        self.title = ''
-        self.shortname = ''
+        self.id = 0  # type: int
+        self.nr = ""  # type: str
+        self.title = ""  # type: str
+        self.shortname = ""  # type: str
         self.fields = {}  # type: Dict[str, object]
         self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
 
@@ -283,7 +282,7 @@ class CourseTrack:
     def __init__(self):
         self.track = None  # type: EventTrack
         self.course = None  # type: Course
-        self.active = False
+        self.active = False  # type: bool
         self.attendees = []  # type: [(Participant, bool)]
 
     @property
@@ -307,8 +306,8 @@ class CourseTrack:
 
 class Lodgement:
     def __init__(self):
-        self.id = 0
-        self.moniker = ''
+        self.id = 0  # type: int
+        self.moniker = ""  # type: str
         self.fields = {}  # type: Dict[str, object]
         self.parts = {}  # type: Dict[EventPart, LodgementPart]
 
@@ -335,9 +334,9 @@ class Lodgement:
 
 class LodgementPart:
     def __init__(self):
-        self.part = None
-        self.lodgement = None
-        self.inhabitants = []  # type: [(Participant, bool)]
+        self.part = None  # type: EventPart
+        self.lodgement = None  # type: Lodgement
+        self.inhabitants = []  # type: List[Tuple[Participant, bool]]
 
     @property
     def regular_inhabitants(self):
@@ -350,18 +349,18 @@ class LodgementPart:
 
 class Participant:
     def __init__(self):
-        self.id = 0
-        self.cdedbid = 0
-        self.name = Name()
-        self.gender = Genders.not_specified
-        self.birthday = datetime.datetime.today()
-        self.age = 0
-        self.email = ""
-        self.telephone = ""
-        self.mobile = ""
-        self.address = Address()
+        self.id = 0  # type: int
+        self.cdedbid = 0  # type: int
+        self.name = Name()  # type: Name
+        self.gender = Genders.not_specified  # type: Genders
+        self.birthday = datetime.datetime.today()  # type: datetime.date
+        self.age = 0  # type: int
+        self.email = ""  # type: str
+        self.telephone = ""  # type: str
+        self.mobile = ""  # type: str
+        self.address = Address()  # type: Address
 
-        self.list_consent = False
+        self.list_consent = False  # type: bool
         self.tracks = {}  # type: Dict[EventTrack, ParticipantTrack]
         self.parts = {}  # type: Dict[EventPart, ParticipantPart]
         self.fields = {}  # type: Dict[str, object]
@@ -406,11 +405,11 @@ class Participant:
 
 class Name:
     def __init__(self):
-        self.title = ""
-        self.given_names = ""
-        self.family_name = ""
-        self.name_supplement = ""
-        self.display_name = ""
+        self.title = ""  # type: str
+        self.given_names = ""  # type: str
+        self.family_name = ""  # type: str
+        self.name_supplement = ""  # type: str
+        self.display_name = ""  # type: str
 
     @property
     def fullname(self):
@@ -431,11 +430,11 @@ class Name:
 
 class Address:
     def __init__(self):
-        self.address = ""
-        self.address_supplement = ""
-        self.postal_code = ""
-        self.location = ""
-        self.country = ""
+        self.address = ""  # type: str
+        self.address_supplement = ""  # type: str
+        self.postal_code = ""  # type: str
+        self.location = ""  # type: str
+        self.country = ""  # type: str
 
     @property
     def full_address(self):
@@ -464,9 +463,9 @@ class ParticipantPart:
     def __init__(self):
         self.part = None  # type: EventPart
         self.participant = None  # type: Participant
-        self.status = RegistrationPartStati.not_applied
+        self.status = RegistrationPartStati.not_applied  # type: RegistrationPartStati
         self.lodgement = None  # type: Lodgement
-        self.campingmat = False
+        self.campingmat = False  # type: bool
 
     @classmethod
     def from_json(cls, data, event_parts, participants, lodgements):
@@ -487,7 +486,7 @@ class ParticipantTrack:
         self.track = None  # type: EventTrack
         self.participant = None  # type: Participant
         self.course = None  # type: Course
-        self.instructor = False
+        self.instructor = False  # type: bool
 
     @classmethod
     def from_json(cls, data, event_tracks, participants, courses):
