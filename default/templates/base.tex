@@ -1,0 +1,47 @@
+<<# This is a base template for all documents except for the tnletter / Teilnehmerbrief.
+
+   It includes the document preamble to load the required packages and define the basic layout and design. It is partly
+   controlled by the config data, to allow easy "theming" of all documents, without need to override this template.
+
+   To load additional packages in sub-templates, override the `packages` block. For other preamble definitions, esp.
+   layout makros and definitions, override the `preamble` block.
+-#>>
+\documentclass[<<% block documentclass_options %>>10pt,landscape,parskip=half+<<% endblock %>>]{scrartcl}
+\usepackage{fontspec}
+\usepackage[german]{babel}
+
+\usepackage{graphicx}
+\usepackage{scrlayer-scrpage}
+\usepackage{longtable}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{calc}
+\usepackage{microtype}
+\usepackage[<<< CONFIG.layout.lists_geometry >>>]{geometry}
+
+<<% block packages %>><<% endblock %>>
+
+% Load Fonts and define colors
+\setmainfont{<<< CONFIG.layout.font >>>}
+\newfontfamily\headingfamily{<<< CONFIG.layout.heading_font >>>}
+\definecolor{design}{HTML}{<<< CONFIG.layout.design_color >>>}
+\definecolor{links}{HTML}{<<< CONFIG.layout.link_color >>>}
+
+\usepackage[
+    colorlinks=True,
+    linkcolor=links,
+    urlcolor=links,
+    pdftitle={<<< title >>>},
+    pdfauthor={<<< CONFIG.meta.pdf_author >>>},
+    unicode
+]{hyperref}
+
+<<# This block should be used to define layout the basic layout, including
+    * header and footer (using \ihead[]{}, \ofoot[]{} etc.)
+    * Macros used for formatting and highlighting (e.g. for table heads and rows)
+    * Changing linewidths and colors #>>
+<<% block preamble %>><<% endblock preamble %>>
+
+\begin{document}
+    <<% block content %>><<% endblock content %>>
+\end{document}
