@@ -7,7 +7,7 @@
 <<% block table_head %>>
     \head{Vorname} & \head{Nachname}
     <<% for part in EVENT.parts -%>>
-        & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
+        & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< part.shortname|e >>><<% endif %>>}
     <<% endfor %>>
     <<% for track in EVENT.tracks -%>>
         & \head{Kurs<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
