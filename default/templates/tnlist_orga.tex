@@ -5,6 +5,7 @@
                       + EVENT.tracks|length * (2 if CONFIG.data.course_room_field else 1)
                       + EVENT.parts|length%>>
 <<% set hide_header = True %>>
+<<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
 
 <<% block table_head %>>
     & \head{Vorname} & \head{Nachname}
@@ -21,7 +22,7 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for participant in EVENT.participants %>>
+    <<% for participant in participants %>>
         <<% if participant.age_class.is_minor %>>
             \fbox{\footnotesize{}<<< participant.age_class.name >>>}
         <<% endif %>>

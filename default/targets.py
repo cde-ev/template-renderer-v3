@@ -23,10 +23,11 @@ import os
 
 from globals import target_function
 from render import RenderTask
+from data import Event
 
 
 @target_function
-def tnletters(event, config, output_dir, match):
+def tnletters(event: Event, config, output_dir, match):
     """Render the "Teilnehmerbrief" for each participant.
 
     This target renders the tnletter.tex template once for every participant of the event. The `--match` parameter may
@@ -55,16 +56,37 @@ def tnletters(event, config, output_dir, match):
 
 
 @target_function
-def tnlists(event, config, output_dir, match):
+def tnlists(event: Event, config, output_dir, match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
-    return (RenderTask('tnlist.tex', 'tnlist', {}, True),
-            RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True),
-            RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {}, True))
+    tasks = [
+        RenderTask('tnlist.tex', 'tnlist', {'participants': [p for p in event.participants if p.list_consent]}, True),
+        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {'participants': event.participants}, True),
+        RenderTask('tnlist_orga.tex', 'tnlist_orga', {'participants': event.participants}, True),
+    ]
+
+    return tasks
 
 
 @target_function
-def courselist(event, config, output_dir, match):
+def tnlists_per_part(event: Event, config, output_dir, match):
+    """Render the participant lists individually for each part."""
+
+    tasks = []
+
+    for part in event.parts:
+        tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
+                                {'participants': [p for p in part.participants if p.list_consent]}, True))
+        tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part.id),
+                                {'participants': part.participants}, True))
+        tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part.id),
+                                {'participants': part.participants}, True))
+
+    return tasks
+
+
+@target_function
+def courselist(event: Event, config, output_dir, match):
     """Render the courselists"""
 
-    return RenderTask('courselist.tex', 'courselist', {}, True),
+    return [RenderTask('courselist.tex', 'courselist', {}, True)]

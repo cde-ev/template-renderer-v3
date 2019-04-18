@@ -2,6 +2,7 @@
 
 <<% set title = "Teilnehmerliste " + EVENT.title|e %>>
 <<% set num_columns = 4 + EVENT.tracks|length %>>
+<<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
 
 <<% block table_head %>>
     \head{Vorname} & \head{Nachname} & \head{E-Mail} & \head{PLZ \& Ort}
@@ -11,7 +12,7 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for participant in EVENT.participants if participant.list_consent %>>
+    <<% for participant in participants %>>
         <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>> &
         \href{mailto:<<< participant.name.fullname|e >>> <<< '<' + participant.email|e + '>' >>>}{<<< participant.email|e >>>} &
         <<< participant.address.postal_code|e >>> <<< participant.address.location|e >>> &
