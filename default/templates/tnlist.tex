@@ -2,7 +2,6 @@
 
 <<% set title = "Teilnehmerliste " + EVENT.title|e %>>
 <<% set num_columns = 4 + EVENT.tracks|length %>>
-<<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
 
 <<% block table_head %>>
     \head{Vorname} & \head{Nachname} & \head{E-Mail} & \head{PLZ \& Ort}

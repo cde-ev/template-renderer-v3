@@ -5,7 +5,6 @@
                       + EVENT.tracks|length * (2 if CONFIG.data.course_room_field else 1)
                       + EVENT.parts|length%>>
 <<% set hide_header = True %>>
-<<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
 
 <<% block table_head %>>
     & \head{Vorname} & \head{Nachname}
