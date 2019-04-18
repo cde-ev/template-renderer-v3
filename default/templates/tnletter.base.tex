@@ -1,0 +1,65 @@
+\documentclass[a4paper,parskip=half,11pt]{scrartcl}
+\usepackage[fromlogo=true,enlargefirstpage=true]{scrletter} % Same as using documentclass scrlttr2 but with sections etc.
+
+\usepackage{fontspec}
+\usepackage[german]{babel}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{microtype}
+
+<<# Use this block to load additional packages, required for your specific tnletter template.    You may override the default fontpackage 'libertine' or use it. #>>
+<<% block packages %>>
+    \usepackage{libertine}
+<<% endblock %>>
+
+% define colors
+\definecolor{design}{HTML}{<<< CONFIG.layout.design_color >>>}
+\definecolor{links}{HTML}{<<< CONFIG.layout.link_color >>>}
+\definecolor{light-gray}{gray}{0.4}
+
+\usepackage[
+    colorlinks=True,
+    linkcolor=links,
+    urlcolor=links,
+    pdftitle={Teilnehmerbrief <<< EVENT.title|e >>> – <<< participant.name.fullname|e >>>},
+    pdfauthor={<<< CONFIG.tnletter.sender >>>},
+    unicode
+]{hyperref}
+
+<<# This block should be used to define additional layout settings and macros #>>
+<<% block preamble %>><<% endblock %>>
+ 
+\begin{document}
+    \setkomavar{fromname}{CdE <<< EVENT.title|e >>>}
+    \setkomavar{fromaddress}{c/o <<< CONFIG.tnletter.sender >>>\\<<< CONFIG.tnletter.sender_address >>>\\<<< CONFIG.tnletter.sender_postal_code >>> <<< CONFIG.tnletter.sender_location >>>}
+    \setkomavar{place}{<<< CONFIG.tnletter.sender_location >>>}
+    \setkomavar{fromlogo}{\includegraphics[height=4cm]{<<< find_asset('PA19_logo2_grey.pdf') >>>}}
+
+    \setkomavar{firsthead}{
+      \parbox[b][4cm][t]{8cm}{
+        \small\textsf{\usekomavar{fromname} \\
+        \usekomavar{fromaddress}}
+      }
+      \hfill
+      \usekomavar{fromlogo}%
+      %\rule{\textwidth}{0.5pt}
+    }
+    \setkomavar{backaddress}{
+        <<< CONFIG.tnletter.sender >>> $\cdot$ <<< CONFIG.tnletter.sender_address >>> $\cdot$ <<< CONFIG.tnletter.sender_postal_code >>> <<< CONFIG.tnletter.sender_location >>>
+    }
+
+    \begin{letter}{
+        <<< participant.name.fullname|e >>>\\
+        <<< participant.address.full_address|e(linebreaks=True) >>>
+    }
+
+        \setkomavar{subject}{<<% block subject %>>Teilnehmerbrief <<< EVENT.title|e >>><<% endblock %>>}
+
+        \opening{<<% block opening %>>Hallo <<< participant.name.given_names|e >>>,<<% endblock %>>}
+
+        <<% block content %>>
+            <<# TODO write generic tnletter, which is configurable via config options and blocks #>>
+        <<% endblock %>>
+    \end{letter}
+\end{document}

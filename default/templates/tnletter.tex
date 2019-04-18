@@ -1,0 +1,10 @@
+<<# This is the default tnletter / Teilnehmerbrief template. It is a placeholder template, which extends the basic
+    tnletter (`tnletter.base.tex`) without overriding any of its contents, to allow rendering the default contents.
+    To customize the tnletter, you should create a `tnletter.tex` in your custom template directory, to override this
+    default template.
+
+    Your custom `tnletter.tex` may either be written from scratch, without any dependency on the base template, or
+    extend the base template and redefine some of its "blocks". The perferred way of customization is extending
+    `tnletter.base.tex` and redefining the `content` block.
+#>>
+<<% extends "tnletter.base.tex" %>>
