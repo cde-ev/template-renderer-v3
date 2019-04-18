@@ -90,3 +90,19 @@ def courselist(event: Event, config, output_dir, match):
     """Render the courselists"""
 
     return [RenderTask('courselist.tex', 'courselist', {}, True)]
+
+
+@target_function
+def nametags(event: Event, config, output_dir, match):
+    p_blocks = [(i, []) for i in [14, 16, 18, 22, 25, 30, 100]]
+    for p in event.participants:
+        for max_age, block in p_blocks:
+            age = p.age
+            if age < max_age:
+                block.append(p)
+                break
+
+    return RenderTask('nametags.tex',
+                      'nametags',
+                      {'participant_blocks': [("age u{}".format(name), ps) for name, ps in p_blocks]},
+                      False),

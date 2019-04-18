@@ -1,0 +1,160 @@
+<<% extends "base.tex" %>>
+
+<<% block documentclass_options %>>12pt,parskip=half+<<% endblock %>>
+
+<<% block preamble %>>
+    \geometry{top=2cm, bottom=2cm, left=1.5cm, right=1.5cm, head=1cm, foot=1cm}
+
+    \addtokomafont{disposition}{\headingfamily}
+
+    \ihead[]{Nametags <<< EVENT.title|e >>>}
+    \chead[]{}
+    \ohead[]{\rightmark}
+    \cfoot[]{}
+    \ifoot[Seite \thepage]{Seite \thepage}
+
+    % Nametag special hacks
+    \setlength{\fboxsep}{0pt}
+    \setlength{\fboxrule}{.5pt}
+    \setlength{\parindent}{0pt}
+    \newsavebox{\ntcontent}
+<<% endblock %>>
+
+<<% block content %>>
+    % Overview page
+    \thispagestyle{plain}
+    \section*{Nametags for <<< EVENT.title|e >>>}
+    Generated nametags with rearside.
+
+    Print double-sided with binding (turning) on the long edge.
+
+    You'll need the following (differently colored) sheets:
+
+    \begin{itemize}
+        \item 1 sheet for this overview page (or print only page 3-$\infty$)
+        <<% for block_name, participants in participant_blocks %>>
+            <<% set num_sheets = (participants|length/8)|round(method='ceil') %>>
+            \item <<<num_sheets|int>>> sheet<<% if num_sheets != 1%>>s<<% endif %>> for \textit{<<< block_name|e >>>}
+        <<% endfor %>>
+    \end{itemize}
+
+    \vspace{3\baselineskip}
+
+    Stand: <<< EVENT.timestamp.strftime('%d.%m.%Y %H:%M') >>>
+
+    \newpage
+    \null\newpage
+
+    <<% for block_name, participants in participant_blocks %>>
+        \renewcommand\rightmark{<<< block_name|e >>>}
+        <<# Split each block of participants into chunks of eight nametags for a single page each #>>%
+        <<% for list in participants|batch(8) -%>>
+            \renewcommand{\arraystretch}{0}
+            \begin{tabular}{ @{} p{9cm} @{\hspace{\fboxrule}} p{9cm} @{} }
+                %
+                <<# Iterate chunk of participants to generate frontside #>>%
+                <<% for p in list %>>
+                    \begin{lrbox}{\ntcontent}
+                        \fbox{\hspace{3mm}\begin{minipage}[b][5.5cm][t]{8.4cm}
+                            \vspace{4mm}
+                            <<%- block nametag_frontside scoped %>>
+                                % Name
+                                \parbox[c][1.7cm][t]{8.4cm}{
+                                    \headingfamily
+                                    <<# TODO make size configurable to adapt it to font -#>>
+                                    \fontsize{26}{37}\selectfont \textbf{\mbox{<<< p.name.given_names|e >>>}}\\
+                                    \fontsize{18}{24}\selectfont \textbf{\mbox{<<< p.name.family_name|e >>>}}
+                                }%
+                                \\[2mm]
+                                % Lodgment
+                                \parbox[t][1.1cm][c]{5cm}{
+                                    <<% block nametag_lodgement -%>>
+                                        <<% for part in EVENT.parts[:2] -%>>
+                                            {<<% if part in p.parts and p.parts[part].lodgement %>><<< p.parts[part].lodgement.moniker|e >>><<% endif %>>}
+                                            <<% if not loop.last %>>\\<<% endif %>>
+                                        <<% endfor %>>
+                                    <<%- endblock %>>
+                                }%
+                                \hspace*{\fill}
+                                % Right side icons
+                                \parbox[t][1.1cm][c]{3cm}{
+                                    \raggedleft
+                                    <<% block nametag_frontrighticons %>>
+                                    <<% endblock %>>
+                                }%
+                                \\[1mm]%
+                                % Course(s)
+                                <<% for track in EVENT.tracks[:2] -%>>
+                                    <<% if track in p.tracks and p.tracks[track].course -%>>
+                                        <<% with course = p.tracks[track].course %>>
+                                            % Course icon
+                                            <<% if CONFIG.nametags.course_icon_path -%>>
+                                                \parbox[t][17mm][c]{15mm}{\null
+                                                    <<%- with icon = find_asset(
+                                                        CONFIG.nametags.course_icon_path.format(nr=course.nr, id=course.id)) -%>>
+                                                        <<% if icon -%>>
+                                                            \includegraphics[keepaspectratio=true, width=1.2cm, height=1.2cm]{<<< icon >>>}
+                                                        <<% else %>>
+                                                            \
+                                                        <<% endif -%>>
+                                                    <<% endwith -%>>
+                                                }%
+                                            <<% endif -%>>
+                                            % Course name
+                                            \parbox[t][17mm][c]{25.4mm}{   <<# TODO set to 58.9mm if only one course is shown #>>
+                                                \begin{flushleft}
+                                                    {<<<course.shortname|e>>>}
+                                                \end{flushleft}
+                                            }%
+                                            <<% if not loop.last %>>\hspace{3mm}<<% endif %>>%
+                                        <<% endwith -%>>
+                                    <<% endif -%>>
+                                <<% endfor -%>>
+                            <<% endblock -%>>
+                        \end{minipage}\hspace{3mm}}
+                    \end{lrbox}
+                    \vspace{-\fboxrule}
+                    \mbox{\rlap{\includegraphics[width=9cm, height=5.5cm]{<<< find_asset('nametag_background.pdf') >>>}}\hspace{-\fboxrule}\usebox{\ntcontent}}
+                    <<% if loop.index is divisibleby 2 %>>\\<<% else %>>&<<% endif %>>
+                <<% endfor %>>
+            \end{tabular}
+
+            <<# Backside of nametags #>>
+            \newpage
+            \begin{tabular}{ @{} p{9cm} @{\hspace{\fboxrule}} p{9cm} @{} }
+                %
+                <<# Iterate chunk of participants with every pair swapped to generate backside #>>%
+                <<% for p in list|inverse_chunks(2) %>>
+                    \hspace{5mm}\begin{minipage}[t][5.5cm][t]{8.0cm}%
+                        \vspace{6mm}
+                        <<%- block nametag_rearside scoped %>>
+                            <<%- block nametag_reartext scoped %>>
+                                <<# TODO show only, if participant has at least one track with courses
+                                <<% if CONFIG.data.course_room_field and EVENT.tracks %>>
+                                    Kursraum:
+                                    <<% for track in EVENT.tracks[:2] if (track in p.tracks and p.tracks[track].course) -%>>
+                                        <<< p.tracks[track].course.fields[CONFIG.data.course_room_field]|e ->>>
+                                        <<% if not loop.last %>>, <<% endif %>>
+                                    <<%- endfor -%>>
+                                <<% endif %>>
+                            <<% endblock %>>
+
+                            \vspace{\fill}
+                            <<%- block nametag_rearlefticons scoped %>>
+                                <<# TODO add meal icons in a generic way #>>
+                            <<% endblock %>>
+
+                            \hspace{\fill}
+                            <<%- block nametag_rearrighticons scoped %>>
+                            <<% endblock -%>>
+                        <<% endblock -%>>
+                        \vspace{6mm}
+                    \end{minipage}\hspace{5mm}%
+                    \vspace{\fboxrule}
+                    <<% if loop.index is divisibleby 2 %>>\\<<% else %>>&<<% endif %>>
+                <<% endfor %>>
+            \end{tabular}
+            \newpage
+        <<% endfor %>>
+    <<% endfor %>>
+<<% endblock %>>
