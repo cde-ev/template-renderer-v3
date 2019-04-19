@@ -538,8 +538,12 @@ class RegistrationTrack:
         self.registration = None  # type: Registration
         self.registration_part = None  # type: RegistrationPart
         self.course = None  # type: Course
-        self.instructor = False  # type: bool
+        self.offered_course = None  # type: Course
         self.choices = []  # type: List[Course]
+
+    @property
+    def instructor(self):
+        return self.offered_course and self.offered_course == self.course
 
     @classmethod
     def from_json(cls, data, event_tracks, registrations, courses):
@@ -548,8 +552,8 @@ class RegistrationTrack:
         rtrack.track = event_tracks[data['track_id']]
         if data['course_id']:
             rtrack.course = courses[data['course_id']]
-            if data['course_instructor'] and data['course_instructor'] == data['course_id']:
-                rtrack.instructor = True
+        if data['course_instructor']:
+            rtrack.offered_course = courses[data['course_instructor']]
         rtrack.choices = [None] * rtrack.track.num_choices
         rtrack.registration_part = rtrack.registration.parts[rtrack.track.part]
         rtrack.registration.tracks[rtrack.track] = rtrack
