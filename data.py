@@ -213,9 +213,18 @@ class Event:
                     if track not in registration.tracks:
                         registration_track = RegistrationTrack()
                         registration_track.registration = registration
+                        registration_track.choices = [None] * track.num_choices
                         registration_track.track = track
                         registration_track.registration_part = registration.parts[part]
                         registration.tracks[track] = registration_track
+
+        # Parse course choices
+        for choice_data in data['event.course_choices'].values():
+            track = tracks_by_id[choice_data['track_id']]
+            rank = choice_data['rank']
+            if rank < track.num_choices:
+                registration = registrations_by_id[choice_data['registration_id']]
+                registration.tracks[track].choices[rank] = courses_by_id[choice_data['course_id']]
 
         # Add registrations to the relevant lodgements and courses
         for registration in event.registrations:
@@ -262,6 +271,7 @@ class EventTrack:
         self.title = ""  # type: str
         self.shortname = ""  # type: str
         self.sortkey = 0  # type: int
+        self.num_choices = 0  # type: int
 
     @classmethod
     def from_json(cls, data, parts_by_id):
@@ -270,6 +280,7 @@ class EventTrack:
         track.title = data['title']
         track.shortname = data['shortname']
         track.sortkey = data['sortkey']
+        track.num_choices = data['num_choices']
         part = parts_by_id.get(data['part_id'], None)
         if part:
             track.part = part
@@ -539,6 +550,7 @@ class RegistrationTrack:
             rtrack.course = courses[data['course_id']]
             if data['course_instructor'] and data['course_instructor'] == data['course_id']:
                 rtrack.instructor = True
+        rtrack.choices = [None] * rtrack.track.num_choices
         rtrack.registration_part = rtrack.registration.parts[rtrack.track.part]
         rtrack.registration.tracks[rtrack.track] = rtrack
         # Adding the registration to the courses' attendee list ist done later, to ensure the correct order
