@@ -52,7 +52,7 @@ def tnletters(event: Event, config, output_dir, match):
                              os.path.join(os.path.realpath(output_dir), "tnletter_{}.pdf".format(p.id))])
 
     return [RenderTask('tnletter.tex', 'tnletter_{}'.format(p.id), {'participant': p}, False)
-            for p in participants]
+            for p in participants if p.is_present]
 
 
 @target_function
@@ -76,11 +76,14 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
     for part in event.parts:
         tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
-                                {'participants': [p for p in part.participants if p.list_consent]}, True))
+                                {'participants': [p for p in event.participants
+                                                  if p.list_consent and p.parts[part].status.is_present]}, True))
         tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part.id),
-                                {'participants': part.participants}, True))
+                                {'participants': [p for p in event.participants
+                                                  if p.parts[part].status.is_present]}, True))
         tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part.id),
-                                {'participants': part.participants}, True))
+                                {'participants': [p for p in event.participants
+                                                  if p.parts[part].status.is_present]}, True))
 
     return tasks
 
@@ -94,13 +97,15 @@ def courselist(event: Event, config, output_dir, match):
 
 @target_function
 def nametags(event: Event, config, output_dir, match):
+    # TODO implement different grouping schemas (configurable via config)
     p_blocks = [(i, []) for i in [14, 16, 18, 22, 25, 30, 100]]
     for p in event.participants:
-        for max_age, block in p_blocks:
-            age = p.age
-            if age < max_age:
-                block.append(p)
-                break
+        if p.is_present:
+            for max_age, block in p_blocks:
+                age = p.age
+                if age < max_age:
+                    block.append(p)
+                    break
 
     return RenderTask('nametags.tex',
                       'nametags',

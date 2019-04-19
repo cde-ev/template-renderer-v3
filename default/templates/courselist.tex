@@ -18,7 +18,7 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for course in EVENT.courses %>>
+    <<% for course in EVENT.courses if course.is_active %>>
         <<< course.nr|e >>>. & <<< course.shortname|e >>>
         <<% if CONFIG.data.course_room_field %>>
             & <<< course.fields[CONFIG.data.course_room_field]|e >>>
@@ -29,7 +29,7 @@
             <<< instructor.name.given_names|e >>> <<< instructor.name.family_name|e >>>
         <<%- endfor %>>
         <<% for track in EVENT.tracks -%>>
-            & <<% if track in course.tracks %>><<< course.tracks[track].attendees|length >>><<% endif %>>
+            & <<% if course.tracks[track].status.is_active %>><<< course.tracks[track].attendees|length >>><<% endif %>>
         <<% endfor %>> \\
         \hline
     <<% endfor %>>

@@ -11,7 +11,7 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for participant in participants %>>
+    <<% for participant in participants if participant.is_present %>>
         <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>> &
         \href{mailto:<<< participant.name.fullname|e >>> <<< '<' + participant.email|e + '>' >>>}{<<< participant.email|e >>>} &
         <<< participant.address.postal_code|e >>> <<< participant.address.location|e >>> &
