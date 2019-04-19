@@ -10,8 +10,8 @@ def load_input_file(filename):
         data = json.load(f)
 
     event = Event.from_json(data)
-    print("Parsed event data with {} participants, {} courses and {} lodgements in {} event parts and {} course tracks."
-          .format(len(event.participants), len(event.courses), len(event.lodgements), len(event.parts),
+    print("Parsed event data with {} registrations, {} courses and {} lodgements in {} event parts and {} course tracks."
+          .format(len(event.registrations), len(event.courses), len(event.lodgements), len(event.parts),
                   len(event.tracks)))
     return event
 
@@ -118,7 +118,7 @@ class Event:
         self.parts = []  # type: List[EventPart]
         self.tracks = []  # type: List[EventTrack]
 
-        self.participants = []  # type: List[Participant]
+        self.registrations = []  # type: List[Registration]
         self.courses = []  # type: List[Course]
         self.lodgements = []  # type: List[Lodgement]
 
@@ -161,10 +161,9 @@ class Event:
 
         # Parse courses and course_segments
         max_course_nr_len = max(len(cd['nr']) for cd in data['event.courses'].values())
-        # For now, the `courses` list includes all courses. Cancelled courses are filtered out later on.
         event.courses = sorted((Course.from_json(course_data, field_types)
-                          for course_data in data['event.courses'].values()),
-                         key=(lambda c: c.nr.rjust(max_course_nr_len, '\0')))
+                                for course_data in data['event.courses'].values()),
+                               key=(lambda c: c.nr.rjust(max_course_nr_len, '\0')))
         courses_by_id = {c.id: c for c in event.courses}
 
         for ct_data in data['event.course_segments'].values():
@@ -188,49 +187,48 @@ class Event:
 
         # Parse registrations
         event_begin = event.begin
-        # For now, the `participants` list includes all registrations. Inactive registrations are filtered later on.
-        event.participants = sorted((Participant.from_json(reg_data, data['core.personas'], field_types, event_begin)
-                               for reg_data in data['event.registrations'].values()),
-                              key=(lambda r: (r.name.given_names, r.name.family_name)))
-        participants_by_id = {p.id: p for p in event.participants}
+        event.registrations = sorted((Registration.from_json(reg_data, data['core.personas'], field_types, event_begin)
+                                      for reg_data in data['event.registrations'].values()),
+                                     key=(lambda r: (r.name.given_names, r.name.family_name)))
+        registrations_by_id = {p.id: p for p in event.registrations}
 
         # Parse registration parts and tracks
         for rp_data in data['event.registration_parts'].values():
-            # ParticipantParts are automatically added to the Participants' `parts` dicts
-            ParticipantPart.from_json(rp_data, parts_by_id, participants_by_id, lodgements_by_id)
+            # RegistrationParts are automatically added to the Registrations' `parts` dicts
+            RegistrationPart.from_json(rp_data, parts_by_id, registrations_by_id, lodgements_by_id)
         for rt_data in data['event.registration_tracks'].values():
-            # ParticipantTracks are automatically added to the Participants' `tracks` dicts
+            # RegistrationTracks are automatically added to the Registrations' `tracks` dicts
             # Filtering of tracks by active parts is done in the following for-loop
-            ParticipantTrack.from_json(rt_data, tracks_by_id, participants_by_id, courses_by_id)
+            RegistrationTrack.from_json(rt_data, tracks_by_id, registrations_by_id, courses_by_id)
 
         # Add missing registration parts and tracks
-        for participant in event.participants:
+        for registration in event.registrations:
             for part in event.parts:
-                if part not in participant.parts:
-                    participant_part = ParticipantPart()
-                    participant_part.participant = participant
-                    participant_part.part = part
-                    participant.parts[part] = participant_part
+                if part not in registration.parts:
+                    registration_part = RegistrationPart()
+                    registration_part.registration = registration
+                    registration_part.part = part
+                    registration.parts[part] = registration_part
                 for track in part.tracks:
-                    if track not in participant.tracks:
-                        participant_track = ParticipantTrack()
-                        participant_track.participant = participant
-                        participant_track.track = track
-                        participant_track.participant_part = participant.parts[part]
-                        participant.tracks[track] = participant_track
+                    if track not in registration.tracks:
+                        registration_track = RegistrationTrack()
+                        registration_track.registration = registration
+                        registration_track.track = track
+                        registration_track.registration_part = registration.parts[part]
+                        registration.tracks[track] = registration_track
 
-        # Filter participants' tracks by their active parts and add them to the relevant parts, lodgements and courses
-        for participant in event.participants:
-            participant.tracks = {t: pt for t, pt in participant.tracks.items()
-                                  if t.part in participant.parts}
-            for part, participant_part in participant.parts.items():
-                if participant_part.lodgement:
-                    participant_part.lodgement.parts[part].inhabitants.append(
-                        (participant, participant_part.campingmat))
-            for track, participant_track in participant.tracks.items():
-                if participant_track.course and track in participant_track.course.tracks:
-                    participant_track.course.tracks[track].attendees.append(
-                        (participant, participant_track.instructor))
+        # Add registrations to the relevant lodgements and courses
+        for registration in event.registrations:
+            registration.tracks = {t: pt for t, pt in registration.tracks.items()
+                                   if t.part in registration.parts}
+            for part, registration_part in registration.parts.items():
+                if registration_part.lodgement:
+                    registration_part.lodgement.parts[part].inhabitants.append(
+                        (registration, registration_part.campingmat))
+            for track, registration_track in registration.tracks.items():
+                if registration_track.course and track in registration_track.course.tracks:
+                    registration_track.course.tracks[track].attendees.append(
+                        (registration, registration_track.instructor))
 
         return event
 
@@ -290,7 +288,7 @@ class Course:
 
     @property
     def instructors(self):
-        return sorted(functools.reduce(lambda x,y: x|y,
+        return sorted(functools.reduce(lambda x, y: x | y,
                                        (set(t.instructors) for t in self.tracks.values())),
                       key=lambda r: (r.name.given_names, r.name.family_name))
 
@@ -321,7 +319,7 @@ class CourseTrack:
         self.track = None  # type: EventTrack
         self.course = None  # type: Course
         self.status = CourseTrackStati.not_offered  # type: CourseTrackStati
-        self.attendees = []  # type: [Tuple[Participant, bool]]
+        self.attendees = []  # type: [Tuple[Registration, bool]]
 
     @property
     def regular_attendees(self):
@@ -374,7 +372,7 @@ class LodgementPart:
     def __init__(self):
         self.part = None  # type: EventPart
         self.lodgement = None  # type: Lodgement
-        self.inhabitants = []  # type: List[Tuple[Participant, bool]]
+        self.inhabitants = []  # type: List[Tuple[Registration, bool]]
 
     @property
     def regular_inhabitants(self):
@@ -385,7 +383,7 @@ class LodgementPart:
         return [p for p, campingmat in self.inhabitants if campingmat]
 
 
-class Participant:
+class Registration:
     def __init__(self):
         self.id = 0  # type: int
         self.cdedbid = 0  # type: int
@@ -399,8 +397,8 @@ class Participant:
         self.address = Address()  # type: Address
 
         self.list_consent = False  # type: bool
-        self.tracks = {}  # type: Dict[EventTrack, ParticipantTrack]
-        self.parts = {}  # type: Dict[EventPart, ParticipantPart]
+        self.tracks = {}  # type: Dict[EventTrack, RegistrationTrack]
+        self.parts = {}  # type: Dict[EventPart, RegistrationPart]
         self.fields = {}  # type: Dict[str, object]
 
     @property
@@ -419,19 +417,19 @@ class Participant:
 
     @classmethod
     def from_json(cls, data, persona_datasets, field_types, event_begin):
-        participant = cls()
-        participant.id = data['id']
+        registration = cls()
+        registration.id = data['id']
         persona_data = persona_datasets[str(data['persona_id'])]
-        participant.cdedbid = persona_data['id']
-        participant.name = Name.from_json_persona(persona_data)
-        participant.gender = Genders(persona_data['gender'])
-        participant.birthday = parse_date(persona_data['birthday'])
-        participant.age = calculate_age(event_begin, participant.birthday)
-        participant.email = persona_data['username']
-        participant.telephone = persona_data['telephone']
-        participant.mobile = persona_data['mobile']
-        participant.address = Address.from_json_persona(persona_data)
-        participant.list_consent = data['list_consent']
+        registration.cdedbid = persona_data['id']
+        registration.name = Name.from_json_persona(persona_data)
+        registration.gender = Genders(persona_data['gender'])
+        registration.birthday = parse_date(persona_data['birthday'])
+        registration.age = calculate_age(event_begin, registration.birthday)
+        registration.email = persona_data['username']
+        registration.telephone = persona_data['telephone']
+        registration.mobile = persona_data['mobile']
+        registration.address = Address.from_json_persona(persona_data)
+        registration.list_consent = data['list_consent']
 
         for field, value in data['fields'].items():
             if field not in field_types:
@@ -440,9 +438,9 @@ class Participant:
                 value = parse_datetime(value)
             elif field_types[field] == FieldDatatypes.date and value is not None:
                 value = parse_date(value)
-            participant.fields[field] = value
+            registration.fields[field] = value
 
-        return participant
+        return registration
 
 
 class Name:
@@ -501,46 +499,47 @@ class Address:
         return address
 
 
-class ParticipantPart:
+class RegistrationPart:
     def __init__(self):
         self.part = None  # type: EventPart
-        self.participant = None  # type: Participant
+        self.registration = None  # type: Registration
         self.status = RegistrationPartStati.not_applied  # type: RegistrationPartStati
         self.lodgement = None  # type: Lodgement
         self.campingmat = False  # type: bool
 
     @classmethod
-    def from_json(cls, data, event_parts, participants, lodgements):
-        ppart = cls()
-        ppart.participant = participants[data['registration_id']]
-        ppart.part = event_parts[data['part_id']]
-        ppart.status = RegistrationPartStati(data['status'])
+    def from_json(cls, data, event_parts, registrations, lodgements):
+        rpart = cls()
+        rpart.registration = registrations[data['registration_id']]
+        rpart.part = event_parts[data['part_id']]
+        rpart.status = RegistrationPartStati(data['status'])
         if data['lodgement_id']:
-            ppart.lodgement = lodgements[data['lodgement_id']]
-        ppart.campingmat = data['is_reserve']
-        ppart.participant.parts[ppart.part] = ppart
-        # Adding the participant to the parts' and lodgement's participant list ist done later, to ensure the order
-        return ppart
+            rpart.lodgement = lodgements[data['lodgement_id']]
+        rpart.campingmat = data['is_reserve']
+        rpart.registration.parts[rpart.part] = rpart
+        # Adding the registration to the lodgement's registration list ist done later, to ensure the order
+        return rpart
 
 
-class ParticipantTrack:
+class RegistrationTrack:
     def __init__(self):
         self.track = None  # type: EventTrack
-        self.participant = None  # type: Participant
-        self.participant_part = None  # type: ParticipantPart
+        self.registration = None  # type: Registration
+        self.registration_part = None  # type: RegistrationPart
         self.course = None  # type: Course
         self.instructor = False  # type: bool
+        self.choices = []  # type: List[Course]
 
     @classmethod
-    def from_json(cls, data, event_tracks, participants, courses):
-        ptrack = cls()
-        ptrack.participant = participants[data['registration_id']]
-        ptrack.track = event_tracks[data['track_id']]
+    def from_json(cls, data, event_tracks, registrations, courses):
+        rtrack = cls()
+        rtrack.registration = registrations[data['registration_id']]
+        rtrack.track = event_tracks[data['track_id']]
         if data['course_id']:
-            ptrack.course = courses[data['course_id']]
+            rtrack.course = courses[data['course_id']]
             if data['course_instructor'] and data['course_instructor'] == data['course_id']:
-                ptrack.instructor = True
-        ptrack.participant_part = ptrack.participant.parts[ptrack.track.part]
-        ptrack.participant.tracks[ptrack.track] = ptrack
-        # Adding the participant to the courses' attendee list ist done later, to ensure the correct order
-        return ptrack
+                rtrack.instructor = True
+        rtrack.registration_part = rtrack.registration.parts[rtrack.track.part]
+        rtrack.registration.tracks[rtrack.track] = rtrack
+        # Adding the registration to the courses' attendee list ist done later, to ensure the correct order
+        return rtrack

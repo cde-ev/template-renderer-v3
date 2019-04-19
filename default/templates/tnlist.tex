@@ -11,13 +11,13 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for participant in participants if participant.is_present %>>
-        <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>> &
-        \href{mailto:<<< participant.name.fullname|e >>> <<< '<' + participant.email|e + '>' >>>}{<<< participant.email|e >>>} &
-        <<< participant.address.postal_code|e >>> <<< participant.address.location|e >>> &
+    <<% for registration in registrations if registration.is_present %>>
+        <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
+        \href{mailto:<<< registration.name.fullname|e >>> <<< '<' + registration.email|e + '>' >>>}{<<< registration.email|e >>>} &
+        <<< registration.address.postal_code|e >>> <<< registration.address.location|e >>> &
         <<% for track in EVENT.tracks -%>>
-            <<% if track in participant.tracks -%>>
-                <<% with course = participant.tracks[track].course -%>>
+            <<% if track in registration.tracks -%>>
+                <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
                 <<%- endwith %>>
             <<%- endif -%>>

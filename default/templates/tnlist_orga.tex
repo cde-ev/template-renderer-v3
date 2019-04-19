@@ -21,21 +21,21 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for participant in participants if participant.is_present %>>
-        <<% if participant.age_class.is_minor %>>
-            \fbox{\footnotesize{}<<< participant.age_class.name >>>}
+    <<% for registration in registrations if registration.is_present %>>
+        <<% if registration.age_class.is_minor %>>
+            \fbox{\footnotesize{}<<< registration.age_class.name >>>}
         <<% endif %>>
-        & <<< participant.name.given_names|e >>> & <<< participant.name.family_name|e >>> &
+        & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
         <<% for part in EVENT.parts -%>>
-            <<% if participant.parts[part].is_present -%>>
-                <<% with lodgement = participant.parts[part].lodgement -%>>
+            <<% if registration.parts[part].is_present -%>>
+                <<% with lodgement = registration.parts[part].lodgement -%>>
                     <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
                 <<%- endwith %>>
             <<%- endif %>> &
         <<% endfor %>>
         <<% for track in EVENT.tracks -%>>
-            <<% if participant.tracks[track].participant_part.is_present -%>>
-                <<% with course = participant.tracks[track].course -%>>
+            <<% if registration.tracks[track].registration_part.is_present -%>>
+                <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
                     <<% if CONFIG.data.course_room_field -%>>
                         & <<% if course %>><<< course.fields[CONFIG.data.course_room_field]|e >>><<% endif %>>
@@ -45,7 +45,7 @@
                 <<% if CONFIG.data.course_room_field %>>&<<% endif %>>
             <<%- endif %>> &
         <<% endfor %>>
-        <<< participant.mobile|e >>> \\
+        <<< registration.mobile|e >>> \\
         \hline
     <<% endfor %>>
 <<% endblock %>>

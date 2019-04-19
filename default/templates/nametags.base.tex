@@ -32,8 +32,8 @@
 
     \begin{itemize}
         \item 1 sheet for this overview page (or print only page 3-$\infty$)
-        <<% for block_name, participants in participant_blocks %>>
-            <<% set num_sheets = (participants|length/8)|round(method='ceil') %>>
+        <<% for block_name, registrations in registration_blocks %>>
+            <<% set num_sheets = (registrations|length/8)|round(method='ceil') %>>
             \item <<<num_sheets|int>>> sheet<<% if num_sheets != 1%>>s<<% endif %>> for \textit{<<< block_name|e >>>}
         <<% endfor %>>
     \end{itemize}
@@ -45,10 +45,10 @@
     \newpage
     \null\newpage
 
-    <<% for block_name, participants in participant_blocks %>>
+    <<% for block_name, registrations in registration_blocks %>>
         \renewcommand\rightmark{<<< block_name|e >>>}
         <<# Split each block of participants into chunks of eight nametags for a single page each #>>%
-        <<% for list in participants|batch(8) -%>>
+        <<% for list in registrations|batch(8) -%>>
             \renewcommand{\arraystretch}{0}
             \begin{tabular}{ @{} p{9cm} @{\hspace{\fboxrule}} p{9cm} @{} }
                 %

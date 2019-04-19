@@ -31,28 +31,28 @@ def tnletters(event: Event, config, output_dir, match):
     """Render the "Teilnehmerbrief" for each participant.
 
     This target renders the tnletter.tex template once for every participant of the event. The `--match` parameter may
-    be used to filter the participants by name and only render some of their letters.
+    be used to filter the registrations by name and only render some of their letters.
     """
-    # Filter participants
+    # Filter registrations
     if match is not None:
         regex = re.compile(match)
-        participants = [p for p in event.participants if regex.search("{} {}".format(p.name.given_names,
-                                                                                     p.name.family_name))]
+        participants = [r for r in event.registrations if regex.search("{} {}".format(r.name.given_names,
+                                                                                       r.name.family_name))]
     else:
-        participants = event.participants
+        participants = event.registrations
 
     # Create MailMerge CSV file
     with open(os.path.join(output_dir, 'tnletter_mailmerge.csv'), 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["persona.given_names", "persona.familyname", "persona.username", "attachment"])
-        for p in participants:
-            writer.writerow([p.name.given_names,
-                             p.name.family_name,
-                             p.email,
-                             os.path.join(os.path.realpath(output_dir), "tnletter_{}.pdf".format(p.id))])
+        for r in participants:
+            writer.writerow([r.name.given_names,
+                             r.name.family_name,
+                             r.email,
+                             os.path.join(os.path.realpath(output_dir), "tnletter_{}.pdf".format(r.id))])
 
-    return [RenderTask('tnletter.tex', 'tnletter_{}'.format(p.id), {'participant': p}, False)
-            for p in participants if p.is_present]
+    return [RenderTask('tnletter.tex', 'tnletter_{}'.format(r.id), {'registration': r}, False)
+            for r in participants if r.is_present]
 
 
 @target_function
@@ -60,9 +60,9 @@ def tnlists(event: Event, config, output_dir, match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
     tasks = [
-        RenderTask('tnlist.tex', 'tnlist', {'participants': [p for p in event.participants if p.list_consent]}, True),
-        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {'participants': event.participants}, True),
-        RenderTask('tnlist_orga.tex', 'tnlist_orga', {'participants': event.participants}, True),
+        RenderTask('tnlist.tex', 'tnlist', {'registrations': [p for p in event.registrations if p.list_consent]}, True),
+        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {'registrations': event.registrations}, True),
+        RenderTask('tnlist_orga.tex', 'tnlist_orga', {'registrations': event.registrations}, True),
     ]
 
     return tasks
@@ -76,13 +76,13 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
     for part in event.parts:
         tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
-                                {'participants': [p for p in event.participants
+                                {'registrations': [p for p in event.registrations
                                                   if p.list_consent and p.parts[part].status.is_present]}, True))
         tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part.id),
-                                {'participants': [p for p in event.participants
+                                {'registrations': [p for p in event.registrations
                                                   if p.parts[part].status.is_present]}, True))
         tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part.id),
-                                {'participants': [p for p in event.participants
+                                {'registrations': [p for p in event.registrations
                                                   if p.parts[part].status.is_present]}, True))
 
     return tasks
@@ -98,10 +98,10 @@ def courselist(event: Event, config, output_dir, match):
 @target_function
 def nametags(event: Event, config, output_dir, match):
     # TODO implement different grouping schemas (configurable via config)
-    p_blocks = [(i, []) for i in [14, 16, 18, 22, 25, 30, 100]]
-    for p in event.participants:
+    r_blocks = [(i, []) for i in [14, 16, 18, 22, 25, 30, 100]]
+    for p in event.registrations:
         if p.is_present:
-            for max_age, block in p_blocks:
+            for max_age, block in r_blocks:
                 age = p.age
                 if age < max_age:
                     block.append(p)
@@ -109,5 +109,5 @@ def nametags(event: Event, config, output_dir, match):
 
     return RenderTask('nametags.tex',
                       'nametags',
-                      {'participant_blocks': [("age u{}".format(name), ps) for name, ps in p_blocks]},
+                      {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks]},
                       False),
