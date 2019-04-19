@@ -96,7 +96,7 @@ class Event:
         self.title = ""  # type: str
         self.shortname = ""  # type: str
         self.parts = []  # type: List[EventPart]
-        self.tracks = []  # type: List[CourseTrack]
+        self.tracks = []  # type: List[EventTrack]
 
         self.participants = []  # type: List[Participant]
         self.courses = []  # type: List[Course]
@@ -207,7 +207,7 @@ class EventPart:
         self.begin = datetime.date.today()  # type: datetime.date
         self.end = datetime.date.today()  # type: datetime.date
 
-        self.tracks = []  # type: List[CourseTrack]
+        self.tracks = []  # type: List[EventTrack]
         self.participants = []  # type: List[Participant]
 
     @classmethod
@@ -283,7 +283,7 @@ class CourseTrack:
         self.track = None  # type: EventTrack
         self.course = None  # type: Course
         self.active = False  # type: bool
-        self.attendees = []  # type: [(Participant, bool)]
+        self.attendees = []  # type: [Tuple[Participant, bool]]
 
     @property
     def regular_attendees(self):
