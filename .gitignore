@@ -3,4 +3,5 @@ __pycache__/
 
 /custom/
 /output/
+/input/
 /export_event.json
