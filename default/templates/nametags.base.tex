@@ -84,12 +84,12 @@
                                 }%
                                 \\[1mm]%
                                 % Course(s)
-                                <<% for track in EVENT.tracks[:2] -%>>
-                                    <<% if track in p.tracks and p.tracks[track].course -%>>
-                                        <<% with course = p.tracks[track].course %>>
-                                            % Course icon
-                                            <<% if CONFIG.nametags.course_icon_path -%>>
-                                                \parbox[t][17mm][c]{15mm}{\null
+                                <<% with courses, merged = get_courses(p, part.tracks[:2] if part else EVENT.tracks[:2]) -%>>
+                                    <<% for course in courses -%>>
+                                        % Course icon
+                                        <<% if CONFIG.nametags.course_icon_path -%>>
+                                            \parbox[t][17mm][c]{15mm}{\null
+                                                <<% if course -%>>
                                                     <<%- with icon = find_asset(
                                                         CONFIG.nametags.course_icon_path.format(nr=course.nr, id=course.id)) -%>>
                                                         <<% if icon -%>>
@@ -98,18 +98,18 @@
                                                             \
                                                         <<% endif -%>>
                                                     <<% endwith -%>>
-                                                }%
-                                            <<% endif -%>>
-                                            % Course name
-                                            \parbox[t][17mm][c]{25.4mm}{   <<# TODO set to 58.9mm if only one course is shown #>>
-                                                \begin{flushleft}
-                                                    {<<<course.shortname|e>>>}
-                                                \end{flushleft}
+                                                <<% endif %>>
                                             }%
-                                            <<% if not loop.last %>>\hspace{3mm}<<% endif %>>%
-                                        <<% endwith -%>>
-                                    <<% endif -%>>
-                                <<% endfor -%>>
+                                        <<% endif -%>>
+                                        % Course name
+                                        \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
+                                            \begin{flushleft}
+                                                {<<<course.shortname|e>>><<% if merged %>><<<CONFIG.nametags.merge_courses_suffix>>><<% endif %>>}
+                                            \end{flushleft}
+                                        }%
+                                        <<% if not loop.last %>>\hspace{3mm}<<% endif %>>%
+                                    <<% endfor -%>>
+                                <<% endwith -%>>
                             <<% endblock -%>>
                         \end{minipage}\hspace{3mm}}
                     \end{lrbox}
@@ -129,14 +129,17 @@
                         \vspace{6mm}
                         <<%- block nametag_rearside scoped %>>
                             <<%- block nametag_reartext scoped %>>
-                                <<# TODO show only, if participant has at least one track with courses
-                                <<% if CONFIG.data.course_room_field and EVENT.tracks %>>
-                                    Kursraum:
-                                    <<% for track in EVENT.tracks[:2] if (track in p.tracks and p.tracks[track].course) -%>>
-                                        <<< p.tracks[track].course.fields[CONFIG.data.course_room_field]|e ->>>
-                                        <<% if not loop.last %>>, <<% endif %>>
-                                    <<%- endfor -%>>
-                                <<% endif %>>
+                                <<% with courses, merged = get_courses(p, part.tracks[:2] if part else EVENT.tracks[:2], True) -%>>
+                                    <<% if CONFIG.data.course_room_field and courses %>>
+                                        <<% if courses|length > 1 %>>Kursräume<<% else %>>Kursraum<<% endif %>>:
+                                        <<% for course in courses -%>>
+                                            <<% if course -%>>
+                                                <<< course.fields[CONFIG.data.course_room_field]|e ->>>
+                                            <<% else %>>—<<% endif -%>>
+                                            <<% if not loop.last %>>, <<% endif %>>
+                                        <<%- endfor -%>>
+                                    <<% endif %>>
+                                <<% endwith %>>
                             <<% endblock %>>
 
                             \vspace{\fill}
