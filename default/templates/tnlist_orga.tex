@@ -1,17 +1,26 @@
 <<% extends "lists.base.tex" %>>
 
+<<% if not parts %>>
+    <<% set parts = EVENT.parts %>>
+<<% endif %>>
+<<% if not tracks %>>
+    <<% set tracks = EVENT.get_tracks(parts) %>>
+<<% endif %>>
+<<% if not registrations %>>
+    <<% set registrations = EVENT.get_registrations(parts, present_only=True, list_consent=False) %>>
+<<% endif %>>
 <<% set title = "Orga-Teilnehmerliste " + EVENT.title|e %>>
 <<% set num_columns = 4
-                      + EVENT.tracks|length * (2 if CONFIG.data.course_room_field else 1)
-                      + EVENT.parts|length%>>
+                    + tracks|length * (2 if CONFIG.data.course_room_field else 1)
+                    + parts|length%>>
 <<% set hide_header = True %>>
 
 <<% block table_head %>>
     & \head{Vorname} & \head{Nachname}
-    <<% for part in EVENT.parts -%>>
+    <<% for part in parts -%>>
         & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< part.shortname|e >>><<% endif %>>}
     <<% endfor %>>
-    <<% for track in EVENT.tracks -%>>
+    <<% for track in tracks -%>>
         & \head{Kurs<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
         <<% if CONFIG.data.course_room_field %>>
             & \head{Kursraum<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
@@ -21,19 +30,19 @@
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for registration in registrations if registration.is_present %>>
+    <<% for registration in registrations %>>
         <<% if registration.age_class.is_minor %>>
             \fbox{\footnotesize{}<<< registration.age_class.name >>>}
         <<% endif %>>
         & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
-        <<% for part in EVENT.parts -%>>
+        <<% for part in parts -%>>
             <<% if registration.parts[part].is_present -%>>
                 <<% with lodgement = registration.parts[part].lodgement -%>>
                     <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
                 <<%- endwith %>>
             <<%- endif %>> &
         <<% endfor %>>
-        <<% for track in EVENT.tracks -%>>
+        <<% for track in tracks -%>>
             <<% if registration.tracks[track].registration_part.is_present -%>>
                 <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>

@@ -241,6 +241,32 @@ class Event:
 
         return event
 
+    def get_registrations(self, parts, present_only=True, list_consent=True):
+        """
+        Get registrations for a list of parts.
+
+        :type parts: List[EventPart]
+        :type present_only: bool
+        :type list_consent: bool
+        :rtype: List[Registration]
+        """
+        if parts is None:
+            return []
+        elif present_only:
+            result = [p for p in self.registrations if any(p.parts[part].is_present for part in parts)]
+        else:
+            result = [p for p in self.registrations if any(p.parts[part].is_involved for part in parts)]
+        if list_consent:
+            result = [p for p in result if p.list_consent]
+
+        return result
+
+    def get_tracks(self, parts):
+        if parts is None:
+            return []
+        else:
+            return [t for t in self.tracks if t.part in parts]
+
 
 class EventPart:
     def __init__(self):
@@ -517,6 +543,14 @@ class RegistrationPart:
         self.status = RegistrationPartStati.not_applied  # type: RegistrationPartStati
         self.lodgement = None  # type: Lodgement
         self.campingmat = False  # type: bool
+
+    @property
+    def is_present(self):
+        return self.status.is_present()
+
+    @property
+    def is_involved(self):
+        return self.status.is_involved()
 
     @classmethod
     def from_json(cls, data, event_parts, registrations, lodgements):

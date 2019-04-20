@@ -60,9 +60,9 @@ def tnlists(event: Event, config, output_dir, match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
     tasks = [
-        RenderTask('tnlist.tex', 'tnlist', {'registrations': [p for p in event.registrations if p.list_consent]}, True),
-        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {'registrations': event.registrations}, True),
-        RenderTask('tnlist_orga.tex', 'tnlist_orga', {'registrations': event.registrations}, True),
+        RenderTask('tnlist.tex', 'tnlist', {}, True),
+        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {}, True),
+        RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True),
     ]
 
     return tasks
@@ -76,14 +76,11 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
     for part in event.parts:
         tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
-                                {'registrations': [p for p in event.registrations
-                                                  if p.list_consent and p.parts[part].status.is_present]}, True))
+                                {'parts': [part]}, True))
         tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part.id),
-                                {'registrations': [p for p in event.registrations
-                                                  if p.parts[part].status.is_present]}, True))
+                                {'parts': [part]}, True))
         tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part.id),
-                                {'registrations': [p for p in event.registrations
-                                                  if p.parts[part].status.is_present]}, True))
+                                {'parts': [part]}, True))
 
     return tasks
 

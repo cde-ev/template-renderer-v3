@@ -65,7 +65,7 @@
     \rowcolors{2}{gray!25}{white}
     \begin{longtable}{
         <<%- block table_columnspec -%>>
-            |<<% for i in range(num_columns) %>>l<<% endfor %>>|
+            |<<< "l" * num_columns >>>|
         <<%- endblock table_columnspec %>>}
         \hline
         \rowcolor{design} <<% block table_head %>><<% endblock %>> \\

@@ -1,27 +1,36 @@
 <<% extends "lists.base.tex" %>>
 
+<<% if not parts %>>
+    <<% set parts = EVENT.parts %>>
+<<% endif %>>
+<<% if not tracks %>>
+    <<% set tracks = EVENT.get_tracks(parts) %>>
+<<% endif %>>
+<<% if not registrations %>>
+    <<% set registrations = EVENT.get_registrations(parts, present_only=True, list_consent=True) %>>
+<<% endif %>>
 <<% set title = "Teilnehmerliste " + EVENT.title|e %>>
-<<% set num_columns = 4 + EVENT.tracks|length %>>
+<<% set num_columns = 4 + tracks|length %>>
 
 <<% block table_head %>>
     \head{Vorname} & \head{Nachname} & \head{E-Mail} & \head{PLZ \& Ort}
-    <<% for track in EVENT.tracks -%>>
+    <<% for track in tracks -%>>
         & \head{Kurs<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
     <<% endfor %>>
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for registration in registrations if registration.is_present %>>
+    <<% for registration in registrations %>>
         <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
         \href{mailto:<<< registration.name.fullname|e >>> <<< '<' + registration.email|e + '>' >>>}{<<< registration.email|e >>>} &
-        <<< registration.address.postal_code|e >>> <<< registration.address.location|e >>> &
-        <<% for track in EVENT.tracks -%>>
+        <<< registration.address.postal_code|e >>> <<< registration.address.location|e >>>
+        <<% for track in tracks -%>>
+            ~&
             <<% if track in registration.tracks -%>>
                 <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
                 <<%- endwith %>>
             <<%- endif -%>>
-            <<% if not loop.last %>> &<<% endif %>>
         <<% endfor %>> \\
         \hline
     <<% endfor %>>
