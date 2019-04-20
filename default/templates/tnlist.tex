@@ -10,6 +10,11 @@
     <<% set registrations = EVENT.get_registrations(parts, present_only=True, list_consent=True) %>>
 <<% endif %>>
 <<% set title = "Teilnehmerliste " + EVENT.title|e %>>
+<<% if parts|length != EVENT.parts|length %>>
+    <<% for part in parts %>>
+        <<% set title = title + " " + part.title|e %>>
+    <<% endfor %>>
+<<% endif %>>
 <<% set num_columns = 4 + tracks|length %>>
 
 <<% block table_head %>>

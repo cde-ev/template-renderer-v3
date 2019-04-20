@@ -10,6 +10,11 @@
     <<% set registrations = EVENT.get_registrations(parts, present_only=True, list_consent=False) %>>
 <<% endif %>>
 <<% set title = "Orga-Teilnehmerliste " + EVENT.title|e %>>
+<<% if parts|length != EVENT.parts|length %>>
+    <<% for part in parts %>>
+        <<% set title = title + " " + part.title|e %>>
+    <<% endfor %>>
+<<% endif %>>
 <<% set num_columns = 4
                     + tracks|length * (2 if CONFIG.data.course_room_field else 1)
                     + parts|length%>>
