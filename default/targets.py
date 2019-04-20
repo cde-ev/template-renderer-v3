@@ -16,7 +16,7 @@ It must return an iterable of render.RenderTask tuples. The iterable may be empt
 generated. Additionally it should contain a docstring according to PEP 257. It will be displayed as description of the
 target to the user.
 """
-
+import enum
 import re
 import csv
 import os
@@ -127,11 +127,14 @@ def nametags(event: Event, config, output_dir, match):
         else:
             return courses, False
 
+    meals = get_meals(config, event.registrations)
+
     if config['nametags'].getboolean('per_part', fallback=(len(event.parts) > 2 or len(event.tracks) > 2)):
         return [RenderTask('nametags.tex',
                            'nametags_{}'.format(part.id),
                            {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks],
                             'part': part,
+                            'meals': meals,
                             'get_courses': get_courses},
                            False)
                 for part in event.parts]
@@ -139,5 +142,45 @@ def nametags(event: Event, config, output_dir, match):
         return RenderTask('nametags.tex',
                           'nametags',
                           {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks],
+                           'meals': meals,
                            'get_courses': get_courses},
                           False),
+
+
+class Meals(enum.IntEnum):
+    meat = 0
+    vegetarian = 1
+    vegan = 2
+    special = 3
+    halfmeat1 = 4
+    halfmeat2 = 5
+
+
+def get_meals(config, registrations):
+    """
+    Helper function for parsing the desired meal of a participant from its datafields.
+    :param config: The Config data
+    :param registrations: The list of all registrations of the event
+    :type registrations: [data.Registration]
+    :return: A dict, mapping registrations to a meal type from the Meals enum.
+    :rtype: Dict[data.Registration, Meals]
+    """
+    meal_field = config.get('data', 'meal_field', fallback=None)
+    halfmeat_group_field = config.get('data', 'halfmeat_group_field', fallback=None)
+    if not meal_field:
+        return {r: None
+                for r in registrations}
+
+    meal_map = {alias: Meals(i)
+                for i, alias in enumerate(config['data']['meal_values'].split(','))}
+
+    result = {}
+    for r in registrations:
+        meal = meal_map.get(r.fields.get(meal_field, ''), None)
+        if meal == Meals.halfmeat1 and halfmeat_group_field and bool(r.fields.get(halfmeat_group_field, None)):
+            meal = Meals.halfmeat2
+        result[r] = meal
+
+    print(list(result.values()))
+    return result
+

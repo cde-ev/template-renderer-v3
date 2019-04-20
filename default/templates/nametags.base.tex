@@ -138,7 +138,7 @@
                                         <<% if courses|length > 1 %>>Kursräume<<% else %>>Kursraum<<% endif %>>:
                                         <<% for course in courses -%>>
                                             <<% if course -%>>
-                                                <<< course.fields[CONFIG.data.course_room_field]|e ->>>
+                                                <<< course.fields[CONFIG.data.course_room_field]|e >>>
                                             <<% else %>>—<<% endif -%>>
                                             <<% if not loop.last %>>, <<% endif %>>
                                         <<%- endfor -%>>
@@ -147,8 +147,13 @@
                             <<% endblock %>>
 
                             \vspace{\fill}
-                            <<%- block nametag_rearlefticons scoped %>>
-                                <<# TODO add meal icons in a generic way #>>
+                            <<%- block nametag_rearlefticons scoped -%>>
+                                <<% with meal = meals[p] -%>>
+                                    <<% if not meal is none and find_asset('meal_' + meal.name + '.pdf') -%>>
+                                        \includegraphics[keepaspectratio=true, width=1cm, height=1cm]{
+                                            <<<- find_asset('meal_' + meal.name + '.pdf') >>>}
+                                    <<% endif %>>
+                                <<%- endwith %>>
                             <<% endblock %>>
 
                             \hspace{\fill}
