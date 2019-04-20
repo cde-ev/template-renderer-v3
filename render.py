@@ -140,7 +140,7 @@ def render_template(task, output_dir, jinja_env, cleanup=True):
         job_name: TeX jobname, defines filename of the output files
         template_args: dict of arguments to be passed to the template
         double_tex: if True, execute LuaLaTeX twice to allow building of links, tocs, longtables etc.
-    :type task: RenderJob
+    :type task: RenderTask
     :param output_dir: Output directory. Absolute or relative path from working directory.
     :type output_dir: str
     :param jinja_env: The jinja Environment to use for template rendering
