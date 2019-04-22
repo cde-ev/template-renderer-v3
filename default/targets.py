@@ -86,6 +86,23 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
 
 @target_function
+def minor_checklist(event: Event, config, output_idr, match):
+
+    return [RenderTask('tnlist_minors.tex', 'tnlist_minors', {}, True)]
+
+
+@target_function
+def minor_checklist_per_part(event: Event, config, output_idr, match):
+
+    tasks = []
+
+    for part in event.parts:
+        tasks.append(RenderTask('tnlist_minors.tex', 'tnlist_minors_{}'.format(part.id), {'parts': [part]}, True))
+
+    return tasks
+
+
+@target_function
 def courselist(event: Event, config, output_dir, match):
     """Render the courselists"""
 

@@ -1,0 +1,61 @@
+<<% extends "lists.base.tex" %>>
+
+<<% if not parts %>>
+    <<% set parts = EVENT.parts %>>
+<<% endif %>>
+<<% if not registrations %>>
+    <<% set registrations = UTIL.get_registrations(
+                EVENT, parts=parts, stati=[ENUMS.RegistrationPartStati.participant], list_consent_only=False,
+                minors_only=True) %>>
+<<% endif %>>
+<<% set title = "Minderjährigenliste " + EVENT.title|e %>>
+<<% if parts|length != EVENT.parts|length %>>
+    <<% for part in parts %>>
+        <<% set title = title + " " + part.title|e %>>
+    <<% endfor %>>
+<<% endif %>>
+<<% set hide_header = True %>>
+
+<<% block packages %>>
+    \usepackage{amssymb}
+<<% endblock %>>
+
+<<% block table_columnspec %>>
+    |lll|
+        <<% for part in parts %>>
+            l|<<< "c|" * UTIL.get_days(part) >>>
+        <<% endfor %>>
+    l|
+<<% endblock %>>
+
+<<% block table_head %>>
+    & \head{Vorname} & \head{Nachname}
+    <<% for part in parts -%>>
+        & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< part.shortname|e >>><<% endif %>>}
+        <<% for days in range(UTIL.get_days(part)) %>>
+            & \head{<<< UTIL.get_date(part, days) >>>}
+        <<% endfor %>>
+    <<% endfor %>>
+     & \head{Handy}
+<<% endblock %>>
+
+<<% block table_body %>>
+    <<% for registration in registrations %>>
+        <<% if registration.age_class.is_minor %>>
+            \fbox{\footnotesize{}<<< registration.age_class.name >>>}
+        <<% endif %>>
+        & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
+        <<% for part in parts -%>>
+            <<% if registration.parts[part].is_present -%>>
+                <<% with lodgement = registration.parts[part].lodgement -%>>
+                    <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
+                <<%- endwith %>> &
+                <<< "$\square$&" * UTIL.get_days(part) >>>
+            <<%- else -%>>
+                \multicolumn{1}{c|}{-}& <<< "-&" * UTIL.get_days(part) >>>
+            <<%- endif %>>
+        <<% endfor %>>
+        <<< registration.mobile|e >>> \\
+        \hline
+    <<% endfor %>>
+<<% endblock %>>
