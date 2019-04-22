@@ -111,6 +111,9 @@ class AgeClasses(enum.IntEnum):
         return self in {AgeClasses.u14, AgeClasses.u16, AgeClasses.u18}
 
 
+ALL_ENUMS = (Genders, RegistrationPartStati, CourseTrackStati, FieldDatatypes, AgeClasses)
+
+
 class Event:
     def __init__(self):
         self.title = ""  # type: str
@@ -240,32 +243,6 @@ class Event:
                         (registration, registration_track.instructor))
 
         return event
-
-    def get_registrations(self, parts, present_only=True, list_consent=True):
-        """
-        Get registrations for a list of parts.
-
-        :type parts: List[EventPart]
-        :type present_only: bool
-        :type list_consent: bool
-        :rtype: List[Registration]
-        """
-        if parts is None:
-            return []
-        elif present_only:
-            result = [p for p in self.registrations if any(p.parts[part].is_present for part in parts)]
-        else:
-            result = [p for p in self.registrations if any(p.parts[part].is_involved for part in parts)]
-        if list_consent:
-            result = [p for p in result if p.list_consent]
-
-        return result
-
-    def get_tracks(self, parts):
-        if parts is None:
-            return []
-        else:
-            return [t for t in self.tracks if t.part in parts]
 
 
 class EventPart:

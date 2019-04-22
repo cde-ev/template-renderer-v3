@@ -4,10 +4,11 @@
     <<% set parts = EVENT.parts %>>
 <<% endif %>>
 <<% if not tracks %>>
-    <<% set tracks = EVENT.get_tracks(parts) %>>
+    <<% set tracks = UTIL.get_tracks(EVENT, parts=parts) %>>
 <<% endif %>>
 <<% if not registrations %>>
-    <<% set registrations = EVENT.get_registrations(parts, present_only=True, list_consent=False) %>>
+    <<% set registrations = UTIL.get_registrations(
+                EVENT, parts=parts, stati=[ENUMS.RegistrationPartStati.participant], list_consent_only=False) %>>
 <<% endif %>>
 <<% set title = "Teilnehmerliste " + EVENT.title|e %>>
 <<% if parts|length != EVENT.parts|length %>>
