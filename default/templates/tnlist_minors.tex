@@ -15,6 +15,7 @@
     <<% endfor %>>
 <<% endif %>>
 <<% set hide_header = True %>>
+<<% set portrait = UTIL.get_total_days(EVENT, parts=parts) < 7 %>>
 
 <<% block packages %>>
     \usepackage{amssymb}

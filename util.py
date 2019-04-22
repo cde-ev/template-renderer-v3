@@ -39,9 +39,12 @@ def get_days(foo: Union[Event, EventPart]):
     return delta.days
 
 
-def get_total_days(event: Event):
+def get_total_days(event: Event, parts: Iterable[EventPart] = None):
 
-    return sum(get_days(part) for part in event.parts)
+    if parts is None:
+        parts = event.parts
+
+    return sum(get_days(part) for part in parts)
 
 
 def get_date(foo: Union[Event, EventPart], days=0):
