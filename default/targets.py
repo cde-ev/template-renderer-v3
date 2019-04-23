@@ -111,22 +111,15 @@ def courselist(event: Event, config, output_dir, match):
 
 @target_function
 def nametags(event: Event, config, output_dir, match):
-    # TODO implement different grouping schemas (configurable via config)
-    r_blocks = [(i, []) for i in [14, 16, 18, 22, 25, 30, 100]]
-    for p in event.registrations:
-        if p.is_present:
-            for max_age, block in r_blocks:
-                age = p.age
-                if age < max_age:
-                    block.append(p)
-                    break
+    per_part = config['nametags'].getboolean('per_part', fallback=(len(event.parts) > 2 or len(event.tracks) > 2))
 
     meals = get_meals(config, event.registrations)
 
-    if config['nametags'].getboolean('per_part', fallback=(len(event.parts) > 2 or len(event.tracks) > 2)):
+    if per_part:
         return [RenderTask('nametags.tex',
                            'nametags_{}'.format(part.id),
-                           {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks],
+                           {'registration_groups': group_participants(
+                               config, (p for p in event.registrations if p.parts[part].status.is_present()), part),
                             'part': part,
                             'meals': meals},
                            False)
@@ -134,7 +127,8 @@ def nametags(event: Event, config, output_dir, match):
     else:
         return RenderTask('nametags.tex',
                           'nametags',
-                          {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks],
+                          {'registration_groups': group_participants(
+                               config, (p for p in event.registrations if p.is_present), event.parts[0]),
                            'meals': meals},
                           False),
 
@@ -146,6 +140,39 @@ class Meals(enum.IntEnum):
     special = 3
     halfmeat1 = 4
     halfmeat2 = 5
+
+
+def group_participants(config, participants, part):
+    """ Helper function for grouping the participants by age and lodgement for different nametag colors.
+
+    First, tries to assign, each participant to one of the config.nametags.age_groups. If not possible, tries to assign
+    them to one of the config.nametags.lodgement_groups. If not possible assignes them to the 'others' group.
+
+    :param config: The Config data
+    :param participants: A list of participants to group
+    :return: List of groups as tuple of group name and list of participants
+    :rtype: [(str, [data.Participant])]
+    """
+    age_groups = [(int(x), [])
+                  for x in config.get('nametags', 'age_groups', fallback="").split(',')]
+    lodgement_groups = [(re.compile(x.strip()), [])
+                        for x in config.get('nametags', 'lodgement_groups', fallback="").split('\n')]
+    others = []
+    for p in participants:
+        for max_age, l in age_groups:
+            if p.age < max_age:
+                l.append(p)
+                break
+        else:
+            for regex, l in lodgement_groups:
+                if p.parts[part].lodgement and re.match(p.parts[part].lodgement.moniker):
+                    l.append(p)
+                    break
+            else:
+                others.append(p)
+    return [("age u{}".format(name), ps) for name, ps in age_groups]\
+           + [(regex.pattern, ps) for regex, ps in lodgement_groups]\
+           + [('others', others)]
 
 
 def get_meals(config, registrations):
