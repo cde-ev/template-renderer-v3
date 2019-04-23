@@ -121,29 +121,6 @@ def nametags(event: Event, config, output_dir, match):
                     block.append(p)
                     break
 
-    def get_courses(registration, tracks, force_merge=False):
-        """Get the courses to be printed on the nametag from a list of the event tracks and the registration
-
-        :param force_merge: Merge equal courses, even if the config doesn't say so
-        :returns The reduced list of courses and a flag to indicate if the courses have been merged
-        :rtype ([courses], bool)
-        """
-        courses = []
-        for t in tracks:
-            reg_track = registration.tracks[t]
-            if reg_track.registration_part.status.is_present:
-                courses.append(registration.tracks[t].course)
-            elif config['nametags']['second_track_always_right']:
-                courses.append(None)
-
-        if config['nametags']['merge_courses'] or force_merge:
-            if len(courses) > 1 and courses[0] is courses[1]:
-                return courses[0], True
-            else:
-                return courses, False
-        else:
-            return courses, False
-
     meals = get_meals(config, event.registrations)
 
     if config['nametags'].getboolean('per_part', fallback=(len(event.parts) > 2 or len(event.tracks) > 2)):
@@ -151,16 +128,14 @@ def nametags(event: Event, config, output_dir, match):
                            'nametags_{}'.format(part.id),
                            {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks],
                             'part': part,
-                            'meals': meals,
-                            'get_courses': get_courses},
+                            'meals': meals},
                            False)
                 for part in event.parts]
     else:
         return RenderTask('nametags.tex',
                           'nametags',
                           {'registration_blocks': [("age u{}".format(name), ps) for name, ps in r_blocks],
-                           'meals': meals,
-                           'get_courses': get_courses},
+                           'meals': meals},
                           False),
 
 
