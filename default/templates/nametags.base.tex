@@ -141,13 +141,14 @@
                                         <<% if courses|length > 1 %>>Kursräume<<% else %>>Kursraum<<% endif %>>:
                                         <<% for course in courses -%>>
                                             <<% if course -%>>
-                                                <<< course.fields[CONFIG.data.course_room_field]|e >>>
+                                                <<< course.fields[CONFIG.data.course_room_field]|e ->>>
                                             <<% else %>>—<<% endif -%>>
                                             <<% if not loop.last %>>, <<% endif %>>
                                         <<%- endfor -%>>
                                     <<% endif %>>
                                 <<% endwith %>>
                             <<% endblock %>>
+
 
                             \vspace{\fill}
                             <<%- block nametag_rearlefticons scoped -%>>
