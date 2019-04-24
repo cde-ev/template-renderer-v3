@@ -141,10 +141,8 @@ class Event:
 
     @property
     def days(self):
-        d = self.begin
-        while d <= self.end:
-            yield d
-            d += datetime.timedelta(days=1)
+        return sorted(functools.reduce(lambda a, b: a | b,
+                                       (set(p.days) for p in self.parts)))
 
     @classmethod
     def from_json(cls, data):
