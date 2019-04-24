@@ -82,6 +82,9 @@
                                 \parbox[t][1.1cm][c]{3cm}{
                                     \raggedleft
                                     <<% block nametag_frontrighticons %>>
+                                        <<% if p.age_class.is_minor %>>
+                                            \includegraphics[keepaspectratio=true, height=0.8cm]{<<< find_asset('nametag_minor.pdf') >>>}
+                                        <<% endif %>>
                                     <<% endblock %>>
                                 }%
                                 \\[1mm]%
