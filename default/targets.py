@@ -23,7 +23,7 @@ import os
 
 from globals import target_function
 from render import RenderTask
-from data import Event
+from data import Event, RegistrationPartStati
 
 
 @target_function
@@ -34,12 +34,12 @@ def tnletters(event: Event, config, output_dir, match):
     be used to filter the registrations by name and only render some of their letters.
     """
     # Filter registrations
+    participants = [r for r in event.registrations
+                    if any(rp.status == RegistrationPartStati.participant for rp in r.parts.values())]
     if match is not None:
         regex = re.compile(match)
-        participants = [r for r in event.registrations if regex.search("{} {}".format(r.name.given_names,
-                                                                                       r.name.family_name))]
-    else:
-        participants = event.registrations
+        participants = [r for r in participants
+                        if regex.search("{} {}".format(r.name.given_names, r.name.family_name))]
 
     # Create MailMerge CSV file
     with open(os.path.join(output_dir, 'tnletter_mailmerge.csv'), 'w') as csvfile:
