@@ -49,7 +49,7 @@
         <<% endif %>>
         & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
         <<% for part in parts -%>>
-            <<% if registration.parts[part].is_present -%>>
+            <<% if registration.parts[part].status.is_present -%>>
                 <<% with lodgement = registration.parts[part].lodgement -%>>
                     <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
                 <<%- endwith %>> &

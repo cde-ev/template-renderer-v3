@@ -524,14 +524,6 @@ class RegistrationPart:
         self.lodgement = None  # type: Lodgement
         self.campingmat = False  # type: bool
 
-    @property
-    def is_present(self):
-        return self.status.is_present
-
-    @property
-    def is_involved(self):
-        return self.status.is_involved
-
     @classmethod
     def from_json(cls, data, event_parts, registrations, lodgements):
         rpart = cls()
