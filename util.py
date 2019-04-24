@@ -5,7 +5,6 @@ from datetime import timedelta
 
 def get_registrations(event: Event, parts: Iterable[EventPart] = None, stati: Iterable[RegistrationPartStati] = None,
                       list_consent_only: bool = False, minors_only: bool = False):
-
     if parts is None:
         parts = event.parts
     if stati is None:
@@ -22,8 +21,7 @@ def get_registrations(event: Event, parts: Iterable[EventPart] = None, stati: It
     return result
 
 
-def get_tracks(event: Event, parts:Iterable[EventPart] = None):
-
+def get_tracks(event: Event, parts: Iterable[EventPart] = None):
     if parts is None:
         parts = event.parts
 
@@ -55,33 +53,32 @@ def get_total_days(event: Event, parts: Iterable[EventPart] = None):
 
 
 def get_date(foo: Union[Event, EventPart], days=0):
-
     date = foo.begin + timedelta(days=days)
 
     return date.strftime("%d.%m.")
 
 
 def get_nametag_courses(registration, tracks, merge=True, second_always_right=False):
-        """Get the courses to be printed on the nametag from a list of the event tracks and the registration
+    """Get the courses to be printed on the nametag from a list of the event tracks and the registration
 
-        :param merge: Merge equal courses of the first and second track
-        :param second_always_right: Return a None value to push the second course to the right, if the participant is
-            not present in the first track's part
-        :returns The reduced list of courses and a flag to indicate if the courses have been merged
-        :rtype ([courses], bool)
-        """
-        courses = []
-        for t in tracks:
-            reg_track = registration.tracks[t]
-            if reg_track.registration_part.status.is_present:
-                courses.append(registration.tracks[t].course)
-            elif second_always_right:
-                courses.append(None)
+    :param merge: Merge equal courses of the first and second track
+    :param second_always_right: Return a None value to push the second course to the right, if the participant is
+        not present in the first track's part
+    :returns The reduced list of courses and a flag to indicate if the courses have been merged
+    :rtype ([courses], bool)
+    """
+    courses = []
+    for t in tracks:
+        reg_track = registration.tracks[t]
+        if reg_track.registration_part.status.is_present:
+            courses.append(registration.tracks[t].course)
+        elif second_always_right:
+            courses.append(None)
 
-        if merge:
-            if len(courses) > 1 and courses[0] is courses[1]:
-                return courses[0], True
-            else:
-                return courses, False
+    if merge:
+        if len(courses) > 1 and courses[0] is courses[1]:
+            return courses[0], True
         else:
             return courses, False
+    else:
+        return courses, False
