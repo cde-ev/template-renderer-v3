@@ -200,6 +200,5 @@ def get_meals(config, registrations):
             meal = Meals.halfmeat2
         result[r] = meal
 
-    print(list(result.values()))
     return result
 
