@@ -1,6 +1,5 @@
 from data import Event, EventPart, RegistrationPartStati
 from typing import Iterable, Union
-from datetime import timedelta
 
 
 def get_registrations(event: Event, parts: Iterable[EventPart] = None, stati: Iterable[RegistrationPartStati] = None,
@@ -37,25 +36,6 @@ def get_parts_without_tracks(event: Event, parts: Iterable[EventPart] = None):
     result = [p for p in parts if not p.tracks]
 
     return result
-
-
-def get_days(foo: Union[Event, EventPart]):
-    delta = foo.end - foo.begin
-
-    return delta.days
-
-
-def get_total_days(event: Event, parts: Iterable[EventPart] = None):
-    if parts is None:
-        parts = event.parts
-
-    return sum(get_days(part) for part in parts)
-
-
-def get_date(foo: Union[Event, EventPart], days=0):
-    date = foo.begin + timedelta(days=days)
-
-    return date.strftime("%d.%m.")
 
 
 def get_nametag_courses(registration, tracks, merge=True, second_always_right=False):
