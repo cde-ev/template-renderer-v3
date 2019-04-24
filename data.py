@@ -54,6 +54,7 @@ class RegistrationPartStati(enum.IntEnum):
     cancelled = 5  #:
     rejected = 6  #:
 
+    @property
     def is_involved(self):
         """Any status which warrants further attention by the orgas.
 
@@ -64,6 +65,7 @@ class RegistrationPartStati(enum.IntEnum):
                         RegistrationPartStati.waitlist,
                         RegistrationPartStati.guest,)
 
+    @property
     def is_present(self):
         return self in (RegistrationPartStati.participant,
                         RegistrationPartStati.guest,)
@@ -75,6 +77,7 @@ class CourseTrackStati(enum.IntEnum):
     cancelled = 1  #:
     active = 2
 
+    @property
     def is_active(self):
         return self == CourseTrackStati.active
 
@@ -308,7 +311,7 @@ class Course:
 
     @property
     def is_active(self):
-        return any(t.status.is_active() for t in self.tracks.values())
+        return any(t.status.is_active for t in self.tracks.values())
 
     @classmethod
     def from_json(cls, data, field_types):
@@ -417,7 +420,7 @@ class Registration:
 
     @property
     def is_present(self):
-        return any(p.status.is_present() for p in self.parts.values())
+        return any(p.status.is_present for p in self.parts.values())
 
     @property
     def age_class(self):
@@ -523,11 +526,11 @@ class RegistrationPart:
 
     @property
     def is_present(self):
-        return self.status.is_present()
+        return self.status.is_present
 
     @property
     def is_involved(self):
-        return self.status.is_involved()
+        return self.status.is_involved
 
     @classmethod
     def from_json(cls, data, event_parts, registrations, lodgements):

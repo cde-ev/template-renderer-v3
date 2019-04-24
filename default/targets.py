@@ -119,7 +119,7 @@ def nametags(event: Event, config, output_dir, match):
         return [RenderTask('nametags.tex',
                            'nametags_{}'.format(part.id),
                            {'registration_groups': group_participants(
-                               config, (p for p in event.registrations if p.parts[part].status.is_present()), part),
+                               config, (p for p in event.registrations if p.parts[part].status.is_present), part),
                             'part': part,
                             'meals': meals},
                            False)
