@@ -17,7 +17,7 @@
     <<% endfor %>>
 <<% endif %>>
 <<% set hide_header = True %>>
-<<% set portrait = (EVENT.end - EVENT.begin).days < 7 %>>
+<<% set portrait = parts|length < 2 and parts[0].days|list|length < 5 %>>
 
 <<% block packages %>>
     \usepackage{amssymb}
