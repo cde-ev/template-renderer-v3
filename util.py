@@ -32,15 +32,22 @@ def get_tracks(event: Event, parts:Iterable[EventPart] = None):
     return result
 
 
-def get_days(foo: Union[Event, EventPart]):
+def get_parts_without_tracks(event: Event, parts: Iterable[EventPart] = None):
+    if parts is None:
+        parts = event.parts
 
+    result = [p for p in parts if not p.tracks]
+
+    return result
+
+
+def get_days(foo: Union[Event, EventPart]):
     delta = foo.end - foo.begin
 
     return delta.days
 
 
 def get_total_days(event: Event, parts: Iterable[EventPart] = None):
-
     if parts is None:
         parts = event.parts
 

@@ -36,11 +36,16 @@
     <<% for registration in registrations %>>
         <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>>
         <<% for part in EVENT.parts -%>>
-            & <<% if part in registration.parts %>>
-                <<% with lodgement = registration.parts[part].lodgement -%>>
-                    <<% if lodgement %>><<< lodgement.moniker|e >>><<% endif %>>
-                <<% endwith %>>
-            <<% endif %>>
+            ~&
+            <<# This only displays the guest flag, filtering should happen above. #>>
+            <<% with status = registration.parts[part].status -%>>
+                <<% if status == ENUMS.RegistrationPartStati.guest -%>>
+                    \custombox{Gast}
+                <<%- endif %>>
+            <<%- endwith %>>
+            <<% with lodgement = registration.parts[part].lodgement -%>>
+                <<% if lodgement %>><<< lodgement.moniker|e >>><<% endif %>>
+            <<%- endwith %>>
         <<% endfor %>>
         <<% for track in tracks -%>>
             & <<% if track in registration.tracks -%>>

@@ -41,27 +41,29 @@
 <<% block table_body %>>
     <<% for registration in registrations %>>
         <<% if registration.age_class.is_minor %>>
-            \fbox{\footnotesize{}<<< registration.age_class.name >>>}
+            \custombox{<<< registration.age_class.name >>>}
         <<% endif %>>
         & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
         <<% for part in parts -%>>
-            <<% if registration.parts[part].is_present -%>>
-                <<% with lodgement = registration.parts[part].lodgement -%>>
-                    <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
-                <<%- endwith %>>
-            <<%- endif %>> &
+            ~&
+            <<# This only displays the guest flag, filtering should happen above. #>>
+            <<% with status = registration.parts[part].status -%>>
+                <<% if status == ENUMS.RegistrationPartStati.guest -%>>
+                    \custombox{Gast}
+                <<%- endif %>>
+            <<%- endwith %>>
+            <<% with lodgement = registration.parts[part].lodgement -%>>
+                <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
+            <<%- endwith %>>
         <<% endfor %>>
         <<% for track in tracks -%>>
-            <<% if registration.tracks[track].registration_part.is_present -%>>
-                <<% with course = registration.tracks[track].course -%>>
-                    <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
-                    <<% if CONFIG.data.course_room_field -%>>
-                        & <<% if course %>><<< course.fields[CONFIG.data.course_room_field]|e >>><<% endif %>>
-                    <<%- endif %>>
-                <<%- endwith %>>
-            <<%- else -%>>
-                <<% if CONFIG.data.course_room_field %>>&<<% endif %>>
-            <<%- endif %>> &
+            ~&
+            <<% with course = registration.tracks[track].course -%>>
+                <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+                <<% if CONFIG.data.course_room_field -%>>
+                    & <<% if course %>><<< course.fields[CONFIG.data.course_room_field]|e >>><<% endif %>>
+                <<%- endif %>>
+            <<%- endwith %>>
         <<% endfor %>>
         <<< registration.mobile|e >>> \\
         \hline

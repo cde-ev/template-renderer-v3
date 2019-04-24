@@ -45,7 +45,7 @@
 <<% block table_body %>>
     <<% for registration in registrations %>>
         <<% if registration.age_class.is_minor %>>
-            \fbox{\footnotesize{}<<< registration.age_class.name >>>}
+            \custombox{<<< registration.age_class.name >>>}
         <<% endif %>>
         & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
         <<% for part in parts -%>>
@@ -55,7 +55,7 @@
                 <<%- endwith %>> &
                 <<< "$\square$&" * UTIL.get_days(part) >>>
             <<%- else -%>>
-                \multicolumn{1}{c|}{-}& <<< "-&" * UTIL.get_days(part) >>>
+                \multicolumn{1}{c|}{---}& <<< "-&" * UTIL.get_days(part) >>>
             <<%- endif %>>
         <<% endfor %>>
         <<< registration.mobile|e >>> \\
