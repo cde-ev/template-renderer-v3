@@ -7,8 +7,11 @@
     <<% set tracks = UTIL.get_tracks(EVENT, parts=parts) %>>
 <<% endif %>>
 <<% if not registrations %>>
-    <<% set registrations = UTIL.get_registrations(
-                EVENT, parts=parts, stati=[ENUMS.RegistrationPartStati.participant], list_consent_only=False) %>>
+    <<% set stati = [ENUMS.RegistrationPartStati.participant] %>>
+    <<% if CONFIG.tnlist.show_guests %>>
+        <<% do stati.append(ENUMS.RegistrationPartStati.guest) %>>
+    <<% endif %>>
+    <<% set registrations = UTIL.get_registrations(EVENT, parts=parts, stati=stati, list_consent_only=False) %>>
 <<% endif %>>
 <<% set title = "Teilnehmerliste " + EVENT.title|e %>>
 <<% if parts|length != EVENT.parts|length %>>
