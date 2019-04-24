@@ -1,5 +1,5 @@
 
-# CdE event Template Rendering System (Version 3)
+# CdE Event Template Rendering System (Version 3)
 
 This repository contains a Python 3 script to render LaTeX based participant lists, course lists, nametags,
 participation letters (“Teilnehmerbriefe”) and other documents, as well as a set of configurable LaTeX templates for
@@ -12,6 +12,7 @@ time-consuming LaTeX compilation.
 
 The default target functions, templates and configuration data can be extended and overridden to adapt the documents
 to the needs of a specific CdE events.
+
 
 
 ## Setup
@@ -33,7 +34,7 @@ You need the following software on your computer:
 
 `lualatex` must be available in the $PATH to be called by the Python script.
 
-#### Setting up prerequisites on Linux systems
+#### Setting up Prerequisites on Linux systems
 … on Ubuntu & Debian:
 ```
 $ sudo apt install python3 python3-jinja2 fonts-linuxlibertine git \
@@ -46,7 +47,7 @@ $ sudo pacman -S python python-jinja2 texlive-core ttf-linux-libertine git
 ```
 
 
-#### Setting up prerequisites on Windows
+#### Setting up Prerequisites on Windows systems
 
 * Download and run the "Windows x86-64 executable installer" of the latest Python 3 release from
   https://www.python.org/downloads/windows/
@@ -74,6 +75,7 @@ The zip file can be downloaded from https://tracker.cde-ev.de/gitea/orgas/cde_te
 Alternatively, using Git, open up a terminal (on Windows preferably a *Git Bash*) and type:
 ```
 $ git clone https://tracker.cde-ev.de/gitea/orgas/cde_template_renderer_v3.git
+$ cd cde_template_renderer_v3/
 $ git checkout stable
 ```
 
@@ -81,6 +83,7 @@ To upgrade to the latest stable version, open a terminal within the template ren
 ```
 $ git pull
 ```
+
 
 
 ## Usage
@@ -125,6 +128,7 @@ $ ./main.py -i export_event_2019-04-24.json -c pa19/ tnlists
 
 Since the custom directory allows to add additional target functions, it is useful to call the script with the `-c`
 parameter but without targets, to get a full list of all available targets (default targets and custom targets). 
+
 
 
 ## Customization
