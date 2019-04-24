@@ -34,11 +34,18 @@ TODO
 TODO
 
 
+### Assets
+
+TODO
+
+
 ### Templates
 
 TODO Jinja2 syntax (and reference)
 
 TODO template inheritance with blocks
+
+TODO reusing blocks (incl. subblocks) with `<<< self.BLOCKNAME() >>>`
 
 TODO our template inheritance structure
 
