@@ -142,6 +142,11 @@ class Event:
             return None
         return max(p.end for p in self.parts)
 
+    @property
+    def days(self):
+        return sorted(functools.reduce(lambda a, b: a | b,
+                                       (set(p.days) for p in self.parts)))
+
     @classmethod
     def from_json(cls, data):
         event = cls()
@@ -257,6 +262,13 @@ class EventPart:
         self.end = datetime.date.today()  # type: datetime.date
 
         self.tracks = []  # type: List[EventTrack]
+
+    @property
+    def days(self):
+        d = self.begin
+        while d <= self.end:
+            yield d
+            d += datetime.timedelta(days=1)
 
     @classmethod
     def from_json(cls, data):

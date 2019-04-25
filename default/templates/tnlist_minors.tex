@@ -17,7 +17,7 @@
     <<% endfor %>>
 <<% endif %>>
 <<% set hide_header = True %>>
-<<% set portrait = UTIL.get_total_days(EVENT, parts=parts) < 7 %>>
+<<% set portrait = parts|length < 2 and parts[0].days|list|length < 5 %>>
 
 <<% block packages %>>
     \usepackage{amssymb}
@@ -26,7 +26,7 @@
 <<% block table_columnspec %>>
     |lll|
         <<% for part in parts %>>
-            l|<<< "c|" * UTIL.get_days(part) >>>
+            l|<<< "c|" * (part.end - part.begin).days >>>
         <<% endfor %>>
     l|
 <<% endblock %>>
@@ -35,8 +35,8 @@
     & \head{Vorname} & \head{Nachname}
     <<% for part in parts -%>>
         & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< part.shortname|e >>><<% endif %>>}
-        <<% for days in range(UTIL.get_days(part)) %>>
-            & \head{<<< UTIL.get_date(part, days) >>>}
+        <<% for day in (part.days|list)[:-1] %>>
+            & \head{<<< day.strftime("%d.%m.") >>>}
         <<% endfor %>>
     <<% endfor %>>
      & \head{Handy}
@@ -53,9 +53,9 @@
                 <<% with lodgement = registration.parts[part].lodgement -%>>
                     <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
                 <<%- endwith %>> &
-                <<< "$\square$&" * UTIL.get_days(part) >>>
+                <<< "$\square$&" * (part.end - part.begin).days >>>
             <<%- else -%>>
-                \multicolumn{1}{c|}{---}& <<< "-&" * UTIL.get_days(part) >>>
+                \multicolumn{1}{c|}{---}& <<< "-&" * (part.end - part.begin).days >>>
             <<%- endif %>>
         <<% endfor %>>
         <<< registration.mobile|e >>> \\
