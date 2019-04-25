@@ -36,7 +36,7 @@
     <<% for part in parts -%>>
         & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< part.shortname|e >>><<% endif %>>}
         <<% for day in (part.days|list)[:-1] %>>
-            & \head{<<< day.strftime("%d.%m.") >>>}
+            & \head{<<< day|date("%d.%m.") >>>}
         <<% endfor %>>
     <<% endfor %>>
      & \head{Handy}
