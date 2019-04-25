@@ -32,6 +32,8 @@ def tnletters(event: Event, config, output_dir, match):
 
     This target renders the tnletter.tex template once for every participant of the event. The `--match` parameter may
     be used to filter the registrations by name and only render some of their letters.
+
+    The target function also creates an CSV file for use with Tunderbird Mailmerge in the output directory.
     """
     # Filter registrations
     participants = [r for r in event.registrations
@@ -70,7 +72,8 @@ def tnlists(event: Event, config, output_dir, match):
 
 @target_function
 def tnlists_per_part(event: Event, config, output_dir, match):
-    """Render the participant lists individually for each part."""
+    """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)
+    individually for each part."""
 
     tasks = []
 
@@ -87,12 +90,14 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
 @target_function
 def minor_checklist(event: Event, config, output_idr, match):
+    """Render a list of all minors with columns to check their presence every evening"""
 
     return [RenderTask('tnlist_minors.tex', 'tnlist_minors', {}, True)]
 
 
 @target_function
 def minor_checklist_per_part(event: Event, config, output_idr, match):
+    """Render a list of all minors for each part with columns to check their presence every evening"""
 
     tasks = []
 
@@ -111,6 +116,7 @@ def courselist(event: Event, config, output_dir, match):
 
 @target_function
 def nametags(event: Event, config, output_dir, match):
+    """Render nametags."""
     per_part = config['nametags'].getboolean('per_part', fallback=(len(event.parts) > 2 or len(event.tracks) > 2))
 
     meals = get_meals(config, event.registrations)
