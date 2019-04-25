@@ -34,7 +34,7 @@
     \setkomavar{fromname}{CdE <<< EVENT.title|e >>>}
     \setkomavar{fromaddress}{c/o <<< CONFIG.tnletter.sender >>>\\<<< CONFIG.tnletter.sender_address >>>\\<<< CONFIG.tnletter.sender_postal_code >>> <<< CONFIG.tnletter.sender_location >>>}
     \setkomavar{place}{<<< CONFIG.tnletter.sender_location >>>}
-    \setkomavar{fromlogo}{\includegraphics[height=4cm]{<<< find_asset('PA19_logo2_grey.pdf') >>>}}
+    \setkomavar{fromlogo}{<<% if CONFIG.layout.logo_file %>>\includegraphics[height=4cm]{<<< find_asset(CONFIG.layout.logo_file) >>>}<<% endif %>>}
 
     \setkomavar{firsthead}{
       \parbox[b][4cm][t]{8cm}{
