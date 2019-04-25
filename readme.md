@@ -134,19 +134,55 @@ parameter but without targets, to get a full list of all available targets (defa
 
 ## Customization
 
-### Configuration Options
+There are four different ways to customize the rendered PDF files for a specific CdE event:
 
-TODO
+* changing configuration options
+* overriding and adding asset files
+* overriding templates
+* overriding target functions
+
+Additionally, you can add your own target functions and templates, along with assets and configuration options for them.
+
+It's recommended to start customizing the default templates using the default configuration options. If this is not
+sufficient for a certain template or use case (typically, the `tnletter.tex` template is such a case), take a look into
+overriding some of the templates. The templates' structure is designed to allow overriding selected portions without
+touching (or even understanding) the rest. At the same time, they profit from code reuse, so only few overrides are
+required to effect the look of multiple documents.
+
+If you want to add your own render targets and templates or do more sophisticated preprocessing of the rendered data
+(e.g. filtering participants by certain criteria), you'll need to override target functions or add your own.
+
+
+
+### Configuration Options 
+
+Configuration options are read from two files using the Python `configparser` module: `default/config.ini` and the
+`config.ini` in your custom directory, if present. Options in the custom `config.ini` override equally named options
+in the same section of the `default/config.ini`.
+
+**Don't change `default/config.ini`** to customize config options. Instead, create a `config.ini` in your custom 
+directory and redefine the same option there with your custom value. This way, you can easily update the template
+rendering systems later, including changes to the default configuration file, without need to merge the changes
+manually. Additionally, you can apply version control (e.g. Git, SVN, Mercurial, …) to your custom directory to keep
+track of changes to your customization independently from the development of the template rendering system. 
+
+You can easily define your custom `config.ini` and use them for easy adjustment in your overriden or added templates
+and target functions. Just specify your own configuration sections and options and they will be available in the
+templates' `CONFIG` variable and the target functions' `config` parameter.  
 
 
 ### Assets
 
-TODO
+TODO overriding assets (no need to change default assets)
+
+TODO adding your own assets
 
 
 ### Templates
 
 TODO Jinja2 syntax (and reference)
+
+TODO overriding templates (again: don't change default templates)
 
 TODO template inheritance with blocks
 
@@ -154,7 +190,7 @@ TODO reusing blocks (incl. subblocks) with `<<< self.BLOCKNAME() >>>`
 
 TODO our template inheritance structure
 
-TODO access to EVENT and CONFIG data
+TODO accessing to EVENT and CONFIG data
 
 TODO `-n` option for debugging templates
 
@@ -163,7 +199,7 @@ TODO `-n` option for debugging templates
 
 TODO function signuature and registration
 
-TODO custom targets and overriding
+TODO custom targets and overriding (again: don't change default targets)
 
 TODO access to EVENT and CONFIG data
 
