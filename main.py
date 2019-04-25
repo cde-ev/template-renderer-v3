@@ -8,6 +8,9 @@ import concurrent.futures
 import sys
 import traceback
 
+import pytz
+
+
 # define some static paths
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_DIR = os.path.join(THIS_DIR, 'default')
@@ -20,6 +23,7 @@ import render
 import data
 import globals
 import util
+
 
 # Some info for cli argument defaults
 default_threads = multiprocessing.cpu_count() - 1
@@ -72,7 +76,8 @@ if os.path.isfile(custom_targets_file):
 event = data.load_input_file(args.input)
 
 # Construct Jinja environment
-jinja_env = render.get_latex_jinja_env(template_dirs, asset_dirs)
+timezone = pytz.timezone(config.get('data', 'timezone'))
+jinja_env = render.get_latex_jinja_env(template_dirs, asset_dirs, timezone)
 jinja_env.globals['CONFIG'] = config
 jinja_env.globals['EVENT'] = event
 jinja_env.globals['ENUMS'] = {e.__name__: e for e in data.ALL_ENUMS}

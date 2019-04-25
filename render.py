@@ -59,6 +59,27 @@ def filter_inverse_chunks(value, n=2):
             yield i
 
 
+def filter_date(value, format='%d.%m.%Y'):
+    """
+    A filter to format date values.
+
+    :type value: datetime.date
+    :param format: a format string for the strftime function
+    """
+    return value.strftime(format)
+
+
+def filter_datetime(value, format='%d.%m.%Y~%H:%M', timezone=datetime.timezone.utc):
+    """
+    A filter to format date values.
+
+    :type value: datetime.datetime
+    :param format: a format string for the strftime function
+    :param timezone: A timezone to convert the datetime object to before formatting
+    """
+    return value.astimezone(timezone).strftime(format)
+
+
 def find_asset(name, asset_dirs):
     """
     Search the given asset directories for an asset with a given name and return its full path with '/' delimiters (to
@@ -76,7 +97,7 @@ def find_asset(name, asset_dirs):
     return None
 
 
-def get_latex_jinja_env(template_paths, asset_paths):
+def get_latex_jinja_env(template_paths, asset_paths, timezone):
     """
     Factory function to construct the Jinja2 Environment object. It sets the template loader, the Jinja variable-,
     block- and comment delimiters, some additional options and the required filters and globals.
@@ -85,6 +106,8 @@ def get_latex_jinja_env(template_paths, asset_paths):
     :type template_paths: [str]
     :param asset_paths: A list of directories to be searched for assets, using the `find_asset` template function
     :type asset_paths: [str]
+    :param timezone: The timezone to show timestamps in
+    :type timezone: datetime.timezone
     :return: The configured Jinja2 Environment
     :rtype: jinja2.Environment
     """
@@ -103,6 +126,8 @@ def get_latex_jinja_env(template_paths, asset_paths):
     )
     latex_jinja2_env.filters['e'] = escape_tex
     latex_jinja2_env.filters['inverse_chunks'] = filter_inverse_chunks
+    latex_jinja2_env.filters['date'] = filter_date
+    latex_jinja2_env.filters['datetime'] = functools.partial(filter_datetime, timezone=timezone)
     latex_jinja2_env.globals['now'] = datetime.datetime.now()
     latex_jinja2_env.globals['find_asset'] = functools.partial(find_asset, asset_dirs=asset_paths)
 

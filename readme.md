@@ -23,6 +23,7 @@ You need the following software on your computer:
 
 * Python 3.5 or higher with
     * jinja2
+    * pytz
 
 * A LaTeX installation with LuaLaTeX and
     * koma-script
@@ -37,13 +38,13 @@ You need the following software on your computer:
 #### Setting up Prerequisites on Linux systems
 … on Ubuntu & Debian:
 ```
-$ sudo apt install python3 python3-jinja2 fonts-linuxlibertine git \
+$ sudo apt install python3 python3-jinja2 python3-tz fonts-linuxlibertine git \
                    texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-luatex
 ```
 
 … on Arch Linux:
 ```
-$ sudo pacman -S python python-jinja2 texlive-core ttf-linux-libertine git
+$ sudo pacman -S python python-jinja2 python-pytz texlive-core ttf-linux-libertine git
 ```
 
 
@@ -61,7 +62,7 @@ $ sudo pacman -S python python-jinja2 texlive-core ttf-linux-libertine git
   * It's recommended to "Use the Nano editor by default"
   * All other default settings are typically good
 * Log off and on again, to make sure, your %PATH% is up to date
-* Open a *Command Prompt* or *Git Bash* and run `pip install --user jinja2`
+* Open a *Command Prompt* or *Git Bash* and run `pip install --user jinja2 pytz`
 * Download the Linux Libertine font from https://sourceforge.net/projects/linuxlibertine/ extract and install it
 
 
