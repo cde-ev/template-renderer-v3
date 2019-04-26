@@ -161,8 +161,8 @@ Configuration options are read from two files using the Python `configparser` mo
 in the same section of the `default/config.ini`.
 
 **Don't change `default/config.ini`** to customize config options. Instead, create a `config.ini` in your custom 
-directory and redefine the same option there with your custom value. This way, you can easily update the template
-rendering systems later, including changes to the default configuration file, without need to merge the changes
+directory and redefine the same option there with a custom value. This way, you can easily update the template
+rendering system later, including changes to the default configuration file, without need to merge the changes
 manually. Additionally, you can apply version control (e.g. Git, SVN, Mercurial, …) to your custom directory to keep
 track of changes to your customization independently from the development of the template rendering system. 
 
@@ -173,26 +173,102 @@ templates' `CONFIG` variable and the target functions' `config` parameter.
 
 ### Assets
 
-TODO overriding assets (no need to change default assets)
+Asset files are typically graphics or fonts to be used within the templates. The default templates are shipped with
+defaullt graphics, especially for the nametags. Additional graphics files can be included by config options (e.g. for
+the event logo and course logos) or by overriding the templates. Assets are included into the templates using the
+`find_asset()` template function. It searches for file with the requested name in the custom directory's `assets` folder
+and – if no matching file has been found – in the `default/assets` folder.
 
-TODO adding your own assets
+This method allows to override default assets by creating an equally named file in the `assets/` folder in the custom
+directory. Again, **don't change the contents of `defaults/assets/`**. Instead create an `assets/` folder in your
+custom directory to override the default assets. 
+
+Adding your own assets is just as easy: If you add them to your custom `assets/` folder, `find_asset()` will find them
+by their filename and return the full path to be used in LaTeX. To use assets in subdirectories of the `assets/` folder,
+pass the relative path of the asset file to `find_asset()`, using slashes (`/`) as path delimiter (even on Windows).
 
 
 ### Templates
 
-TODO Jinja2 syntax (and reference)
+The templates are rendered to TeX files by the Jinja2 template engine and afterwards compiled to PDF files by LuaLaTeX.
+To avoid conflicts of the Jinja template syntax with TeX syntax (esp. considering curly brackets), we use a modified
+Jinja environment with different delimiters:
 
-TODO overriding templates (again: don't change default templates)
+|                | Default Jinja Syntax | Our Syntax           |
+|----------------|----------------------|----------------------|
+| Expressions    | `{{ expression }}`   | `<<< expression >>>` |
+| Tags           | `{% tag %}`          | `<<% tag %>>`        |
+| Comments       | `{# ... #}`          | `<<# ... #>>`        | 
 
-TODO template inheritance with blocks
+This modification is consistent with the syntax of LaTeX templates in the CdE Datenbank source code.
+Apart from that, the Jinja2 documentation applies to our templates: http://jinja.pocoo.org/docs/2.10/templates/
 
-TODO reusing blocks (incl. subblocks) with `<<< self.BLOCKNAME() >>>`
+We use some global template variables, which are available in every template:
 
-TODO our template inheritance structure
+| Variable        | Type          | Description                                                |
+|-----------------|---------------|------------------------------------------------------------|
+| `EVENT`         | data.Event    | The full event data, as parsed from the CdEdb export file  |
+| `CONFIG`        | Configparser  | The full configuration data from the `config.ini` files    |
+| `UTIL`          | module        | The `util.py` module with some utilty functions            |
+| `ENUMS`         | dict          | A dict of all enums defined in `data.py` to compare values |
+| `now`           | datetime      | The timestamp of the starting of the script                |
+| `find_asset`    | function      | Function to get full path of an asset by filename          |
 
-TODO accessing to EVENT and CONFIG data
+Overriding templates works just like overriding assets: Just create a `templates/` folder in your custom directory and
+place a file there, with the same name as the template to be overridden. Jinja will search this folder first for every
+single template file to be loaded. Again, **don't change the default templates**. Instead copy the template to your
+custom `templates/` directory and modify it there.
 
-TODO `-n` option for debugging templates
+To allow reusing LaTeX code in different templates and overriding of specific portions of the templates without copying
+the whole template (which would updates ineffective), we make heavy use of template inheritance and *blocks*. *Blocks*
+are placeholders with a default content, defined in a base template, to be overriden by sub-templates, *extending* the
+this template.
+
+The current inheritance tree of the default templates:
+```
+base.tex
+├── lists.base.tex
+│   ├─ courselist.tex
+│   ├─ tnlist.tex
+│   ├─ tnlist_blockboard.tex
+│   ├─ tnlist_minors.tex
+│   └─ tnlist_orga.tex
+└── nametags.base.tex
+    └─ nametags.tex
+tnletter.base.tex
+└── tnletter.tex
+```
+The primare purpose of `base.tex` and `lists.base.tex` is definition of common LaTeX code, used for all documents or
+at least all lists. They may be overridden to change the overall look of the sub-templates. On the other hand,
+`nametags.base.tex` and `tnletter.base.tex` contain the actual template code for the respective documents. They define
+many *blocks*, which are **not** overridden by the default sub-templates. Since the sub-template is used by the target
+functions, this structure allows to override the sub-template to override only specific *blocks* of the base template. 
+
+
+#### Additional Tricks
+
+**Sub-Blocks:**
+Sometimes *blocks* are nested within the base templates to allow redefinition of different sized parts of the code. For
+example, the `nametags.base.tex` templates allows to override the nametags' rearside text (`block nametag_reartext`) or
+the complete rearside (`block nametag_rearside`). When redefining/overriding a *block*, it es possible to use the
+content of another *block*, including sub-blocks, as `<<< self.BLOCKNAME() >>>`. This way, it is possible to override a
+*block* to rearrange its sub-blocks, but keep their individual default contents:
+```
+<<% block nametag_rearside %>>
+    <<< self.nametag_rearlefticons >>>
+    \hspace{\fill}
+    <<< self.nametag_rearrighticons >>>
+    
+    
+    \vspace{\fill}
+    <<< self.nametag_reartext >>>
+<<% endblock %%>
+```
+
+
+**No Cleanup:** By default, the `output/` directory is cleaned up, after each successful rendering task. I.e. all files
+with the jobname and an extension different from `.pdf` are deleted – including the rendered `.tex` file and the
+LuaLaTeX `.log`. The command line option `-n` disables this cleanup, which is quite helpful for debugging. 
 
 
 ### Target Functions
