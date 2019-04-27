@@ -164,7 +164,7 @@ in the same section of the `default/config.ini`.
 directory and redefine the same option there with a custom value. This way, you can easily update the template
 rendering system later, including changes to the default configuration file, without need to merge the changes
 manually. Additionally, you can apply version control (e.g. Git, SVN, Mercurial, …) to your custom directory to keep
-track of changes to your customization independently from the development of the template rendering system. 
+track of changes to your customization independently from the development of the Template Rendering System. 
 
 You can easily define your custom `config.ini` and use them for easy adjustment in your overriden or added templates
 and target functions. Just specify your own configuration sections and options and they will be available in the
@@ -208,7 +208,7 @@ We use some global template variables, which are available in every template:
 | Variable        | Type          | Description                                                |
 |-----------------|---------------|------------------------------------------------------------|
 | `EVENT`         | data.Event    | The full event data, as parsed from the CdEdb export file  |
-| `CONFIG`        | Configparser  | The full configuration data from the `config.ini` files    |
+| `CONFIG`        | ConfigParser  | The full configuration data from the `config.ini` files    |
 | `UTIL`          | module        | The `util.py` module with some utilty functions            |
 | `ENUMS`         | dict          | A dict of all enums defined in `data.py` to compare values |
 | `now`           | datetime      | The timestamp of the starting of the script                |
@@ -219,10 +219,10 @@ place a file there, with the same name as the template to be overridden. Jinja w
 single template file to be loaded. Again, **don't change the default templates**. Instead copy the template to your
 custom `templates/` directory and modify it there.
 
-To allow reusing LaTeX code in different templates and overriding of specific portions of the templates without copying
-the whole template (which would updates ineffective), we make heavy use of template inheritance and *blocks*. *Blocks*
-are placeholders with a default content, defined in a base template, to be overriden by sub-templates, *extending* the
-this template.
+To allow reusing LaTeX code in different templates and overriding of specific portions of the templates, without copying
+the whole template (which would make updates ineffective), we make heavy use of template inheritance and *blocks*.
+In Jinja2, *Blocks* are placeholders with a default content, defined in a base template, which can be overriden by
+sub-templates, *extending* this template.
 
 The current inheritance tree of the default templates:
 ```
@@ -238,10 +238,10 @@ base.tex
 tnletter.base.tex
 └── tnletter.tex
 ```
-The primare purpose of `base.tex` and `lists.base.tex` is definition of common LaTeX code, used for all documents or
+The primary purpose of `base.tex` and `lists.base.tex` is definition of common LaTeX code, used for all documents or
 at least all lists. They may be overridden to change the overall look of the sub-templates. On the other hand,
 `nametags.base.tex` and `tnletter.base.tex` contain the actual template code for the respective documents. They define
-many *blocks*, which are **not** overridden by the default sub-templates. Since the sub-template is used by the target
+many *blocks*, which are **not** overridden by the default sub-templates. Since the sub-templates are used by the target
 functions, this structure allows to override the sub-template to override only specific *blocks* of the base template. 
 
 
@@ -262,22 +262,45 @@ content of another *block*, including sub-blocks, as `<<< self.BLOCKNAME() >>>`.
     
     \vspace{\fill}
     <<< self.nametag_reartext >>>
-<<% endblock %%>
+<<% endblock %>>
 ```
 
 
-**No Cleanup:** By default, the `output/` directory is cleaned up, after each successful rendering task. I.e. all files
-with the jobname and an extension different from `.pdf` are deleted – including the rendered `.tex` file and the
-LuaLaTeX `.log`. The command line option `-n` disables this cleanup, which is quite helpful for debugging. 
+**No Cleanup:** By default, the `output/` directory is cleaned up after each successful rendering task. I.e. all files
+with the jobname and an extension different from `.pdf` are deleted – including the generated `.tex` file and the
+LuaLaTeX `.log`. The command line option `-n` of the Template Rendering System disables this cleanup, which is quite
+helpful to debug the templates. 
 
 
 ### Target Functions
 
-TODO function signuature and registration
+Target functions are defined in the `default/targets.py` and the `targets.py` file in the custom directory. They take
+the event and configuration data and return a list of `RenderTask`s, each defining the template to be rendered, as set
+of template variables and the output jobname. Target functions are registered in the list of available render targets,
+using the `@globals.target_function` decorator. The function's name is used as identifier for the target; the function's
+docstring (according to PEP 257) is used as description text in the command line user interface.
 
-TODO custom targets and overriding (again: don't change default targets)
+Each target function must have the following signature:
+```python
+@globals.target_function
+def example_target(event: data.Event, config: ConfigParser, output_dir: str, match: str) -> [render.RenderTask]:
+    ...
+```
+The `output_dir` parameter can be used to prepare the output directory for the render tasks. (e.g. creating an
+additional file or subdirectory). The `match` parameter is optionally specified by the user (using the `-m` command line
+parameter) and can be used to filter the objects (participants, courses, …) to be included when rendering the templates.
 
-TODO access to EVENT and CONFIG data
+Each `RenderTask` takes four arguments to its constructor:
+* `template_name`: filename of the template to be rendered
+* `job_name`: LaTeX jobname, i.e. name of the output PDF file
+* `template_args`: (optional) A dict of variables to be passed to the template
+* `double_tex`: (optional) A boolean value. If true, LuaLaTeX is invoked twice to allow LaTeX macros to use the `.aux`
+  file (e.g. references, longtables, …)
 
-TODO passing of template variables
- 
+For some usecases it is required to create multiple `RenderTasks` for the same template, but with different jobnames and
+template variables (e.g. the tnletter). 
+
+Target functions in the custom `targets.py` override equally named default target functions. Thus, the custom
+`targets.py` can be used to specify custom target functions and override default target functions. As for the
+templates, please **don't change the `default/targets.py`**, but copy the target function to be changed to your custom
+`targets.py` and modify it there. 
