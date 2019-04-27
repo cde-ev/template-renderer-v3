@@ -10,6 +10,7 @@
         provide the full LaTeX table specification.
       * (optional) hide_header: Set to True to hide the heading and logo section
       * (optional) portrait: Set to True to use portrait DIN A4 format instead of landscape
+      * (optional) show_timestamp: Set to True to show full timestamp in footer instead of date only
 
     The following blocks should be specified:
       * table_head: Should have a form similar to "\head{Column A} & \head{Column B}". Without trailing newline
@@ -32,7 +33,11 @@
     \ifoot[Seite \thepage]{Seite \thepage}
     \ihead[]{<<< title >>>}
     \cfoot[]{}
-    \ofoot[Stand: <<< EVENT.timestamp|date >>>]{Stand: <<< EVENT.timestamp|date >>>}
+    <<% if show_timestamp %>>
+        \ofoot[Stand: <<< EVENT.timestamp|datetime >>>]{Stand: <<< EVENT.timestamp|datetime >>>}
+    <<% else %>>
+        \ofoot[Stand: <<< EVENT.timestamp|date >>>]{Stand: <<< EVENT.timestamp|date >>>}
+    <<% endif %>>
 
     % Coloring of table
     \arrayrulecolor{design}

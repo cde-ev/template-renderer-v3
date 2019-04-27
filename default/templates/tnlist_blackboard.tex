@@ -21,6 +21,7 @@
 <<% endif %>>
 <<% set num_columns = 2 + EVENT.tracks|length + EVENT.parts|length %>>
 <<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
+<<% set show_timestamp = True %>>
 
 <<% block table_head %>>
     \head{Vorname} & \head{Nachname}

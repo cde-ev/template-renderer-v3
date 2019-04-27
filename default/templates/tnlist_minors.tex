@@ -18,6 +18,7 @@
 <<% endif %>>
 <<% set hide_header = True %>>
 <<% set portrait = parts|length < 2 and parts[0].days|list|length < 5 %>>
+<<% set show_timestamp = True %>>
 
 <<% block packages %>>
     \usepackage{amssymb}
