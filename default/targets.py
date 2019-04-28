@@ -63,6 +63,7 @@ def tnlists(event: Event, config, output_dir, match):
 
     tasks = [
         RenderTask('tnlist.tex', 'tnlist', {}, True),
+        RenderTask('tnlist_nocourse.tex', 'tnlist_nocourse', {}, True),
         RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {}, True),
         RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True),
     ]

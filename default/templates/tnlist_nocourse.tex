@@ -1,0 +1,63 @@
+<<% extends "lists.base.tex" %>>
+
+<<% if not parts %>>
+    <<% set parts = EVENT.parts %>>
+<<% endif %>>
+<<% if not registrations %>>
+    <<% set stati = [ENUMS.RegistrationPartStati.participant] %>>
+    <<% if CONFIG.tnlist.show_guests %>>
+        <<% do stati.append(ENUMS.RegistrationPartStati.guest) %>>
+    <<% endif %>>
+    <<% set registrations = UTIL.get_registrations(EVENT, parts=parts, stati=stati, list_consent_only=True) %>>
+<<% endif %>>
+<<% set title = "Teilnehmerliste " + EVENT.title|e %>>
+<<% set portrait = parts|length < 2 %>>
+<<% if parts|length != EVENT.parts|length %>>
+    <<% for part in parts %>>
+        <<% set title = title + " " + part.title|e %>>
+    <<% endfor %>>
+<<% endif %>>
+
+<<% block packages %>>
+    \usepackage{amssymb}
+<<% endblock %>>
+
+<<% block table_columnspec %>>
+    |llll
+        <<%- if parts|length > 1 -%>>
+            <<< "c" * parts|length >>>
+        <<%- endif -%>>
+    |
+<<% endblock %>>
+
+<<% block table_head %>>
+    \head{Vorname} & \head{Nachname} & \head{E-Mail} & \head{PLZ \& Ort}
+    <<% if parts|length > 1 -%>>
+        <<% for part in parts -%>>
+            & \head{<<< part.shortname|e >>>}
+        <<%- endfor %>>
+    <<%- endif %>>
+<<% endblock %>>
+
+<<% block table_body %>>
+    <<% for registration in registrations %>>
+        <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
+        \href{mailto:<<< registration.name.fullname|e >>> <<< '<' + registration.email|e + '>' >>>}{<<< registration.email|e >>>} &
+        <<< registration.address.postal_code|e >>> <<< registration.address.location|e >>>
+        <<% if parts|length > 1 %>>
+            <<% for part in parts -%>>
+                ~&
+                <<% with status = registration.parts[part].status -%>>
+                    <<% if status == ENUMS.RegistrationPartStati.participant -%>>
+                        \checkmark
+                    <<%- elif status == ENUMS.RegistrationPartStati.guest -%>>
+                        \custombox{Gast}
+                    <<%- else -%>>
+                        ---
+                    <<%- endif %>>
+                <<%- endwith %>>
+            <<%- endfor %>>
+        <<%- endif %>>
+        \\ \hline
+    <<% endfor %>>
+<<% endblock %>>
