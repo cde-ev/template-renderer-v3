@@ -21,6 +21,7 @@ import re
 import csv
 import os
 
+import util
 from globals import target_function
 from render import RenderTask
 from data import Event, RegistrationPartStati
@@ -61,11 +62,26 @@ def tnletters(event: Event, config, output_dir, match):
 def tnlists(event: Event, config, output_dir, match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
+    participants = util.get_active_registrations(event, include_guests=config['tnlist']['show_guests'])
+    participants_lc = util.get_active_registrations(event, include_guests=config['tnlist']['show_guests'],
+                                                    list_consent_only=True)
+    participants_orga = util.get_active_registrations(event, include_guests=config['tnlist']['show_guests_orga'])
+
     tasks = [
-        RenderTask('tnlist.tex', 'tnlist', {}, True),
-        RenderTask('tnlist_nocourse.tex', 'tnlist_nocourse', {}, True),
-        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard', {}, True),
-        RenderTask('tnlist_orga.tex', 'tnlist_orga', {}, True),
+        RenderTask('tnlist.tex', 'tnlist',
+                   {'registrations': participants_lc, 'status_parts': [p for p in event.parts if not p.tracks],
+                    'tracks': event.tracks},
+                   True),
+        RenderTask('tnlist.tex', 'tnlist_nocourse',
+                   {'registrations': participants_lc, 'status_parts': event.parts if len(event.parts) > 1 else [],
+                    'tracks': []},
+                   True),
+        RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard',
+                   {'registrations': participants, 'parts': event.parts, 'tracks': event.tracks},
+                   True),
+        RenderTask('tnlist_orga.tex', 'tnlist_orga',
+                   {'registrations': participants_orga, 'parts': event.parts, 'tracks': event.tracks},
+                   True),
     ]
 
     return tasks
@@ -79,12 +95,26 @@ def tnlists_per_part(event: Event, config, output_dir, match):
     tasks = []
 
     for part in event.parts:
+        participants = util.get_active_registrations(event, parts=(part,),
+                                                     include_guests=config['tnlist']['show_guests'])
+        participants_lc = util.get_active_registrations(event, parts=(part,),
+                                                        include_guests=config['tnlist']['show_guests'],
+                                                        list_consent_only=True)
+        participants_orga = util.get_active_registrations(event, parts=(part,),
+                                                          include_guests=config['tnlist']['show_guests_orga'])
+
         tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
-                                {'parts': [part]}, True))
+                                {'registrations': participants_lc, 'parts': [part], 'tracks': part.tracks,
+                                 'title_suffix': " ({})".format(part.title)},
+                                True))
         tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part.id),
-                                {'parts': [part]}, True))
+                                {'registrations': participants, 'parts': [part], 'tracks': part.tracks,
+                                 'title_suffix': " ({})".format(part.title)},
+                                True))
         tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part.id),
-                                {'parts': [part]}, True))
+                                {'registrations': participants_orga, 'parts': [part], 'tracks': part.tracks,
+                                 'title_suffix': " ({})".format(part.title)},
+                                True))
 
     return tasks
 

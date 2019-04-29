@@ -1,24 +1,14 @@
+<<# List of participants to be used inside the orga office.
+
+    Required template variables:
+    * registrations: List of all participants to be included in list
+    * parts: List of event parts to show the lodgement assignment of the participants for
+    * tracks: List of event tracks to show the course assignment of the participants for
+    * title_suffix: (optional) Suffix to be appended to the title "Teilnehmerliste"
+#>>
 <<% extends "lists.base.tex" %>>
 
-<<% if not parts %>>
-    <<% set parts = EVENT.parts %>>
-<<% endif %>>
-<<% if not tracks %>>
-    <<% set tracks = UTIL.get_tracks(EVENT, parts=parts) %>>
-<<% endif %>>
-<<% if not registrations %>>
-    <<% set stati = [ENUMS.RegistrationPartStati.participant] %>>
-    <<% if CONFIG.tnlist.show_guests_orga %>>
-        <<% do stati.append(ENUMS.RegistrationPartStati.guest) %>>
-    <<% endif %>>
-    <<% set registrations = UTIL.get_registrations(EVENT, parts=parts, stati=stati) %>>
-<<% endif %>>
-<<% set title = "Orga-Teilnehmerliste " + EVENT.title|e %>>
-<<% if parts|length != EVENT.parts|length %>>
-    <<% for part in parts %>>
-        <<% set title = title + " " + part.title|e %>>
-    <<% endfor %>>
-<<% endif %>>
+<<% set title = "Orga-Teilnehmerliste" + title_suffix|default('') %>>
 <<% set num_columns = 4
                     + tracks|length * (2 if CONFIG.data.course_room_field else 1)
                     + parts|length%>>
@@ -44,9 +34,9 @@
         <<% if registration.age_class.is_minor %>>
             \custombox{<<< registration.age_class.name >>>}
         <<% endif %>>
-        & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
+        & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>>
         <<% for part in parts -%>>
-            ~&
+            &
             <<# This only displays the guest flag, filtering should happen above. #>>
             <<% with status = registration.parts[part].status -%>>
                 <<% if status == ENUMS.RegistrationPartStati.guest -%>>

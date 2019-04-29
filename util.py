@@ -2,40 +2,28 @@ from data import Event, EventPart, RegistrationPartStati
 from typing import Iterable, Union
 
 
-def get_registrations(event: Event, parts: Iterable[EventPart] = None, stati: Iterable[RegistrationPartStati] = None,
-                      list_consent_only: bool = False, minors_only: bool = False):
+def get_active_registrations(event: Event, parts: Iterable[EventPart] = None, include_guests: bool = False,
+                             list_consent_only: bool = False, minors_only: bool = False):
+    """
+    Construct a list of all active participants of an event, possibly filtered by active parts, list_consent and age.
+
+    :param parts: The event parts to check the registration for activity. If not given, all event parts are considered
+    :param include_guests: If true, `RegistrationPartStati.guest` is considered as acitve. Otherwise only `participant`.
+    :param list_consent_only: If true, only registrations with list_consent == True are returned
+    :param minors_only: If true, only minors are returned
+    :rtype: List[data.Registration]
+    """
     if parts is None:
         parts = event.parts
-    if stati is None:
-        stati = [RegistrationPartStati.participant]
+    active_stati = [RegistrationPartStati.participant]
+    if include_guests:
+        active_stati.append(RegistrationPartStati.guest)
 
-    result = [r for r in event.registrations if any(r.parts[part].status in stati for part in parts)]
-
-    if list_consent_only:
-        result = [r for r in result if r.list_consent]
-
-    if minors_only:
-        result = [r for r in result if r.age_class.is_minor]
-
-    return result
-
-
-def get_tracks(event: Event, parts: Iterable[EventPart] = None):
-    if parts is None:
-        parts = event.parts
-
-    result = [t for t in event.tracks if t.part in parts]
-
-    return result
-
-
-def get_parts_without_tracks(event: Event, parts: Iterable[EventPart] = None):
-    if parts is None:
-        parts = event.parts
-
-    result = [p for p in parts if not p.tracks]
-
-    return result
+    return [r
+            for r in event.registrations
+            if any(r.parts[part].status in active_stati for part in parts)
+                and (not list_consent_only or r.list_consent)
+                and (not minors_only or r.age_class.is_minor)]
 
 
 def get_nametag_courses(registration, tracks, merge=True, second_always_right=False):

@@ -1,26 +1,22 @@
+<<# List of participants to be posted to the blackboard at the event.
+
+    Required template variables:
+    * registrations: List of all participants to be included in list
+    * parts: List of event parts to show the lodgement assignment of the participants for
+    * tracks: List of event tracks to show the course assignment of the participants for
+    * title_suffix: (optional) Suffix to be appended to the title "Teilnehmerliste"
+#>>
 <<% extends "lists.base.tex" %>>
 
-<<% if not parts %>>
-    <<% set parts = EVENT.parts %>>
-<<% endif %>>
-<<% if not tracks %>>
-    <<% set tracks = UTIL.get_tracks(EVENT, parts=parts) %>>
-<<% endif %>>
-<<% if not registrations %>>
-    <<% set stati = [ENUMS.RegistrationPartStati.participant] %>>
-    <<% if CONFIG.tnlist.show_guests %>>
-        <<% do stati.append(ENUMS.RegistrationPartStati.guest) %>>
-    <<% endif %>>
-    <<% set registrations = UTIL.get_registrations(EVENT, parts=parts, stati=stati, list_consent_only=False) %>>
-<<% endif %>>
-<<% set title = "Teilnehmerliste " + EVENT.title|e %>>
+<<% set title = "Teilnehmerliste" + title_suffix|default('') %>>
 <<% if parts|length != EVENT.parts|length %>>
     <<% for part in parts %>>
         <<% set title = title + " " + part.title|e %>>
     <<% endfor %>>
 <<% endif %>>
-<<% set num_columns = 2 + EVENT.tracks|length + EVENT.parts|length %>>
-<<% set portrait = (EVENT.tracks|length + EVENT.parts|length) < 3 %>>
+
+<<% set num_columns = 2 + tracks|length + parts|length %>>
+<<% set portrait = (tracks|length + parts|length) < 3 %>>
 <<% set show_timestamp = True %>>
 
 <<% block table_head %>>
@@ -36,9 +32,9 @@
 <<% block table_body %>>
     <<% for registration in registrations %>>
         <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>>
-        <<% for part in EVENT.parts -%>>
+        <<% for part in parts -%>>
             ~&
-            <<# This only displays the guest flag, filtering should happen above. #>>
+            <<# This only displays the guest flag, filtering should happen in target function. #>>
             <<% with status = registration.parts[part].status -%>>
                 <<% if status == ENUMS.RegistrationPartStati.guest -%>>
                     \custombox{Gast}
