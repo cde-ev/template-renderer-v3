@@ -63,9 +63,11 @@ def filter_date(value, format='%d.%m.%Y'):
     """
     A filter to format date values.
 
-    :type value: datetime.date
+    :type value: datetime.date or None
     :param format: a format string for the strftime function
     """
+    if value is None:
+        return ''
     return value.strftime(format)
 
 
@@ -73,10 +75,12 @@ def filter_datetime(value, format='%d.%m.%Y~%H:%M', timezone=datetime.timezone.u
     """
     A filter to format date values.
 
-    :type value: datetime.datetime
+    :type value: datetime.datetime or None
     :param format: a format string for the strftime function
     :param timezone: A timezone to convert the datetime object to before formatting
     """
+    if value is None:
+        return ''
     return value.astimezone(timezone).strftime(format)
 
 
