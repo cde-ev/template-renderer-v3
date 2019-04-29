@@ -41,11 +41,13 @@
                 <<%- endif %>>
             <<%- endwith %>>
             <<% with lodgement = registration.parts[part].lodgement -%>>
-                <<% if lodgement %>><<< lodgement.moniker|e >>><<% endif %>>
+                <<% if registration.parts[part].status.is_present and lodgement %>>
+                    <<< lodgement.moniker|e >>>
+                <<% endif %>>
             <<%- endwith %>>
         <<% endfor %>>
         <<% for track in tracks -%>>
-            & <<% if track in registration.tracks -%>>
+            & <<% if registration.tracks[track].registration_part.status == ENUMS.RegistrationPartStati.participant -%>>
                 <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
                 <<% endwith -%>>

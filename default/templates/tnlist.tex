@@ -51,7 +51,7 @@
         <<%- endfor %>>
         <<% for track in tracks -%>>
             ~&
-            <<% if track in registration.tracks -%>>
+            <<% if registration.tracks[track].registration_part.status == ENUMS.RegistrationPartStati.participant -%>>
                 <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
                 <<%- endwith %>>
