@@ -62,10 +62,11 @@ def tnletters(event: Event, config, output_dir, match):
 def tnlists(event: Event, config, output_dir, match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
-    participants = util.get_active_registrations(event, include_guests=config['tnlist']['show_guests'])
-    participants_lc = util.get_active_registrations(event, include_guests=config['tnlist']['show_guests'],
+    participants = util.get_active_registrations(event, include_guests=config.getboolean('tnlist', 'show_guests'))
+    participants_lc = util.get_active_registrations(event, include_guests=config.getboolean('tnlist', 'show_guests'),
                                                     list_consent_only=True)
-    participants_orga = util.get_active_registrations(event, include_guests=config['tnlist']['show_guests_orga'])
+    participants_orga = util.get_active_registrations(event,
+                                                      include_guests=config.getboolean('tnlist', 'show_guests_orga'))
 
     tasks = [
         RenderTask('tnlist.tex', 'tnlist',
@@ -96,12 +97,12 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
     for part in event.parts:
         participants = util.get_active_registrations(event, parts=(part,),
-                                                     include_guests=config['tnlist']['show_guests'])
+                                                     include_guests=config.getboolean('tnlist', 'show_guests'))
         participants_lc = util.get_active_registrations(event, parts=(part,),
-                                                        include_guests=config['tnlist']['show_guests'],
+                                                        include_guests=config.getboolean('tnlist', 'show_guests'),
                                                         list_consent_only=True)
-        participants_orga = util.get_active_registrations(event, parts=(part,),
-                                                          include_guests=config['tnlist']['show_guests_orga'])
+        participants_orga = util.get_active_registrations(
+            event, parts=(part,), include_guests=config.getboolean('tnlist', 'show_guests_orga'))
 
         tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
                                 {'registrations': participants_lc, 'parts': [part], 'tracks': part.tracks,
