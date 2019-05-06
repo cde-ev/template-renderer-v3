@@ -202,7 +202,7 @@ def group_participants(config, participants, part):
                 break
         else:
             for regex, l in lodgement_groups:
-                if p.parts[part].lodgement and re.match(p.parts[part].lodgement.moniker):
+                if p.parts[part].lodgement and regex.match(p.parts[part].lodgement.moniker):
                     l.append(p)
                     break
             else:

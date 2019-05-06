@@ -44,8 +44,8 @@ def get_nametag_courses(registration, tracks, merge=True, second_always_right=Fa
             courses.append(None)
 
     if merge:
-        if len(courses) > 1 and courses[0] is courses[1]:
-            return courses[0], True
+        if len(courses) > 1 and courses[0] is courses[1] and courses[0] is not None:
+            return [courses[0]], True
         else:
             return courses, False
     else:

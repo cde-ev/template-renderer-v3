@@ -93,12 +93,12 @@
                                 <<% block nametag_courses -%>>
                                     <<% with courses, merged = UTIL.get_nametag_courses(
                                             p, part.tracks[:2] if part else EVENT.tracks[:2],
-                                            CONFIG.nametags.merge_courses, CONFIG.nametags.second_track_always_right) -%>>
+                                            CONFIG.getboolean('nametags', 'merge_courses'), CONFIG.nametags.second_track_always_right) -%>>
                                         <<% for course in courses -%>>
-                                            % Course icon
-                                            <<% if CONFIG.nametags.course_icon_path -%>>
-                                                \parbox[t][17mm][c]{15mm}{\null
-                                                    <<% if course -%>>
+                                            <<% if course -%>>
+                                                % Course icon
+                                                <<% if CONFIG.nametags.course_icon_path -%>>
+                                                    \parbox[t][17mm][c]{15mm}{
                                                         <<%- with icon = find_asset(
                                                             CONFIG.nametags.course_icon_path.format(nr=course.nr, id=course.id)) -%>>
                                                             <<% if icon -%>>
@@ -107,16 +107,18 @@
                                                                 \
                                                             <<% endif -%>>
                                                         <<% endwith -%>>
-                                                    <<% endif %>>
+                                                    }%
+                                                <<% endif -%>>
+                                                % Course name
+                                                \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
+                                                    \begin{flushleft}
+                                                        {<<<course.shortname|e>>> <<% if merged %>><<<CONFIG.nametags.merge_courses_suffix|e>>><<% endif %>>}
+                                                    \end{flushleft}
                                                 }%
-                                            <<% endif -%>>
-                                            % Course name
-                                            \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
-                                                \begin{flushleft}
-                                                    {<<<course.shortname|e>>><<% if merged %>><<<CONFIG.nametags.merge_courses_suffix>>><<% endif %>>}
-                                                \end{flushleft}
-                                            }%
-                                            <<% if not loop.last %>>\hspace{3mm}<<% endif %>>%
+                                            <<%- else -%>>
+                                                \hspace*{40.4mm}
+                                            <<%- endif %>>
+                                            <<%- if not loop.last %>>\hspace{3mm}<<% endif %>>%
                                         <<% endfor -%>>
                                     <<% endwith -%>>
                                 <<% endblock -%>>
