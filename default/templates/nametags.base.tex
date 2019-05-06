@@ -67,9 +67,10 @@
                                         \fontsize{18}{24}\selectfont \textbf{\mbox{<<< p.name.family_name|e >>>}}
                                     <<% endblock -%>>
                                 }%
-                                \\[2mm]
+                                \offinterlineskip
+                                \\[2mm]%
                                 % Lodgment
-                                \parbox[t][1.1cm][c]{5cm}{
+                                \parbox[t][1.1cm][c]{5cm}{%
                                     <<% block nametag_lodgement -%>>
                                         <<% for part in ([part] if part else EVENT.parts[:2]) -%>>
                                             {<<% if part in p.parts and p.parts[part].lodgement %>><<< p.parts[part].lodgement.moniker|e >>><<% endif %>>}
@@ -77,7 +78,7 @@
                                         <<% endfor %>>
                                     <<%- endblock %>>
                                 }%
-                                \hspace*{\fill}
+                                \hspace*{\fill}%
                                 % Right side icons
                                 \parbox[t][1.1cm][c]{3cm}{
                                     \raggedleft
