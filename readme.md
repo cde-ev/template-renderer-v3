@@ -30,21 +30,20 @@ You need the following software on your computer:
     * colortbl
     * xcolor
     * longtable
-
-* The *Linux Libertine* font for the default templates
+    * libertine (the *Linux Libertine* font) for the default templates
 
 `lualatex` must be available in the $PATH to be called by the Python script.
 
 #### Setting up Prerequisites on Linux systems
 … on Ubuntu & Debian:
 ```
-$ sudo apt install python3 python3-jinja2 python3-tz fonts-linuxlibertine git \
-                   texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-luatex
+$ sudo apt install python3 python3-jinja2 python3-tz git \
+                   texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-luatex texlive-fonts-extra
 ```
 
 … on Arch Linux:
 ```
-$ sudo pacman -S python python-jinja2 python-pytz texlive-core ttf-linux-libertine git
+$ sudo pacman -S python python-jinja2 python-pytz texlive-core texlive-fontsextra git
 ```
 
 
@@ -63,7 +62,6 @@ $ sudo pacman -S python python-jinja2 python-pytz texlive-core ttf-linux-liberti
   * All other default settings are typically good
 * Log off and on again, to make sure, your %PATH% is up to date
 * Open a *Command Prompt* or *Git Bash* and run `pip install --user jinja2 pytz`
-* Download the Linux Libertine font from https://sourceforge.net/projects/linuxlibertine/ extract and install it
 
 
 ### Installation

@@ -22,8 +22,40 @@
 <<% block packages %>><<% endblock %>>
 
 % Load Fonts and define colors
-\setmainfont{<<< CONFIG.layout.font >>>}
-\newfontfamily\headingfamily{<<< CONFIG.layout.heading_font >>>}
+<<% with cfg = CONFIG.layout %>>
+    <<# a) with font packages #>>
+    <<< cfg.font_packages >>>
+
+    <<# b) use installed system fonts by their family name #>>
+    <<% if cfg.systemfont %>>
+        \setmainfont{<<< cfg.systemfont >>>}
+        <<% if not cfg.systemfont_headings and not cfg.fontfile_heading %>>
+            \newcommand{\headingfamily}{<<< cfg.fontswitch_headings >>>}
+        <<% endif %>>
+    <<% endif %>>
+    <<% if cfg.systemfont_headings %>>
+        \newfontfamily\headingfamily{<<< cfg.systemfont_headings >>>}
+    <<% endif %>>
+
+    <<# c) use font files from the assets folder #>>
+    <<% if cfg.fontfile %>>
+        \setmainfont{<<< cfg.fontfile >>>}[
+            <<% if cfg.fontfile_dir %>>Path = <<< find_asset(cfg.fontfile_dir) >>>,<<% endif %>>
+            <<% if cfg.fontfile_bold %>>BoldFont = <<< cfg.fontfile_bold >>>,<<% endif %>>
+            <<% if cfg.fontfile_italic %>>ItalicFont = <<< cfg.fontfile_italic >>>,<<% endif %>>
+            <<% if cfg.fontfile_bolditalic %>>BoldItalicFont = <<< cfg.fontfile_bolditalic >>>,<<% endif %>>
+        ]
+    <<% endif %>>
+    <<% if cfg.fontfile_heading %>>
+        \newfontfamily\headingfamily{<<< cfg.fontfile_heading >>>}[
+            <<% if cfg.fontfile_heading_dir %>>Path = <<< find_asset(cfg.fontfile_heading_dir|default(cfg.fontfile_dir)) >>>,<<% endif %>>
+            <<% if cfg.fontfile_heading_bold %>>BoldFont = <<< cfg.fontfile_heading_bold >>>,<<% endif %>>
+            <<% if cfg.fontfile_heading_italic %>>ItalicFont = <<< cfg.fontfile_heading_italic >>>,<<% endif %>>
+            <<% if cfg.fontfile_heading_bolditalic %>>BoldItalicFont = <<< cfg.fontfile_heading_bolditalic >>>,<<% endif %>>
+        ]
+    <<% endif %>>
+<<% endwith %>>
+
 \definecolor{design}{HTML}{<<< CONFIG.layout.design_color >>>}
 \definecolor{links}{HTML}{<<< CONFIG.layout.link_color >>>}
 
