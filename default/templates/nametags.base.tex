@@ -73,8 +73,10 @@
                                 \parbox[t][1.1cm][c]{5cm}{%
                                     <<% block nametag_lodgement -%>>
                                         <<% for part in ([part] if part else EVENT.parts[:2]) -%>>
-                                            {<<% if part in p.parts and p.parts[part].lodgement %>><<< p.parts[part].lodgement.moniker|e >>><<% endif %>>}
-                                            <<% if not loop.last %>>\\<<% endif %>>
+                                            <<% if part in p.parts and p.parts[part].lodgement %>>
+                                                <<< p.parts[part].lodgement.moniker|e >>>
+                                                <<% if not loop.last %>>\\<<% endif %>>
+                                            <<% endif %>>
                                         <<% endfor %>>
                                     <<%- endblock %>>
                                 }%
@@ -83,7 +85,13 @@
                                 \parbox[t][1.1cm][c]{3cm}{
                                     \raggedleft
                                     <<% block nametag_frontrighticons %>>
-                                        <<% if p.age_class.is_minor %>>
+                                        <<% if not part and not p.is_participant
+                                               or part and p.parts[part].status != ENUMS.RegistrationPartStati.participant -%>>
+                                            \hspace{3mm}%
+                                            \includegraphics[keepaspectratio=true, height=0.8cm]{<<< find_asset('nametag_guest.pdf') >>>}
+                                        <<% endif %>>
+                                        <<% if p.age_class.is_minor -%>>
+                                            \hspace{3mm}%
                                             \includegraphics[keepaspectratio=true, height=0.8cm]{<<< find_asset('nametag_minor.pdf') >>>}
                                         <<% endif %>>
                                     <<% endblock %>>

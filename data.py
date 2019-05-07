@@ -435,6 +435,10 @@ class Registration:
         return any(p.status.is_present for p in self.parts.values())
 
     @property
+    def is_participant(self):
+        return any(p.status == RegistrationPartStati.participant for p in self.parts.values())
+
+    @property
     def age_class(self):
         if self.age >= 18:
             return AgeClasses.full
