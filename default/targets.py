@@ -94,6 +94,7 @@ def tnlists_per_part(event: Event, config, output_dir, match):
     individually for each part."""
 
     tasks = []
+    part_suffixes = util.generate_part_jobnames(event)
 
     for part in event.parts:
         participants = util.get_active_registrations(event, parts=(part,),
@@ -104,15 +105,15 @@ def tnlists_per_part(event: Event, config, output_dir, match):
         participants_orga = util.get_active_registrations(
             event, parts=(part,), include_guests=config.getboolean('tnlist', 'show_guests_orga'))
 
-        tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part.id),
+        tasks.append(RenderTask('tnlist.tex', 'tnlist_{}'.format(part_suffixes[part]),
                                 {'registrations': participants_lc, 'parts': [part], 'tracks': part.tracks,
                                  'title_suffix': " ({})".format(part.title)},
                                 True))
-        tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part.id),
+        tasks.append(RenderTask('tnlist_blackboard.tex', 'tnlist_blackboard_{}'.format(part_suffixes[part]),
                                 {'registrations': participants, 'parts': [part], 'tracks': part.tracks,
                                  'title_suffix': " ({})".format(part.title)},
                                 True))
-        tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part.id),
+        tasks.append(RenderTask('tnlist_orga.tex', 'tnlist_orga_{}'.format(part_suffixes[part]),
                                 {'registrations': participants_orga, 'parts': [part], 'tracks': part.tracks,
                                  'title_suffix': " ({})".format(part.title)},
                                 True))
@@ -154,8 +155,9 @@ def nametags(event: Event, config, output_dir, match):
     meals = get_meals(config, event.registrations)
 
     if per_part:
+        part_suffixes = util.generate_part_jobnames(event)
         return [RenderTask('nametags.tex',
-                           'nametags_{}'.format(part.id),
+                           'nametags_{}'.format(part_suffixes[part]),
                            {'registration_groups': group_participants(
                                config, (p for p in event.registrations if p.parts[part].status.is_present), part),
                             'part': part,

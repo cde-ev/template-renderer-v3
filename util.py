@@ -1,5 +1,5 @@
 from data import Event, EventPart, RegistrationPartStati
-from typing import Iterable, Union
+from typing import Iterable, Union, Dict
 
 
 def get_active_registrations(event: Event, parts: Iterable[EventPart] = None, include_guests: bool = False,
@@ -50,3 +50,45 @@ def get_nametag_courses(registration, tracks, merge=True, second_always_right=Fa
             return courses, False
     else:
         return courses, False
+
+
+def generate_part_jobnames(event: Event) -> Dict[EventPart, str]:
+    """
+    Helper function to generate a filename suffix for each event part to be used in jobnames.
+
+    It uses sanitize_filename() to transform each part's shortname into a safe filename suffix. Afterwards, it appends
+    the part's id to all ambiguous names, if any.
+    :param event: The event to get the parts from
+    :return: A dict mapping each event part object to its safe jobname suffix
+    """
+    result = {part: sanitize_filename(part.shortname)
+              for part in event.parts}
+
+    # Find ambiguous suffixes
+    reverse_result = {}
+    ambiguous_parts = set()
+    for part, suffix in result.items():
+        if suffix in reverse_result:
+            ambiguous_parts.add(reverse_result[suffix])
+            ambiguous_parts.add(part)
+        reverse_result[suffix] = part
+
+    # Add part id to parts with ambiguous suffix
+    for part in ambiguous_parts:
+        result[part] += '_{}'.format(part.id)
+
+    return result
+
+
+# According to https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+# but we allow dots.
+FILENAME_SANITIZE_MAP = {x: '_' for x in "/\\?%*:|\"<> "}
+
+def sanitize_filename(name: str) -> str:
+    """
+    Helper function to sanitize filenames (strip forbidden and problematic characters).
+
+    :param name: The unsafe name
+    :return: A sanitized version of the name to be used as filename
+    """
+    return name.translate(FILENAME_SANITIZE_MAP)
