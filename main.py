@@ -14,7 +14,6 @@ import pytz
 # define some static paths
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_DIR = os.path.join(THIS_DIR, 'default')
-OUTPUT_DIR = os.path.join(THIS_DIR, 'output')
 
 # Make sure the additional modules are found
 sys.path.insert(0, THIS_DIR)
@@ -34,9 +33,13 @@ parser = argparse.ArgumentParser(description='Template renderer for CdE Events')
 parser.add_argument('targets', metavar='TARGETS', type=str, nargs='*',
                     help='Specifies which templates to render.')
 parser.add_argument('-c', '--custom-dir', default=os.path.join(THIS_DIR, 'custom'),
-                    help="Path of custom directory to find config file, templates and assets.")
+                    help="Path of custom directory to find config file, templates and assets. Defaults to the `custom` "
+                         "directory in the script's directory.")
 parser.add_argument('-i', '--input', default="export_event.json",
-                    help="Path of custom directory to find config file, templates and assets.")
+                    help="Path of the input file, exported from the CdEdb. Typically xxx_export_event.json.")
+parser.add_argument('-o', '--output', default=os.path.join(THIS_DIR, 'output'),
+                    help="Path of the output directory. Defaults to the `output` directory in the script's directory. "
+                         "The directory must exist.")
 parser.add_argument('-j', '--max-threads', type=int, default=default_threads,
                     help='Maximum number of concurrent template renderings and LuaLaTeX compile processes. '
                          'Defaults to {} on your system.'.format(default_threads))
@@ -114,10 +117,10 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_threads) as exec
         if target not in globals.TARGETS.keys():
             print("Target '{}' is unknown".format(target))
             continue
-        render_tasks = globals.TARGETS[target](event, config, OUTPUT_DIR, args.match)
+        render_tasks = globals.TARGETS[target](event, config, args.output, args.match)
         for task in render_tasks:
             future = executor.submit(shutter.wrap(render.render_template),
-                                     task, output_dir=OUTPUT_DIR, cleanup=not args.no_cleanup, jinja_env=jinja_env)
+                                     task, output_dir=args.output, cleanup=not args.no_cleanup, jinja_env=jinja_env)
             futures.append(future)
         count_tasks += len(render_tasks)
 
