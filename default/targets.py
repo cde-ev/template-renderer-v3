@@ -137,6 +137,13 @@ def minor_checklists(event: Event, config, output_idr, match):
 
 
 @target_function
+def tnlists_cl(event: Event, config, output_dir, match):
+    """Render participant listings of individual courses and lodgements"""
+
+    return [RenderTask('tnlist_kl.tex', 'tnlist_kl', {}, True)]
+
+
+@target_function
 def courselist(event: Event, config, output_dir, match):
     """Render the courselists"""
 
