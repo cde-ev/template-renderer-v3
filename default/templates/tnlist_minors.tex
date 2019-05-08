@@ -1,23 +1,9 @@
 <<% extends "lists.base.tex" %>>
 
-<<% if not parts %>>
-    <<% set parts = EVENT.parts %>>
-<<% endif %>>
-<<% if not registrations %>>
-    <<% set stati = [ENUMS.RegistrationPartStati.participant] %>>
-    <<% if CONFIG.tnlist.show_guests_orga %>>
-        <<% do stati.append(ENUMS.RegistrationPartStati.guest) %>>
-    <<% endif %>>
-    <<% set registrations = UTIL.get_registrations(EVENT, parts=parts, stati=stati, minors_only=True) %>>
-<<% endif %>>
-<<% set title = "Minderjährigenliste " + EVENT.title|e %>>
-<<% if parts|length != EVENT.parts|length %>>
-    <<% for part in parts %>>
-        <<% set title = title + " " + part.title|e %>>
-    <<% endfor %>>
-<<% endif %>>
+<<% set title = "Minderjährigen-Checkliste " + part.title|e %>>
+
 <<% set hide_header = True %>>
-<<% set portrait = parts|length < 2 and parts[0].days|list|length < 5 %>>
+<<% set portrait = part.days|list|length < 5 %>>
 <<% set show_timestamp = True %>>
 
 <<% block packages %>>
@@ -25,20 +11,14 @@
 <<% endblock %>>
 
 <<% block table_columnspec %>>
-    |lll|
-        <<% for part in parts %>>
-            l|<<< "c|" * (part.end - part.begin).days >>>
-        <<% endfor %>>
-    l|
+    |lll|l| <<< "c|" * (part.end - part.begin).days >>> l|
 <<% endblock %>>
 
 <<% block table_head %>>
     & \head{Vorname} & \head{Nachname}
-    <<% for part in parts -%>>
-        & \head{Unterkunft<<% if EVENT.parts|length > 1 %>> <<< part.shortname|e >>><<% endif %>>}
-        <<% for day in (part.days|list)[:-1] %>>
-            & \head{<<< day|date("%d.%m.") >>>}
-        <<% endfor %>>
+    & \head{Unterkunft}
+    <<% for day in (part.days|list)[:-1] %>>
+        & \head{<<< day|date("%d.%m.") >>>}
     <<% endfor %>>
      & \head{Handy}
 <<% endblock %>>
@@ -49,16 +29,14 @@
             \custombox{<<< registration.age_class.name >>>}
         <<% endif %>>
         & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
-        <<% for part in parts -%>>
-            <<% if registration.parts[part].status.is_present -%>>
-                <<% with lodgement = registration.parts[part].lodgement -%>>
-                    <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
-                <<%- endwith %>> &
-                <<< "$\square$&" * (part.end - part.begin).days >>>
-            <<%- else -%>>
-                \multicolumn{1}{c|}{---}& <<< "-&" * (part.end - part.begin).days >>>
-            <<%- endif %>>
-        <<% endfor %>>
+        <<% if registration.parts[part].status.is_present -%>>
+            <<% with lodgement = registration.parts[part].lodgement -%>>
+                <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
+            <<%- endwith %>> &
+            <<< "$\square$&" * (part.end - part.begin).days >>>
+        <<%- else -%>>
+            \multicolumn{1}{c|}{---}& <<< "-&" * (part.end - part.begin).days >>>
+        <<%- endif %>>
         <<< registration.mobile|e >>> \\
         \hline
     <<% endfor %>>

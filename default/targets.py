@@ -122,22 +122,18 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
 
 @target_function
-def minor_checklist(event: Event, config, output_idr, match):
-    """Render a list of all minors with columns to check their presence every evening"""
+def minor_checklists(event: Event, config, output_idr, match):
+    """Render a list of all minors with columns to check their presence every evening (one document per event part)"""
+    part_suffixes = util.generate_part_jobnames(event)
 
-    return [RenderTask('tnlist_minors.tex', 'tnlist_minors', {}, True)]
-
-
-@target_function
-def minor_checklist_per_part(event: Event, config, output_idr, match):
-    """Render a list of all minors for each part with columns to check their presence every evening"""
-
-    tasks = []
-
-    for part in event.parts:
-        tasks.append(RenderTask('tnlist_minors.tex', 'tnlist_minors_{}'.format(part.id), {'parts': [part]}, True))
-
-    return tasks
+    return [
+        RenderTask('tnlist_minors.tex', 'tnlist_minors_{}'.format(part_suffixes[part]),
+                   {'part': part,
+                    'registrations': util.get_active_registrations(
+                        event, parts=(part,), include_guests=True, minors_only=True)},
+                   True)
+        for part in event.parts
+    ]
 
 
 @target_function

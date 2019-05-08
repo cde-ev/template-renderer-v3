@@ -1,0 +1,84 @@
+\documentclass[12pt,portrait,parskip=half+,a5paper]{scrartcl}
+\usepackage{fontspec}
+\usepackage[german]{babel}
+
+\usepackage{scrlayer-scrpage}
+\usepackage{longtable}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{calc}
+\usepackage{graphicx}
+
+\usepackage[top=1cm,bottom=1cm,left=1cm,right=1cm]{geometry}
+\usepackage{pgfpages}
+\pgfpagesuselayout{2 on 1}[a4paper,landscape] % Two A5 pages on one A4 page
+
+\usepackage{microtype}
+\usepackage[
+    colorlinks=True,
+    urlcolor=design!50!black,
+    pdftitle={Kurslisten für Kursleiter},
+    pdfauthor={Michael Thies},
+    unicode
+]{hyperref}
+
+% Load Fonts and define colors
+\setmainfont{LinBiolinum_Rah.ttf}[
+    BoldFont=LinBiolinum_RBah.ttf,
+    ItalicFont=LinBiolinum_RIah.ttf,
+    Path=(((ASSETS)))/fonts/,
+]
+\newfontfamily\headingfamily{tillana-regular.ttf}[
+    BoldFont=tillana-bold.ttf,
+    Path=(((ASSETS)))/fonts/,
+]
+\definecolor{design}{HTML}{3d8511}
+
+% General Layout
+\ifoot[]{}
+\ihead[]{}
+\cfoot[]{}
+\ofoot[]{}
+
+\begin{document}
+    ((% for course in courses %))
+
+        \begin{minipage}[t]{\textwidth-2cm}%
+            \raggedright
+            \headingfamily\bfseries\Large{}((( course.no|e ))). ((( course.short_name|e )))\\
+            \normalsize{}((( course.long_name|e )))
+        \end{minipage}%
+        \begin{minipage}[c][2cm][t]{2cm}
+            ((%- if asset_exists("course_icons/{0:0>2}.pdf".format(course.no)) -%))
+            %    \includegraphics[keepaspectratio=true, width=2cm, height=2cm]{%
+             %       (((ASSETS)))/course_icons/((("{0:0>2}.pdf".format(course.no))))}% Course icon
+            ((% endif %))
+        \end{minipage}%
+
+        ((% if course.participants|length > 0 %))
+            Teilnehmer:
+            \begin{itemize}
+                ((%- for participant in course.participants -%))
+                    \item ((( participant.first_name|e ))) ((( participant.last_name|e )))
+                          ((% if participant.get_age() < 18 %))\fbox{<18}((% endif %))
+                ((% endfor -%))
+            \end{itemize}
+        ((% else %))
+            Kurs ohne Teilnehmer!
+        ((% endif %))
+
+        \vspace{\fill}
+        \begin{minipage}[b]{\textwidth-2cm}%
+            Kursleiter: ((% for kl in course.kls -%))
+                            ((% if not loop.first %)), ((% endif -%))
+                            ((( kl.first_name|e ))) ((( kl.last_name|e )))
+                        ((%- endfor %))\\
+            ((% if course.room %))Kursraum: ((( course.room.name|e )))((% endif %))\\
+            Stand: ((( now.strftime('%d.%m.%Y') )))
+        \end{minipage}%
+        \begin{minipage}[b][2cm][b]{2cm}%
+            \includegraphics[width=\textwidth]{(((ASSETS)))/logo_sw.pdf}
+        \end{minipage}%
+        \pagebreak
+    ((% endfor -%))
+\end{document}
