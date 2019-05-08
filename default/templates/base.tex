@@ -25,13 +25,13 @@
 <<% with cfg = CONFIG.layout %>>
     <<# a) with font packages #>>
     <<< cfg.font_packages >>>
+    <<% if not cfg.systemfont_headings and not cfg.fontfile_heading %>>
+        \newcommand{\headingfamily}{<<< cfg.fontswitch_headings >>>}
+    <<% endif %>>
 
     <<# b) use installed system fonts by their family name #>>
     <<% if cfg.systemfont %>>
         \setmainfont{<<< cfg.systemfont >>>}
-        <<% if not cfg.systemfont_headings and not cfg.fontfile_heading %>>
-            \newcommand{\headingfamily}{<<< cfg.fontswitch_headings >>>}
-        <<% endif %>>
     <<% endif %>>
     <<% if cfg.systemfont_headings %>>
         \newfontfamily\headingfamily{<<< cfg.systemfont_headings >>>}
