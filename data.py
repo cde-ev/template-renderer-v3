@@ -32,6 +32,11 @@ def calculate_age(reference, born):
     return reference.year - born.year - ((reference.month, reference.day) < (born.month, born.day))
 
 
+def registration_sort_key(r):
+    """ Sort key function for registrations. Should be used whenever sorting a list of registrations"""
+    return r.name.given_names, r.name.family_name
+
+
 class Genders(enum.IntEnum):
     """Spec for field gender of core.personas.
     From Cdedb v2: cdedb.database.constants
@@ -200,7 +205,7 @@ class Event:
         event_begin = event.begin
         event.registrations = sorted((Registration.from_json(reg_data, data['core.personas'], field_types, event_begin)
                                       for reg_data in data['event.registrations'].values()),
-                                     key=(lambda r: (r.name.given_names, r.name.family_name)))
+                                     key=registration_sort_key)
         registrations_by_id = {p.id: p for p in event.registrations}
 
         # Parse registration parts and tracks
@@ -319,7 +324,7 @@ class Course:
     def instructors(self):
         return sorted(functools.reduce(lambda x, y: x | y,
                                        (set(t.instructors) for t in self.tracks.values())),
-                      key=lambda r: (r.name.given_names, r.name.family_name))
+                      key=registration_sort_key)
 
     @property
     def is_active(self):
