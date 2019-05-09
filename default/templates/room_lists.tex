@@ -1,0 +1,158 @@
+<<# Inhabitant- and course-attendee lists for each room in one event part.
+
+    Required template variables:
+    * part: The EventPart to generate the lists for
+    * rooms: A joined list of lodgements and course rooms, including room name, lodgement object and courses with active
+      tracks.Each entry should look like this: (title, lodgment, [(course, [track])]). `lodgment` may be None (in this
+      case, inhabitant listing is skipped). If no course is given, the course listing is omitted.
+
+    We assume that there are not more than ~ ATTENDEES_PER_COLUMN + 3 inhabitants per lodgement not more than
+    ATTENDEES_PER_COLUMN course instructors in a course and not more than 2*ATTENDEES_PER_COLUMN attendees in a course
+    in total.
+#>>
+<<% extends "base.tex" %>>
+
+<<% block documentclass_options %>>14pt,landscape,parskip=half+,a4paper<<% endblock %>>
+
+<<% block packages %>>
+    \usepackage{enumitem}
+<<% endblock %>>
+
+<<% block preamble %>>
+    \geometry{top=1cm,bottom=2cm,left=2cm,right=2cm,foot=1cm}
+
+    \ifoot[]{}
+    \ihead[]{}
+    \ohead[]{\rightmark}
+    \cfoot[]{}
+    \ofoot[Stand: <<< EVENT.timestamp|datetime >>>]{Stand: <<< EVENT.timestamp|datetime >>>}
+
+    \setitemize{itemsep=0pt}
+<<% endblock %>>
+
+<<% set title = "Raumlisten " + EVENT.title|e + ((" " + part.title) if (EVENT.parts|length > 1) else "") %>>
+<<% set ATTENDEES_PER_COLUMN = 14 %>>
+
+<<% block content %>>
+    <<% for room_name, lodgement, room_courses in rooms -%>>
+        \begin{minipage}[t][2cm][c]{\textwidth-3.5cm}%
+            \vspace{0pt}
+            \raggedright
+            \headingfamily\bfseries\Large{}<<< room_name|e >>>
+        \end{minipage}%
+        \hspace{0.5cm}%
+        <<% if CONFIG.layout.logo_file %>>
+            \begin{minipage}[t]{3cm}%
+                \vspace{0pt}
+                \raggedleft
+                \includegraphics[height=2cm]{<<< find_asset(CONFIG.layout.logo_file) >>>}
+            \end{minipage}%
+        <<% endif %>>
+        \renewcommand{\rightmark}{<<< room_name|e >>>}
+        \thispagestyle{plain}
+
+        \setlength{\columnsep}{2cm}
+        \begin{minipage}[t]{0.5\textwidth}
+            <<% if lodgement and lodgement.parts[part].inhabitants %>>
+                {
+                    \headingfamily\bfseries Bewohner:
+                }
+                \begin{itemize}
+                    <<%- for inhabitant, campingmat in lodgement.parts[part].inhabitants
+                            if inhabitant.parts[part].status == ENUMS.RegistrationPartStati.participant -%>>
+                        \item <<< inhabitant.name.given_names|e >>> <<< inhabitant.name.family_name|e >>>
+                            <<% if campingmat %>>{\small (Isomatte)}<<% endif %>>
+                    <<% endfor -%>>
+                \end{itemize}
+            <<% endif %>>
+        \end{minipage}%
+        <<% set ns = namespace(columns_on_page = 1 if lodgement and lodgement.parts[part].inhabitants else 0) %>>
+        <<% for course, course_tracks in room_courses %>>
+            <<% set attendees = UTIL.gather_course_attendees(course, part) %>>
+            <<# Idea of pagebreaks: Large courses (>ATTENDEES_PER_COLUMN attendees incl. instructors) always get their
+                own page. Small courses get one half page, so we must page-break before the third small course in a row.
+                #>>
+            <<# Output large course (>ATTENDEES_PER_COLUMN attendees) in two columns #>>
+            <<% if attendees|length + course.instructors|length > ATTENDEES_PER_COLUMN -%>>
+                <<% set ns.columns_on_page = ns.columns_on_page + 2 %>>
+                {\headingfamily\bfseries
+                    Kurs: <<< course.shortname|e >>>
+                    <<% if part.tracks|length > 1 or True %>>
+                        \\\mdseries
+                        (<<% for track in course_tracks -%>>
+                            <<< track.title >>><<% if not loop.last %>>, <<% endif %>>
+                         <<%- endfor %>>)
+                    <<% endif %>>
+                    \vspace{0.6\baselineskip}
+                }
+
+                \begin{minipage}[t]{0.5\textwidth}
+                    <<% if course.instructors|length > 0 %>>
+                        Kursleiter:
+                        \begin{itemize}
+                            <<%- for instr in course.instructors -%>>
+                                \item <<< instr.name.given_names|e >>> <<< instr.name.family_name|e >>>
+                            <<% endfor -%>>
+                        \end{itemize}
+                    <<% endif %>>
+                    <<% set num_instructors = course.instructors|length %>>
+                    Teilnehmer:
+                    \begin{itemize}
+                        <<%- for attendee, attendee_tracks in attendees[0:ATTENDEES_PER_COLUMN-num_instructors] -%>>
+                            \item <<< attendee.name.given_names|e >>> <<< attendee.name.family_name|e >>>
+                        <<% endfor -%>>
+                    \end{itemize}
+                \end{minipage}%
+                \begin{minipage}[t]{0.5\textwidth}
+                    \begin{itemize}
+                        <<%- for attendee, attendee_tracks in attendees[ATTENDEES_PER_COLUMN-num_instructors:] -%>>
+                            \item <<< attendee.name.given_names|e >>> <<< attendee.name.family_name|e >>>
+                        <<% endfor -%>>
+                    \end{itemize}
+                \end{minipage}
+
+            <<#- Output short course (<=ATTENDEES_PER_COLUMN attendees) in one column #>>
+            <<% else -%>>
+                <<% set ns.columns_on_page = ns.columns_on_page + 1 %>>
+                \begin{minipage}[t]{0.5\textwidth}
+                    {\headingfamily\bfseries
+                        Kurs: <<< course.shortname|e >>>
+                        <<% if part.tracks|length > 1 %>>
+                            \\\mdseries
+                            (<<% for track in course_tracks -%>>
+                                <<< track.title >>><<% if not loop.last %>>, <<% endif %>>
+                             <<%- endfor %>>)
+                        <<% endif %>>
+                        \vspace{0.6\baselineskip}
+                    }
+
+                    <<% if course.instructors|length > 0 %>>
+                        Kursleiter:
+                        \begin{itemize}
+                            <<%- for instr in course.instructors -%>>
+                                \item <<< instr.name.given_names|e >>> <<< instr.name.family_name|e >>>
+                            <<% endfor -%>>
+                        \end{itemize}
+                    <<% endif %>>
+                    <<% if attendees|length > 0 %>>
+                        Teilnehmer:
+                        \begin{itemize}
+                        <<%- for attendee, attendee_tracks in attendees -%>>
+                            \item <<< attendee.name.given_names|e >>> <<< attendee.name.family_name|e >>>
+                        <<% endfor -%>>
+                        \end{itemize}
+                    <<% endif %>>
+                \end{minipage}%
+            <<% endif %>>
+            <<% if ns.columns_on_page >= 2 and not loop.last %>>
+                <<% set ns.columns_on_page = 0 %>>
+
+
+                \pagebreak
+            <<% endif %>>
+        <<% endfor %>>
+
+
+        \pagebreak
+    <<% endfor -%>>
+<<% endblock %>>

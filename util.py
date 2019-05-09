@@ -53,23 +53,25 @@ def get_nametag_courses(registration, tracks, merge=True, second_always_right=Fa
         return courses, False
 
 
-def gather_course_attendees(course: Course) -> Iterable[Tuple[Registration, Iterable[EventTrack]]]:
+def gather_course_attendees(course: Course, part: EventPart=None) -> Iterable[Tuple[Registration, Iterable[EventTrack]]]:
     """ Get a single list of all regular attendees (not instructors or guests) of a course (in all active tracks of the
     course)
 
     :param course: The course to gather its atttendees
+    :param part: If given, only consider tracks in this part
     :return: A list of tuples, each representing a unique attendee of the course:
         (Registration: list of EventTracks, in which they attend the course)
     """
     regs = {}  # type: Dict[Registration, List[EventTrack]]
     for event_track, course_track in course.tracks.items():
-        for reg, instr in course_track.attendees:
-            if (not instr and course_track.status == CourseTrackStati.active
-                    and reg.tracks[event_track].registration_part.status == RegistrationPartStati.participant):
-                if reg in regs:
-                    regs[reg].append(event_track)
-                else:
-                    regs[reg] = [event_track]
+        if not part or event_track in part.tracks:
+            for reg, instr in course_track.attendees:
+                if (not instr and course_track.status == CourseTrackStati.active
+                        and reg.tracks[event_track].registration_part.status == RegistrationPartStati.participant):
+                    if reg in regs:
+                        regs[reg].append(event_track)
+                    else:
+                        regs[reg] = [event_track]
 
     return [(r, regs[r]) for r in sorted(regs.keys(), key=registration_sort_key)]
 

@@ -17,6 +17,7 @@ generated. Additionally it should contain a docstring according to PEP 257. It w
 target to the user.
 """
 import enum
+import operator
 import re
 import csv
 import os
@@ -24,7 +25,7 @@ import os
 import util
 from globals import target_function
 from render import RenderTask
-from data import Event, RegistrationPartStati
+from data import Event, RegistrationPartStati, CourseTrackStati
 
 
 @target_function
@@ -138,9 +139,39 @@ def minor_checklists(event: Event, config, output_idr, match):
 
 @target_function
 def tnlists_cl(event: Event, config, output_dir, match):
-    """Render participant listings of individual courses and lodgements"""
+    """Render participant listings of individual courses and rooms (course rooms + lodgements)
 
-    return [RenderTask('tnlist_kl.tex', 'tnlist_kl', {}, True)]
+    Course rooms and lodgements are combined by their name.
+    """
+    targets = []
+    part_suffixes = util.generate_part_jobnames(event)
+
+    # Inhabitant and course-attendee listings for each room for each part
+    course_room_field = config.get('data', 'course_room_field', fallback=None)
+    for part in event.parts:
+        # We need to build the rooms_by_name dict new for every part, as the rooms are dependent on the course_rooms of
+        # the courses taking place in that part.
+        rooms_by_name = {l.moniker: (l, []) for l in event.lodgements}
+        for c in event.courses:
+            course_room = c.fields.get(course_room_field, None)
+            course_tracks = [t for t in part.tracks if c.tracks[t].status == CourseTrackStati.active]
+            if course_room and course_tracks:
+                if course_room in rooms_by_name:
+                    rooms_by_name[course_room][1].append((c, course_tracks))
+                else:
+                    rooms_by_name[course_room] = (None, [(c, course_tracks)])
+
+        targets.append(RenderTask('room_lists.tex',
+                                  'room_list_{}'.format(part_suffixes[part]),
+                                  {'part': part,
+                                   'rooms': sorted([(t, l, cs) for t, (l, cs) in rooms_by_name.items()],
+                                                   key=operator.itemgetter(0))},
+                                  True))
+
+    # Attendee-listing for course instructors
+    targets.append(RenderTask('tnlist_kl.tex', 'tnlist_kl', {}, True))
+
+    return targets
 
 
 @target_function
