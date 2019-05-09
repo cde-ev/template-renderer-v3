@@ -1,3 +1,9 @@
+<<# Checklist, to check presence of all minors each evening of one EventPart.
+
+    Required template variables:
+    * part: The EventPart to generate the lists for
+    * registrations: List of all minor participants of this EventPart
+#>>
 <<% extends "lists.base.tex" %>>
 
 <<% set title = "Minderjährigen-Checkliste " + part.title|e %>>
