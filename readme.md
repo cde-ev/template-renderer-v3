@@ -38,13 +38,19 @@ You need the following software on your computer:
 … on Ubuntu & Debian:
 ```
 $ sudo apt install python3 python3-jinja2 python3-tz git \
-                   texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-luatex texlive-fonts-extra
+                   texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-luatex texlive-fonts-extra \
+                   texlive-lang-german
 ```
 
 … on Arch Linux:
 ```
 $ sudo pacman -S python python-jinja2 python-pytz texlive-core texlive-fontsextra git
 ```
+
+
+If you're using Debian 9 (Stretch), you'll need to install the updated Jinja2 version from Debian Backports. See
+https://backports.debian.org/ for instructions to add the backports package repository and run
+`sudo apt install -t stretch-backports python3-jinja2`
 
 
 #### Setting up Prerequisites on Windows systems
