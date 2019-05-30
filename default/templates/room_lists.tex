@@ -53,7 +53,7 @@
 
         \setlength{\columnsep}{2cm}
         \begin{minipage}[t]{0.5\textwidth}
-            <<% if lodgement and lodgement.parts[part].inhabitants %>>
+            <<% if lodgement %>>
                 {
                     \headingfamily\bfseries Bewohner:
                 }
@@ -62,11 +62,13 @@
                             if inhabitant.parts[part].status == ENUMS.RegistrationPartStati.participant -%>>
                         \item <<< inhabitant.name.given_names|e >>> <<< inhabitant.name.family_name|e >>>
                             <<% if campingmat %>>{\small (Isomatte)}<<% endif %>>
+                    <<% else -%>>
+                        \item \textit{Keine Bewohner}
                     <<% endfor -%>>
                 \end{itemize}
             <<% endif %>>
         \end{minipage}%
-        <<% set ns = namespace(columns_on_page = 1 if lodgement and lodgement.parts[part].inhabitants else 0) %>>
+        <<% set ns = namespace(columns_on_page = 1 if lodgement else 0) %>>
         <<% for course, course_tracks in room_courses %>>
             <<% set attendees = UTIL.gather_course_attendees(course, part) %>>
             <<# Idea of pagebreaks: Large courses (>ATTENDEES_PER_COLUMN attendees incl. instructors) always get their
