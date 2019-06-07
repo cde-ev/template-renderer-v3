@@ -176,7 +176,8 @@ class Event:
                        for field_data in data['event.field_definitions'].values()}
 
         # Parse courses and course_segments
-        max_course_nr_len = max(len(cd['nr']) for cd in data['event.courses'].values())
+        max_course_nr_len = max(len(cd['nr']) if cd['nr'] else 0
+                                for cd in data['event.courses'].values())
         event.courses = sorted((Course.from_json(course_data, field_types)
                                 for course_data in data['event.courses'].values()),
                                key=(lambda c: c.nr.rjust(max_course_nr_len, '\0')))
@@ -336,7 +337,7 @@ class Course:
         course.id = data['id']
         course.title = data['title']
         course.shortname = data['shortname']
-        course.nr = data['nr']
+        course.nr = data['nr'] if data['nr'] else ""
         for field, value in data['fields'].items():
             if field not in field_types:
                 continue
