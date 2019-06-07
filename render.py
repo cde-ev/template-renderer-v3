@@ -53,8 +53,7 @@ def filter_inverse_chunks(value, n=2):
                 end = True
                 if i == 0:
                     break
-            else:
-                chunk.append(last)
+            chunk.append(last)
         for i in reversed(chunk):
             yield i
 
