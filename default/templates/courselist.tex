@@ -7,13 +7,13 @@
 
 <<% set title = "Kursliste " + EVENT.title|e %>>
 <<% set num_columns = 3
-                      + (1 if CONFIG.data.course_room_field else 0)
+                      + (1 if EVENT.course_room_field else 0)
                       + EVENT.tracks|length %>>
 <<% set hide_header = True %>>
 
 <<% block table_head %>>
     \head{Nr.} & \head{Name}
-    <<% if CONFIG.data.course_room_field %>>
+    <<% if EVENT.course_room_field %>>
         & \head{Kursraum}
     <<% endif %>>
     & \head{Kursleiter}
@@ -25,8 +25,8 @@
 <<% block table_body %>>
     <<% for course in EVENT.courses if course.is_active %>>
         <<< course.nr|e >>>. & <<< course.shortname|e >>>
-        <<% if CONFIG.data.course_room_field %>>
-            & <<< course.fields[CONFIG.data.course_room_field]|e >>>
+        <<% if EVENT.course_room_field %>>
+            & <<< course.fields[EVENT.course_room_field]|e >>>
         <<% endif %>>
         &
         <<% for instructor in course.instructors -%>>

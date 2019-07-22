@@ -10,7 +10,7 @@
 
 <<% set title = "Orga-Teilnehmerliste" + title_suffix|default('') %>>
 <<% set num_columns = 4
-                    + tracks|length * (2 if CONFIG.data.course_room_field else 1)
+                    + tracks|length * (2 if EVENT.course_room_field else 1)
                     + parts|length%>>
 <<% set hide_header = True %>>
 <<% set show_timestamp = True %>>
@@ -22,7 +22,7 @@
     <<% endfor %>>
     <<% for track in tracks -%>>
         & \head{Kurs<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
-        <<% if CONFIG.data.course_room_field %>>
+        <<% if EVENT.course_room_field %>>
             & \head{Kursraum<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
         <<% endif %>>
     <<% endfor %>>
@@ -54,11 +54,11 @@
             <<% if registration.tracks[track].registration_part.status == ENUMS.RegistrationPartStati.participant %>>
                 <<% with course = registration.tracks[track].course -%>>
                     <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
-                    <<% if CONFIG.data.course_room_field -%>>
-                        & <<% if course %>><<< course.fields[CONFIG.data.course_room_field]|e >>><<% endif %>>
+                    <<% if EVENT.course_room_field -%>>
+                        & <<% if course %>><<< course.fields[EVENT.course_room_field]|e >>><<% endif %>>
                     <<%- endif %>>
                 <<%- endwith %>>
-            <<% elif CONFIG.data.course_room_field %>>
+            <<% elif EVENT.course_room_field %>>
                 &
             <<% endif %>>
         <<% endfor %>>

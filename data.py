@@ -133,6 +133,8 @@ class Event:
         self.courses = []  # type: List[Course]
         self.lodgements = []  # type: List[Lodgement]
 
+        self.course_room_field = None
+
         self.timestamp = datetime.datetime.now()
 
     @property
@@ -174,6 +176,10 @@ class Event:
         # Get field definitions
         field_types = {field_data['field_name']: FieldDatatypes(field_data['kind'])
                        for field_data in data['event.field_definitions'].values()}
+
+        if event_data.get('course_room_field', None):
+            event.course_room_field = (data['event.field_definitions']
+                                       .get(str(event_data['course_room_field']), None)['field_name'])
 
         # Parse courses and course_segments
         max_course_nr_len = max(len(cd['nr']) if cd['nr'] else 0

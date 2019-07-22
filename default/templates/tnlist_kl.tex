@@ -77,8 +77,8 @@
             <<% for kl in course.instructors -%>>
                 <<< kl.name.fullname|e >>><<% if not loop.last %>>, <<% endif %>>
             <<%- endfor %>>\\
-            <<% if CONFIG.data.course_room_field -%>>
-                Kursraum: <<< course.fields[CONFIG.data.course_room_field]|e >>>\\
+            <<% if EVENT.course_room_field -%>>
+                Kursraum: <<< course.fields[EVENT.course_room_field]|e >>>\\
             <<% endif %>>
             Stand: <<< EVENT.timestamp|datetime >>>
         \end{minipage}%

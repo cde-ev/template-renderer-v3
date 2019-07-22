@@ -151,11 +151,11 @@
                             <<%- block nametag_reartext scoped %>>
                                 <<% with courses, merged = UTIL.get_nametag_courses(
                                         p, part.tracks[:2] if part else EVENT.tracks[:2], True, False) -%>>
-                                    <<% if CONFIG.data.course_room_field and courses %>>
+                                    <<% if EVENT.course_room_field and courses %>>
                                         <<% if courses|length > 1 %>>Kursräume<<% else %>>Kursraum<<% endif %>>:
                                         <<% for course in courses -%>>
                                             <<% if course -%>>
-                                                <<< course.fields[CONFIG.data.course_room_field]|e ->>>
+                                                <<< course.fields[EVENT.course_room_field]|e ->>>
                                             <<% else %>>—<<% endif -%>>
                                             <<% if not loop.last %>>, <<% endif %>>
                                         <<%- endfor -%>>

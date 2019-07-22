@@ -147,13 +147,12 @@ def tnlists_cl(event: Event, config, output_dir, match):
     part_suffixes = util.generate_part_jobnames(event)
 
     # Inhabitant and course-attendee listings for each room for each part
-    course_room_field = config.get('data', 'course_room_field', fallback=None)
     for part in event.parts:
         # We need to build the rooms_by_name dict new for every part, as the rooms are dependent on the course_rooms of
         # the courses taking place in that part.
         rooms_by_name = {l.moniker: (l, []) for l in event.lodgements}
         for c in event.courses:
-            course_room = c.fields.get(course_room_field, None)
+            course_room = c.fields.get(event.course_room_field, None)
             course_tracks = [t for t in part.tracks if c.tracks[t].status == CourseTrackStati.active]
             if course_room and course_tracks:
                 if course_room in rooms_by_name:
