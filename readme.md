@@ -93,9 +93,9 @@ $ git pull
 
 ## Usage
 
-To render and compile PDF files, first download a full event export from the CdE Datenbank and store the file as
-`export_event.json` in the template renderer's directory:
-CdEDB → Events → EVENT'S NAME → Downloads → Full Event Export / JSON-File
+To render and compile PDF files, first download a partial event export from the CdE Datenbank and store the file as
+`partial_export_event.json` in the template renderer's directory:
+CdEDB → Events → EVENT'S NAME → Downloads → Partial Event Export / JSON file
 
 **On Windows**, open up a Command Prompt (shift+rightclick on directory → Open command window here) or a Git Bash
 (Rightclick on directory → Git Bash here) in the directory of the template renderer and run
@@ -123,12 +123,12 @@ $ ./main.py --help
 ```
 
 Most important parameters are
-* `-i INPUT_FILE` to specify an other input file than `export_event.json`
+* `-i INPUT_FILE` to specify an other input file than `partial_export_event.json`
 * `-c CUSTOM_DIR` to specify a custom directory (see Customization) different from the `custom` folder
 
 A call with parameters might look like the following example:
 ```
-$ ./main.py -i export_event_2019-04-24.json -c pa19/ tnlists 
+$ ./main.py -i pa19_partial_export_event.json -c pa19/ tnlists
 ```
 
 Since the custom directory allows to add additional target functions, it is useful to call the script with the `-c`

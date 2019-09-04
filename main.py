@@ -35,8 +35,8 @@ parser.add_argument('targets', metavar='TARGETS', type=str, nargs='*',
 parser.add_argument('-c', '--custom-dir', default=os.path.join(THIS_DIR, 'custom'),
                     help="Path of custom directory to find config file, templates and assets. Defaults to the `custom` "
                          "directory in the script's directory.")
-parser.add_argument('-i', '--input', default="export_event.json",
-                    help="Path of the input file, exported from the CdEdb. Typically xxx_export_event.json.")
+parser.add_argument('-i', '--input', default="partial_export_event.json",
+                    help="Path of the input file, exported from the CdEdb. Typically xxx_partial_export_event.json.")
 parser.add_argument('-o', '--output', default=os.path.join(THIS_DIR, 'output'),
                     help="Path of the output directory. Defaults to the `output` directory in the script's directory. "
                          "The directory must exist.")
