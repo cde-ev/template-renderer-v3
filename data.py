@@ -5,7 +5,8 @@ import json
 import datetime
 from typing import List, Dict, Tuple
 
-MINIMUM_EXPORT_VERSION = 3
+MINIMUM_EXPORT_VERSION = 4
+MAXIMUM_EXPORT_VERSION = 4
 
 
 def load_input_file(filename):
@@ -161,9 +162,9 @@ class Event:
     def from_json(cls, data):
         if 'kind' not in data or data['kind'] != "partial":
             raise ValueError("This script requires a 'Partial Export' from the CdEDB!")
-        if data['CDEDB_EXPORT_EVENT_VERSION'] < MINIMUM_EXPORT_VERSION:
-            raise ValueError("This script requires a 'Partial Export' of version {} or newer!"
-                             .format(MINIMUM_EXPORT_VERSION))
+        if not MINIMUM_EXPORT_VERSION <= data['CDEDB_EXPORT_EVENT_VERSION'] <= MINIMUM_EXPORT_VERSION:
+            raise ValueError("This script requires a 'Partial Export' with versio number in [{},{}]!"
+                             .format(MINIMUM_EXPORT_VERSION, MAXIMUM_EXPORT_VERSION))
 
         event = cls()
 
@@ -171,6 +172,7 @@ class Event:
         event.title = event_data['title']
         event.shortname = event_data['shortname']
         event.timestamp = datetime.datetime.strptime(data['timestamp'].replace(':', ''), "%Y-%m-%dT%H%M%S.%f%z")
+        event.course_room_field = event_data.['course_room_field']
 
         # Parse parts and tracks
         event.parts = [EventPart.from_json(part_id, part_data)
@@ -184,13 +186,6 @@ class Event:
         # Get field definitions
         field_types = {field_name: FieldDatatypes(field_data['kind'])
                        for field_name, field_data in event_data['fields'].items()}
-
-        try:
-            event.course_room_field = next(field_name
-                                           for field_name, field_data in event_data['fields'].items()
-                                           if field_data['id'] == event_data.get('course_room_field', None))
-        except StopIteration:
-            pass
 
         # Parse courses and course_segments
         event.courses = [Course.from_json(course_id, course_data, field_types, tracks_by_id)
@@ -436,8 +431,7 @@ class Registration:
     def from_json(cls, reg_id, data, field_types, event_begin, event_parts, event_tracks, courses, lodgements):
         registration = cls()
         registration.id = int(reg_id)
-        # FIXME
-        #registration.cdedbid = data['persona']['id']
+        registration.cdedbid = data['persona']['id']
         registration.name = Name.from_json_persona(data['persona'])
         registration.gender = Genders(data['persona']['gender'])
         registration.birthday = parse_date(data['persona']['birthday'])
