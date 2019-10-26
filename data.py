@@ -172,7 +172,7 @@ class Event:
         event.title = event_data['title']
         event.shortname = event_data['shortname']
         event.timestamp = datetime.datetime.strptime(data['timestamp'].replace(':', ''), "%Y-%m-%dT%H%M%S.%f%z")
-        event.course_room_field = event_data.['course_room_field']
+        event.course_room_field = event_data['course_room_field']
 
         # Parse parts and tracks
         event.parts = [EventPart.from_json(part_id, part_data)
