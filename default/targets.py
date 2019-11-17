@@ -250,9 +250,9 @@ def group_participants(config: configparser.ConfigParser, participants: Iterable
                     break
             else:
                 others.append(p)
-    return [("age u{}".format(name), ps) for name, ps in age_groups]\
-           + [(regex.pattern, ps) for regex, ps in lodgement_groups]\
-           + [('others', others)]
+    return ([("age u{}".format(name), ps) for name, ps in age_groups]
+            + [(regex.pattern, ps) for regex, ps in lodgement_groups]
+            + [('others', others)])
 
 
 def get_meals(config: configparser.ConfigParser, registrations: Iterable[Registration])\
@@ -281,4 +281,3 @@ def get_meals(config: configparser.ConfigParser, registrations: Iterable[Registr
         result[r] = meal
 
     return result
-

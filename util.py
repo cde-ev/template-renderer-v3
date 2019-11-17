@@ -8,6 +8,7 @@ def get_active_registrations(event: Event, parts: Iterable[EventPart] = None, in
     """
     Construct a list of all active participants of an event, possibly filtered by active parts, list_consent and age.
 
+    :param event: The Event data
     :param parts: The event parts to check the registration for activity. If not given, all event parts are considered
     :param include_guests: If true, `RegistrationPartStati.guest` is considered as acitve. Otherwise only `participant`.
     :param list_consent_only: If true, only registrations with list_consent == True are returned
@@ -55,7 +56,8 @@ def get_nametag_courses(registration: Registration, tracks: Iterable[EventTrack]
         return courses, False
 
 
-def gather_course_attendees(course: Course, part: EventPart=None) -> Iterable[Tuple[Registration, Iterable[EventTrack]]]:
+def gather_course_attendees(course: Course, part: EventPart = None)\
+        -> Iterable[Tuple[Registration, Iterable[EventTrack]]]:
     """ Get a single list of all regular attendees (not instructors or guests) of a course (in all active tracks of the
     course)
 

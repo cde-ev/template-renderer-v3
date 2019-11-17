@@ -14,7 +14,8 @@ def load_input_file(filename: str):
         data = json.load(f)
 
     event = Event.from_json(data)
-    print("Parsed event data with {} registrations, {} courses and {} lodgements in {} event parts and {} course tracks."
+    print("Parsed event data with {} registrations, {} courses and {} lodgements in {} event parts and {} course "
+          "tracks."
           .format(len(event.registrations), len(event.courses), len(event.lodgements), len(event.parts),
                   len(event.tracks)))
     return event
@@ -455,7 +456,7 @@ class Registration:
 
         registration.parts = {event_parts[int(pi)]: RegistrationPart.from_json(pd, registration,
                                                                                event_parts[int(pi)], lodgements)
-                               for pi, pd in data['parts'].items()}
+                              for pi, pd in data['parts'].items()}
         registration.tracks = {event_tracks[int(ti)]: RegistrationTrack.from_json(td, registration,
                                                                                   event_tracks[int(ti)], courses)
                                for ti, td in data['tracks'].items()}
