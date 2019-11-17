@@ -136,6 +136,7 @@ class Event:
 
         self.registrations = []  # type: List[Registration]
         self.courses = []  # type: List[Course]
+        self.lodgement_groups = []  # type: List[LodgementGroup]
         self.lodgements = []  # type: List[Lodgement]
 
         self.course_room_field = None
@@ -181,6 +182,12 @@ class Event:
         event.tracks.sort(key=(lambda t: t.sortkey))
         tracks_by_id = {t.id: t for t in event.tracks}
 
+        # Parse lodgement_groups
+        event.lodgement_groups = [LodgementGroup.from_json(lg_id, lg_data)
+                                  for lg_id, lg_data in data['lodgement_groups'].items()]
+        event.lodgement_groups.sort(key=(lambda lg: lg.moniker))
+        lodgement_groups_by_id = {lg.id: lg for lg in event.lodgement_groups}
+
         # Get field definitions
         field_types = {field_name: FieldDatatypes(field_data['kind'])
                        for field_name, field_data in event_data['fields'].items()}
@@ -194,10 +201,15 @@ class Event:
         courses_by_id = {c.id: c for c in event.courses}
 
         # Parse lodgements
-        event.lodgements = [Lodgement.from_json(lodgement_id, lodgement_data, field_types, event.parts)
+        event.lodgements = [Lodgement.from_json(lodgement_id, lodgement_data, field_types, event.parts,
+                                                lodgement_groups_by_id)
                             for lodgement_id, lodgement_data in data['lodgements'].items()]
         event.lodgements.sort(key=(lambda l: l.moniker))
         lodgements_by_id = {l.id: l for l in event.lodgements}
+        # Add lodgements to lodgement groups
+        for lodgement in event.lodgements:
+            if lodgement.group:
+                lodgement.group.lodgements.append(lodgement)
 
         # Parse registrations
         event_begin = event.begin
@@ -297,7 +309,7 @@ class Course:
         return any(t.status.is_active for t in self.tracks.values())
 
     @classmethod
-    def from_json(cls, course_id: int, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
+    def from_json(cls, course_id: str, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
                   event_tracks: Dict[int, EventTrack]) -> 'Course':
         course = cls()
         course.id = int(course_id)
@@ -348,19 +360,36 @@ class CourseTrack:
         return course_track
 
 
+class LodgementGroup:
+    def __init__(self):
+        self.id = 0  # type: int
+        self.moniker = ""  # type: str
+        self.lodgements = []  # type: List[Lodgement]
+
+    @classmethod
+    def from_json(cls, lodgement_group_id: str, data: Dict[str, Any]):
+        lodgement_group = cls()
+        lodgement_group.id = int(lodgement_group_id)
+        lodgement_group.moniker = data['moniker']
+        return lodgement_group
+
+
 class Lodgement:
     def __init__(self):
         self.id = 0  # type: int
         self.moniker = ""  # type: str
+        self.group = None  # type: Optional[LodgementGroup]
         self.fields = {}  # type: Dict[str, object]
         self.parts = {}  # type: Dict[EventPart, LodgementPart]
 
     @classmethod
-    def from_json(cls, lodgement_id: int, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
-                  event_parts: List[EventPart]) -> 'Lodgement':
+    def from_json(cls, lodgement_id: str, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
+                  event_parts: List[EventPart], lodgement_groups: Dict[int, LodgementGroup]) -> 'Lodgement':
         lodgement = cls()
         lodgement.id = int(lodgement_id)
         lodgement.moniker = data['moniker']
+        lodgement.group = lodgement_groups.get(data['group_id'], None)
+        # Adding lodgements to group's list is done afterwards to fix the order
         for field, value in data['fields'].items():
             if field not in field_types:
                 continue
