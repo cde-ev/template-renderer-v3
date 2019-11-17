@@ -68,12 +68,12 @@ if os.path.isdir(custom_asset_dir):
     asset_dirs.insert(0, os.path.abspath(custom_asset_dir))
 
 # Import targets specifications
-import default.targets
+import default.targets  # type: ignore
 custom_targets_file = os.path.join(args.custom_dir, 'targets.py')
 if os.path.isfile(custom_targets_file):
     spec = importlib.util.spec_from_file_location("custom.targets", custom_targets_file)
     foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)
+    spec.loader.exec_module(foo)  # type: ignore
 
 # read input json file
 event = data.load_input_file(args.input)
@@ -92,12 +92,12 @@ if not args.targets:
     if globals.TARGETS:
         max_name_length = max(len(name) for name in globals.TARGETS)
         print("No targets given. Please specify one or more of the following targets:\n")
-        for name, target in globals.TARGETS.items():
+        for target_name, target_fn in globals.TARGETS.items():
             # TODO use shutil.get_terminal_size and textwrap.fill and some fancy logic to adapt docstrings to terminal
-            print("{:{}}".format(name + ':', max_name_length+2), end='')
-            if target.__doc__:
+            print("{:{}}".format(target_name + ':', max_name_length+2), end='')
+            if target_fn.__doc__:
                 print(('\n' + ' ' * (max_name_length+2))
-                      .join(l.strip() for l in target.__doc__.strip().splitlines()))
+                      .join(l.strip() for l in target_fn.__doc__.strip().splitlines()))
             print()
     else:
         print("No targets are available. This script is pretty useless. Take a look at the documentation,"

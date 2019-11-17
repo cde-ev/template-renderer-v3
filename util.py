@@ -1,6 +1,6 @@
 from data import (Event, EventPart, EventTrack, Registration, Course, registration_sort_key,
                   CourseTrackStati, RegistrationPartStati)
-from typing import Iterable, Union, Dict, Tuple, List
+from typing import Iterable, Union, Dict, Tuple, List, Optional
 
 
 def get_active_registrations(event: Event, parts: Iterable[EventPart] = None, include_guests: bool = False,
@@ -27,16 +27,18 @@ def get_active_registrations(event: Event, parts: Iterable[EventPart] = None, in
                 and (not minors_only or r.age_class.is_minor)]
 
 
-def get_nametag_courses(registration, tracks, merge=True, second_always_right=False):
+def get_nametag_courses(registration: Registration, tracks: Iterable[EventTrack], merge=True,
+                        second_always_right=False) -> Tuple[List[Optional[Course]], bool]:
     """Get the courses to be printed on the nametag from a list of the event tracks and the registration
 
+    :param registration: The registration to get its courses
+    :param tracks: The list of event tracks to get the courses (e.g. only the tracks of one EventPart)
     :param merge: Merge equal courses of the first and second track
     :param second_always_right: Return a None value to push the second course to the right, if the participant is
         not present in the first track's part
     :returns The reduced list of courses and a flag to indicate if the courses have been merged
-    :rtype ([courses], bool)
     """
-    courses = []
+    courses = []  # type: List[Optional[Course]]
     for t in tracks:
         reg_track = registration.tracks[t]
         if reg_track.registration_part.status.is_present:
@@ -89,7 +91,7 @@ def generate_part_jobnames(event: Event) -> Dict[EventPart, str]:
               for part in event.parts}
 
     # Find ambiguous suffixes
-    reverse_result = {}
+    reverse_result = {}  # type: Dict[str, EventPart]
     ambiguous_parts = set()
     for part, suffix in result.items():
         if suffix in reverse_result:
@@ -106,7 +108,9 @@ def generate_part_jobnames(event: Event) -> Dict[EventPart, str]:
 
 # According to https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 # but we allow dots.
-FILENAME_SANITIZE_MAP = {x: '_' for x in "/\\?%*:|\"<> "}
+FILENAME_SANITIZE_MAP = str.maketrans({
+    x: '_'
+    for x in "/\\?%*:|\"<> "})
 
 def sanitize_filename(name: str) -> str:
     """

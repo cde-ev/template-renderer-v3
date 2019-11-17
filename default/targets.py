@@ -21,15 +21,17 @@ import operator
 import re
 import csv
 import os
+from typing import List, Tuple, Iterable, Dict, Any, Optional, Pattern
+import configparser
 
 import util
 from globals import target_function
 from render import RenderTask
-from data import Event, RegistrationPartStati, CourseTrackStati
+from data import Event, EventPart, RegistrationPartStati, CourseTrackStati, Lodgement, Registration, Course, EventTrack
 
 
 @target_function
-def tnletters(event: Event, config, output_dir, match):
+def tnletters(event: Event, _config, output_dir, match):
     """Render the "Teilnehmerbrief" for each participant.
 
     This target renders the tnletter.tex template once for every participant of the event. The `--match` parameter may
@@ -60,7 +62,7 @@ def tnletters(event: Event, config, output_dir, match):
 
 
 @target_function
-def tnlists(event: Event, config, output_dir, match):
+def tnlists(event: Event, config, _output_dir, _match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)"""
 
     participants = util.get_active_registrations(event, include_guests=config.getboolean('tnlist', 'show_guests'))
@@ -90,7 +92,7 @@ def tnlists(event: Event, config, output_dir, match):
 
 
 @target_function
-def tnlists_per_part(event: Event, config, output_dir, match):
+def tnlists_per_part(event: Event, config, _output_dir, _match):
     """Render the participant lists (one with, one without course, one for the orgas, one for the blackboard)
     individually for each part."""
 
@@ -123,7 +125,7 @@ def tnlists_per_part(event: Event, config, output_dir, match):
 
 
 @target_function
-def minor_checklists(event: Event, config, output_idr, match):
+def minor_checklists(event: Event, _config, _output_idr, _match):
     """Render a list of all minors with columns to check their presence every evening (one document per event part)"""
     part_suffixes = util.generate_part_jobnames(event)
 
@@ -138,7 +140,7 @@ def minor_checklists(event: Event, config, output_idr, match):
 
 
 @target_function
-def tnlists_cl(event: Event, config, output_dir, match):
+def tnlists_cl(event: Event, _config, _output_dir, _match):
     """Render participant listings of individual courses and rooms (course rooms + lodgements)
 
     Course rooms and lodgements are combined by their name.
@@ -150,9 +152,10 @@ def tnlists_cl(event: Event, config, output_dir, match):
     for part in event.parts:
         # We need to build the rooms_by_name dict new for every part, as the rooms are dependent on the course_rooms of
         # the courses taking place in that part.
-        rooms_by_name = {l.moniker: (l, []) for l in event.lodgements}
+        rooms_by_name = {l.moniker: (l, []) for l in event.lodgements}\
+            # type: Dict[str, Tuple[Optional[Lodgement], List[Tuple[Course, List[EventTrack]]]]]
         for c in event.courses:
-            course_room = c.fields.get(event.course_room_field, None)
+            course_room = c.fields.get(event.course_room_field, None)  # type: Any
             course_tracks = [t for t in part.tracks if c.tracks[t].status == CourseTrackStati.active]
             if course_room and course_tracks:
                 if course_room in rooms_by_name:
@@ -174,14 +177,14 @@ def tnlists_cl(event: Event, config, output_dir, match):
 
 
 @target_function
-def courselist(event: Event, config, output_dir, match):
+def courselist(_event: Event, _config, _output_dir, _match):
     """Render the courselists"""
 
     return [RenderTask('courselist.tex', 'courselist', {}, True)]
 
 
 @target_function
-def nametags(event: Event, config, output_dir, match):
+def nametags(event: Event, config, _output_dir, _match):
     """Render nametags."""
     per_part = config['nametags'].getboolean('per_part', fallback=(len(event.parts) > 2 or len(event.tracks) > 2))
 
@@ -215,7 +218,8 @@ class Meals(enum.IntEnum):
     halfmeat2 = 5
 
 
-def group_participants(config, participants, part):
+def group_participants(config: configparser.ConfigParser, participants: Iterable[Registration], part: EventPart)\
+        -> List[Tuple[str, List[Registration]]]:
     """ Helper function for grouping the participants by age and lodgement for different nametag colors.
 
     First, tries to assign, each participant to one of the config.nametags.age_groups. If not possible, tries to assign
@@ -223,13 +227,16 @@ def group_participants(config, participants, part):
 
     :param config: The Config data
     :param participants: A list of participants to group
+    :param part: The event part to consider for grouping by lodgement
     :return: List of groups as tuple of group name and list of participants
-    :rtype: [(str, [data.Participant])]
+    :rtype: [(str, [Registration])]
     """
     age_groups = [(int(x), [])
-                  for x in config.get('nametags', 'age_groups', fallback="").split(',')]
+                  for x in config.get('nametags', 'age_groups', fallback="").split(',')]\
+        # type: List[Tuple[int, List[Registration]]]
     lodgement_groups = [(re.compile(x.strip()), [])
-                        for x in config.get('nametags', 'lodgement_groups', fallback="").split('\n')]
+                        for x in config.get('nametags', 'lodgement_groups', fallback="").split('\n')] \
+        # type: List[Tuple[Pattern, List[Registration]]]
     others = []
     for p in participants:
         for max_age, l in age_groups:
@@ -248,14 +255,14 @@ def group_participants(config, participants, part):
            + [('others', others)]
 
 
-def get_meals(config, registrations):
+def get_meals(config: configparser.ConfigParser, registrations: Iterable[Registration])\
+        -> Dict[Registration, Optional[Meals]]:
     """
     Helper function for parsing the desired meal of a participant from its datafields.
     :param config: The Config data
     :param registrations: The list of all registrations of the event
     :type registrations: [data.Registration]
     :return: A dict, mapping registrations to a meal type from the Meals enum.
-    :rtype: Dict[data.Registration, Meals]
     """
     meal_field = config.get('data', 'meal_field', fallback=None)
     halfmeat_group_field = config.get('data', 'halfmeat_group_field', fallback=None)
@@ -264,7 +271,7 @@ def get_meals(config, registrations):
                 for r in registrations}
 
     meal_map = {alias: Meals(i)
-                for i, alias in enumerate(config['data']['meal_values'].split(','))}
+                for i, alias in enumerate(config['data']['meal_values'].split(','))}  # type: Dict[Any, Meals]
 
     result = {}
     for r in registrations:

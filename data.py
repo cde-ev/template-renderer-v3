@@ -3,13 +3,13 @@ import functools
 import itertools
 import json
 import datetime
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any, Optional, Iterable
 
 MINIMUM_EXPORT_VERSION = 4
 MAXIMUM_EXPORT_VERSION = 6
 
 
-def load_input_file(filename):
+def load_input_file(filename: str):
     with open(filename, encoding='utf-8') as f:
         data = json.load(f)
 
@@ -20,15 +20,15 @@ def load_input_file(filename):
     return event
 
 
-def parse_date(value):
+def parse_date(value: str) -> datetime.date:
     return datetime.datetime.strptime(value, "%Y-%m-%d").date()
 
 
-def parse_datetime(value):
+def parse_datetime(value: str) -> datetime.datetime:
     return datetime.datetime.strptime(value.replace(':', ''), "%Y-%m-%dT%H%M%S%z")
 
 
-def calculate_age(reference, born):
+def calculate_age(reference: datetime.date, born: datetime.date) -> int:
     """Calculate age on a reference date based on birthday.
 
     Source: https://stackoverflow.com/a/9754466
@@ -36,7 +36,7 @@ def calculate_age(reference, born):
     return reference.year - born.year - ((reference.month, reference.day) < (born.month, born.day))
 
 
-def registration_sort_key(r):
+def registration_sort_key(r: 'Registration'):
     """ Sort key function for registrations. Should be used whenever sorting a list of registrations"""
     return r.name.given_names, r.name.family_name
 
@@ -115,7 +115,7 @@ class AgeClasses(enum.IntEnum):
     u14 = 4  #: less than 14 years old
 
     @property
-    def is_minor(self):
+    def is_minor(self) -> bool:
         """Checks whether a legal guardian is required.
 
         :rtype: bool
@@ -142,24 +142,21 @@ class Event:
         self.timestamp = datetime.datetime.now()
 
     @property
-    def begin(self):
-        if not self.parts:
-            return None
+    def begin(self) -> datetime.date:
         return self.parts[0].begin
 
     @property
-    def end(self):
-        if not self.parts:
-            return None
+    def end(self) -> datetime.date:
         return max(p.end for p in self.parts)
 
     @property
-    def days(self):
-        return sorted(functools.reduce(lambda a, b: a | b,
+    def days(self) -> List[datetime.date]:
+        # Silencing of mypy false-positive required (https://github.com/python/mypy/issues/4150)
+        return sorted(functools.reduce(lambda a, b: a | b,  # type: ignore
                                        (set(p.days) for p in self.parts)))
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, data: Dict[str, Any]) -> 'Event':
         if 'kind' not in data or data['kind'] != "partial":
             raise ValueError("This script requires a 'Partial Export' from the CdEDB!")
         if not MINIMUM_EXPORT_VERSION <= data['CDEDB_EXPORT_EVENT_VERSION'] <= MINIMUM_EXPORT_VERSION:
@@ -236,14 +233,14 @@ class EventPart:
         self.tracks = []  # type: List[EventTrack]
 
     @property
-    def days(self):
+    def days(self) -> Iterable[datetime.date]:
         d = self.begin
         while d <= self.end:
             yield d
             d += datetime.timedelta(days=1)
 
     @classmethod
-    def from_json(cls, part_id, data):
+    def from_json(cls, part_id: int, data: Dict[str, Any]) -> 'EventPart':
         part = cls()
         part.id = int(part_id)
         part.title = data['title']
@@ -266,7 +263,7 @@ class EventTrack:
         self.num_choices = 0  # type: int
 
     @classmethod
-    def from_json(cls, track_id, data, part):
+    def from_json(cls, track_id: int, data: Dict[str, Any], part: EventPart) -> 'EventTrack':
         track = cls()
         track.id = int(track_id)
         track.title = data['title']
@@ -288,8 +285,9 @@ class Course:
         self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
 
     @property
-    def instructors(self):
-        return sorted(functools.reduce(lambda x, y: x | y,
+    def instructors(self) -> List['Registration']:
+        # Silencing of mypy false-positive required (https://github.com/python/mypy/issues/4150)
+        return sorted(functools.reduce(lambda x, y: x | y,  # type: ignore
                                        (set(t.instructors) for t in self.tracks.values())),
                       key=registration_sort_key)
 
@@ -298,7 +296,8 @@ class Course:
         return any(t.status.is_active for t in self.tracks.values())
 
     @classmethod
-    def from_json(cls, course_id, data, field_types, event_tracks):
+    def from_json(cls, course_id: int, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
+                  event_tracks: Dict[int, EventTrack]) -> 'Course':
         course = cls()
         course.id = int(course_id)
         course.title = data['title']
@@ -332,15 +331,15 @@ class CourseTrack:
         self.attendees = []  # type: [Tuple[Registration, bool]]
 
     @property
-    def regular_attendees(self):
+    def regular_attendees(self) -> List['Registration']:
         return [p for p, instructor in self.attendees if not instructor]
 
     @property
-    def instructors(self):
+    def instructors(self) -> List['Registration']:
         return [p for p, instructor in self.attendees if instructor]
 
     @classmethod
-    def from_json(cls, data, course, track):
+    def from_json(cls, data: Dict[str, Any], course: Course, track: EventTrack) -> 'CourseTrack':
         course_track = cls()
         course_track.track = track
         course_track.course = course
@@ -356,7 +355,8 @@ class Lodgement:
         self.parts = {}  # type: Dict[EventPart, LodgementPart]
 
     @classmethod
-    def from_json(cls, lodgement_id, data, field_types, event_parts):
+    def from_json(cls, lodgement_id: int, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
+                  event_parts: List[EventPart]) -> 'Lodgement':
         lodgement = cls()
         lodgement.id = int(lodgement_id)
         lodgement.moniker = data['moniker']
@@ -383,11 +383,11 @@ class LodgementPart:
         self.inhabitants = []  # type: List[Tuple[Registration, bool]]
 
     @property
-    def regular_inhabitants(self):
+    def regular_inhabitants(self) -> List['Registration']:
         return [p for p, campingmat in self.inhabitants if not campingmat]
 
     @property
-    def campingmat_inhabitants(self):
+    def campingmat_inhabitants(self) -> List['Registration']:
         return [p for p, campingmat in self.inhabitants if campingmat]
 
 
@@ -410,15 +410,15 @@ class Registration:
         self.fields = {}  # type: Dict[str, object]
 
     @property
-    def is_present(self):
+    def is_present(self) -> bool:
         return any(p.status.is_present for p in self.parts.values())
 
     @property
-    def is_participant(self):
+    def is_participant(self) -> bool:
         return any(p.status == RegistrationPartStati.participant for p in self.parts.values())
 
     @property
-    def age_class(self):
+    def age_class(self) -> AgeClasses:
         if self.age >= 18:
             return AgeClasses.full
         if self.age >= 16:
@@ -428,7 +428,9 @@ class Registration:
         return AgeClasses.u14
 
     @classmethod
-    def from_json(cls, reg_id, data, field_types, event_begin, event_parts, event_tracks, courses, lodgements):
+    def from_json(cls, reg_id: str, data: Dict, field_types: Dict[str, FieldDatatypes], event_begin: datetime.date,
+                  event_parts: Dict[int, EventPart], event_tracks: Dict[int, EventTrack], courses: Dict[int, Course],
+                  lodgements: Dict[int, Lodgement]) -> 'Registration':
         registration = cls()
         registration.id = int(reg_id)
         registration.cdedbid = data['persona']['id']
@@ -484,13 +486,13 @@ class Name:
         self.display_name = ""  # type: str
 
     @property
-    def fullname(self):
+    def fullname(self) -> str:
         return ((self.title + " ") if self.title else "") \
                + self.given_names + " " + self.family_name \
                + ((" " + self.name_supplement) if self.name_supplement else "")
 
     @classmethod
-    def from_json_persona(cls, data):
+    def from_json_persona(cls, data: Dict[str, Any]) -> 'Name':
         name = cls()
         name.title = data['title']
         name.given_names = data['given_names']
@@ -509,7 +511,7 @@ class Address:
         self.country = ""  # type: str
 
     @property
-    def full_address(self):
+    def full_address(self) -> str:
         res = self.address + "\n"
         if self.address_supplement:
             res += self.address_supplement + "\n"
@@ -521,7 +523,7 @@ class Address:
         return res
 
     @classmethod
-    def from_json_persona(cls, data):
+    def from_json_persona(cls, data: Dict[str, Any]) -> 'Address':
         address = cls()
         address.address = data['address']
         address.address_supplement = data['address_supplement']
@@ -540,7 +542,8 @@ class RegistrationPart:
         self.campingmat = False  # type: bool
 
     @classmethod
-    def from_json(cls, data, registration, part, lodgements):
+    def from_json(cls, data: Dict[str, Any], registration: Registration, part: EventPart,
+                  lodgements: Dict[int, Lodgement]) -> 'RegistrationPart':
         rpart = cls()
         rpart.registration = registration
         rpart.part = part
@@ -559,14 +562,15 @@ class RegistrationTrack:
         self.registration_part = None  # type: RegistrationPart
         self.course = None  # type: Course
         self.offered_course = None  # type: Course
-        self.choices = []  # type: List[Course]
+        self.choices = []  # type: List[Optional[Course]]
 
     @property
-    def instructor(self):
-        return self.offered_course and self.offered_course == self.course
+    def instructor(self) -> bool:
+        return self.offered_course is not None and self.offered_course == self.course
 
     @classmethod
-    def from_json(cls, data, registration, track, courses):
+    def from_json(cls, data: Dict[str, Any], registration: Registration, track: EventTrack,
+                  courses: Dict[int, Course]) -> 'RegistrationTrack':
         rtrack = cls()
         rtrack.registration = registration
         rtrack.track = track

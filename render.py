@@ -4,6 +4,7 @@ import functools
 import re
 import os
 import subprocess
+from typing import Iterable, Any, Optional
 
 import jinja2
 
@@ -34,7 +35,7 @@ def escape_tex(value, linebreaks=False):
     return res
 
 
-def filter_inverse_chunks(value, n=2):
+def filter_inverse_chunks(value: Iterable[Any], n=2):
     """
     A generator to be used as jinja filter that reverses chunks of n elements from the given iterator.
     The last element will be repeated to fill the last chunk if neccessary.
@@ -58,7 +59,7 @@ def filter_inverse_chunks(value, n=2):
             yield i
 
 
-def filter_date(value, format='%d.%m.%Y'):
+def filter_date(value: Optional[datetime.date], format='%d.%m.%Y'):
     """
     A filter to format date values.
 
@@ -70,7 +71,7 @@ def filter_date(value, format='%d.%m.%Y'):
     return value.strftime(format)
 
 
-def filter_datetime(value, format='%d.%m.%Y~%H:%M', timezone=datetime.timezone.utc):
+def filter_datetime(value: Optional[datetime.datetime], format='%d.%m.%Y~%H:%M', timezone=datetime.timezone.utc):
     """
     A filter to format date values.
 
@@ -83,7 +84,7 @@ def filter_datetime(value, format='%d.%m.%Y~%H:%M', timezone=datetime.timezone.u
     return value.astimezone(timezone).strftime(format)
 
 
-def find_asset(name, asset_dirs):
+def find_asset(name: str, asset_dirs: Iterable[str]):
     """
     Search the given asset directories for an asset with a given name and return its full path with '/' delimiters (to
     be used in TeX).
@@ -154,7 +155,7 @@ class ScheduleShutter:
 
 
 class RenderTask:
-    def __init__(self, template_name, job_name, template_args=None, double_tex=False):
+    def __init__(self, template_name: str, job_name: str, template_args=None, double_tex=False):
         self.template_name = template_name
         self.job_name = job_name
         self.template_args = template_args or {}
