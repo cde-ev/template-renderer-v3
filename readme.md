@@ -21,7 +21,7 @@ to the needs of a specific CdE events.
 
 You need the following software on your computer:
 
-* Python 3.5 or higher with
+* Python 3.6 or higher with
     * jinja2
     * pytz
 
