@@ -161,8 +161,8 @@ class Event:
     def from_json(cls, data: Dict[str, Any]) -> 'Event':
         if 'kind' not in data or data['kind'] != "partial":
             raise ValueError("This script requires a 'Partial Export' from the CdEDB!")
-        if not MINIMUM_EXPORT_VERSION <= data['CDEDB_EXPORT_EVENT_VERSION'] <= MINIMUM_EXPORT_VERSION:
-            raise ValueError("This script requires a 'Partial Export' with versio number in [{},{}]!"
+        if not MINIMUM_EXPORT_VERSION <= data['CDEDB_EXPORT_EVENT_VERSION'] <= MAXIMUM_EXPORT_VERSION:
+            raise ValueError("This script requires a 'Partial Export' with version number in [{},{}]!"
                              .format(MINIMUM_EXPORT_VERSION, MAXIMUM_EXPORT_VERSION))
 
         event = cls()
