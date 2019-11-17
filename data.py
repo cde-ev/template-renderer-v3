@@ -452,7 +452,7 @@ class Registration:
             registration.fields[field] = value
 
         registration.parts = {event_parts[int(pi)]: RegistrationPart.from_json(pd, registration,
-                                                                               event_tracks[int(pi)], lodgements)
+                                                                               event_parts[int(pi)], lodgements)
                                for pi, pd in data['parts'].items()}
         registration.tracks = {event_tracks[int(ti)]: RegistrationTrack.from_json(td, registration,
                                                                                   event_tracks[int(ti)], courses)
