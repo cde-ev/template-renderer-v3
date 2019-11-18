@@ -21,13 +21,14 @@ import operator
 import re
 import csv
 import os
-from typing import List, Tuple, Iterable, Dict, Any, Optional, Pattern
+from typing import List, Tuple, Iterable, Dict, Any, Optional
 import configparser
 
 import util
 from globals import target_function
 from render import RenderTask
-from data import Event, EventPart, RegistrationPartStati, CourseTrackStati, Lodgement, Registration, Course, EventTrack
+from data import Event, EventPart, RegistrationPartStati, CourseTrackStati, Lodgement, Registration, Course, \
+    EventTrack, LodgementGroup
 
 
 @target_function
@@ -195,7 +196,8 @@ def nametags(event: Event, config, _output_dir, _match):
         return [RenderTask('nametags.tex',
                            'nametags_{}'.format(part_suffixes[part]),
                            {'registration_groups': group_participants(
-                               config, (p for p in event.registrations if p.parts[part].status.is_present), part),
+                               event, config, (p for p in event.registrations if p.parts[part].status.is_present),
+                               part),
                             'part': part,
                             'meals': meals},
                            False)
@@ -204,7 +206,7 @@ def nametags(event: Event, config, _output_dir, _match):
         return RenderTask('nametags.tex',
                           'nametags',
                           {'registration_groups': group_participants(
-                               config, (p for p in event.registrations if p.is_present), event.parts[0]),
+                               event, config, (p for p in event.registrations if p.is_present), event.parts[0]),
                            'meals': meals},
                           False),
 
@@ -218,7 +220,8 @@ class Meals(enum.IntEnum):
     halfmeat2 = 5
 
 
-def group_participants(config: configparser.ConfigParser, participants: Iterable[Registration], part: EventPart)\
+def group_participants(event: Event, config: configparser.ConfigParser, participants: Iterable[Registration],
+                       part: EventPart)\
         -> List[Tuple[str, List[Registration]]]:
     """ Helper function for grouping the participants by age and lodgement for different nametag colors.
 
@@ -234,9 +237,8 @@ def group_participants(config: configparser.ConfigParser, participants: Iterable
     age_groups = [(int(x), [])
                   for x in config.get('nametags', 'age_groups', fallback="").split(',')]\
         # type: List[Tuple[int, List[Registration]]]
-    lodgement_groups = [(re.compile(x.strip()), [])
-                        for x in config.get('nametags', 'lodgement_groups', fallback="").split('\n')] \
-        # type: List[Tuple[Pattern, List[Registration]]]
+    lodgement_groups = [(lg, [])
+                        for lg in event.lodgement_groups]  # type: List[Tuple[LodgementGroup, List[Registration]]]
     others = []
     for p in participants:
         for max_age, l in age_groups:
@@ -244,14 +246,14 @@ def group_participants(config: configparser.ConfigParser, participants: Iterable
                 l.append(p)
                 break
         else:
-            for regex, l in lodgement_groups:
-                if p.parts[part].lodgement and regex.match(p.parts[part].lodgement.moniker):
-                    l.append(p)
+            for lg, ps in lodgement_groups:
+                if p.parts[part].lodgement.group is lg:
+                    ps.append(p)
                     break
             else:
                 others.append(p)
     return ([("age u{}".format(name), ps) for name, ps in age_groups]
-            + [(regex.pattern, ps) for regex, ps in lodgement_groups]
+            + [(lg.moniker, ps) for lg, ps in lodgement_groups]
             + [('others', others)])
 
 
