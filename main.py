@@ -25,7 +25,7 @@ import util
 
 
 # Some info for cli argument defaults
-default_threads = multiprocessing.cpu_count() - 1
+default_threads = max(1, multiprocessing.cpu_count() - 1)
 default_output_dir = os.path.join(os.path.dirname(__file__), 'output')
 
 # parse CLI arguments
