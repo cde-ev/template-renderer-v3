@@ -10,6 +10,9 @@
 \usepackage{fontspec}
 \usepackage[german]{babel}
 
+<<% if CONFIG.getboolean('layout', 'lua-visual-debug') -%>>
+    \usepackage{lua-visual-debug}
+<<% endif %>>
 \usepackage{graphicx}
 \usepackage{scrlayer-scrpage}
 \usepackage{longtable}
