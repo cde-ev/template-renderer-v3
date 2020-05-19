@@ -120,7 +120,9 @@
                                                 % Course name
                                                 \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
                                                     \begin{flushleft}
-                                                        {<<<course.shortname|e>>> <<% if merged %>><<<CONFIG.nametags.merge_courses_suffix|e>>><<% endif %>>}
+                                                        {<<<course.shortname|e>>>
+                                                            <<% if p in course.instructors %>><<<CONFIG.nametags.course_instructor_suffix|e>>><<% endif %>>
+                                                            <<% if merged %>><<<CONFIG.nametags.merge_courses_suffix|e>>><<% endif %>>}
                                                     \end{flushleft}
                                                 }%
                                             <<%- else -%>>
