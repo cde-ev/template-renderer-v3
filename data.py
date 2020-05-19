@@ -6,7 +6,7 @@ import datetime
 from typing import List, Dict, Tuple, Any, Optional, Iterable
 
 MINIMUM_EXPORT_VERSION = 4
-MAXIMUM_EXPORT_VERSION = 6
+MAXIMUM_EXPORT_VERSION = 10
 
 
 def load_input_file(filename: str):
