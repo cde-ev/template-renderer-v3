@@ -5,6 +5,7 @@ import importlib.util
 import multiprocessing
 import os
 import concurrent.futures
+import re
 import sys
 import traceback
 
@@ -48,6 +49,9 @@ parser.add_argument('-m', '--match', type=str, default=None,
                          'tnletters only letters with recipients\' name matching to the given string are compiled.')
 parser.add_argument('-n', '--no-cleanup', action='store_const', const=True, default=False,
                     help='Don\'t delete rendered template and LaTeX auxiliary files after compilation.')
+parser.add_argument('-D', nargs=1, action='append', dest='definitions',
+                    help='Override a specific config value in the format `-D section.key=value`. This can be used to '
+                         'try config options temporily. Might be specified multiple times with different options.')
 args = parser.parse_args()
 
 
@@ -56,6 +60,14 @@ config = configparser.ConfigParser()
 with open(os.path.join(DEFAULT_DIR, 'config.ini')) as f:
     config.read_file(f)
 config.read((os.path.join(args.custom_dir, 'config.ini'),))
+
+DEFINITION_RE = re.compile(r'^(.*?)\.(.*?)=(.*)$')
+for definition in args.definitions or []:
+    match = DEFINITION_RE.match(definition[0])
+    if not match:
+        print("Invalid cli definition '{}'".format(definition))
+        continue
+    config.set(match[1], match[2], match[3])
 
 # Initialize lists of template and asset directories
 template_dirs = [os.path.join(DEFAULT_DIR, 'templates')]

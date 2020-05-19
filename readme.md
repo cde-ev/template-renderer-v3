@@ -273,7 +273,15 @@ content of another *block*, including sub-blocks, as `<<< self.BLOCKNAME() >>>`.
 **No Cleanup:** By default, the `output/` directory is cleaned up after each successful rendering task. I.e. all files
 with the jobname and an extension different from `.pdf` are deleted – including the generated `.tex` file and the
 LuaLaTeX `.log`. The command line option `-n` of the Template Rendering System disables this cleanup, which is quite
-helpful to debug the templates. 
+helpful to debug the templates.
+
+
+**Lua-Visual-Debug:** The default `base.tex` templates can include the `lua-visual-debug` LuaTeX packge which will
+colorfully highlight all TeX boxes and spaces in the PDF file. This is controlled by the config option
+`layout.lua-visual-debug`. It may be temporarily enabled with the `-D` command line option:
+```bash
+$ ./main.py -D layout.lua-visual-debug=on nametags
+```
 
 
 ### Target Functions
