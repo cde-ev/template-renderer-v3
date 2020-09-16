@@ -5,8 +5,8 @@ import json
 import datetime
 from typing import List, Dict, Tuple, Any, Optional, Iterable
 
-MINIMUM_EXPORT_VERSION = 4
-MAXIMUM_EXPORT_VERSION = 10
+MINIMUM_EXPORT_VERSION = [12, 0]
+MAXIMUM_EXPORT_VERSION = [13, 2**62]
 
 
 def load_input_file(filename: str):
@@ -161,9 +161,17 @@ class Event:
     def from_json(cls, data: Dict[str, Any]) -> 'Event':
         if 'kind' not in data or data['kind'] != "partial":
             raise ValueError("This script requires a 'Partial Export' from the CdEDB!")
-        if not MINIMUM_EXPORT_VERSION <= data['CDEDB_EXPORT_EVENT_VERSION'] <= MAXIMUM_EXPORT_VERSION:
-            raise ValueError("This script requires a 'Partial Export' with version number in [{},{}]!"
-                             .format(MINIMUM_EXPORT_VERSION, MAXIMUM_EXPORT_VERSION))
+        try:
+            # Compatibility with export schema version 12 (with old version field)
+            version = data.get('EVENT_SCHEMA_VERSION')
+            if not version:
+                version = [data['CDEDB_EXPORT_EVENT_VERSION'], 0]
+        except KeyError as e:
+            raise ValueError("No CdEDB export version tag found. This script requires a 'Partial Export' from the "
+                             "CdEDB!") from e
+        if not MINIMUM_EXPORT_VERSION <= version <= MAXIMUM_EXPORT_VERSION:
+            raise ValueError("This script requires a 'Partial Export' with version number in [{}.{},{}.{}]!"
+                             .format(*MINIMUM_EXPORT_VERSION, *MAXIMUM_EXPORT_VERSION))
 
         event = cls()
 
@@ -580,7 +588,7 @@ class RegistrationPart:
         rpart.status = RegistrationPartStati(data['status'])
         if data['lodgement_id']:
             rpart.lodgement = lodgements[data['lodgement_id']]
-        rpart.campingmat = data['is_reserve']
+        rpart.campingmat = data['is_camping_mat']
         # Adding the registration to the lodgement's registration list is done later, to ensure the order
         return rpart
 
