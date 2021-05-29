@@ -37,7 +37,7 @@
         & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
         <<% if registration.parts[part].status.is_present -%>>
             <<% with lodgement = registration.parts[part].lodgement -%>>
-                <<% if lodgement -%>><<< lodgement.moniker|e >>><<%- endif %>>
+                <<% if lodgement -%>><<< lodgement.title|e >>><<%- endif %>>
             <<%- endwith %>> &
             <<< "$\square$&" * (part.end - part.begin).days >>>
         <<%- else -%>>

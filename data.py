@@ -6,7 +6,7 @@ import datetime
 from typing import List, Dict, Tuple, Any, Optional, Iterable
 
 MINIMUM_EXPORT_VERSION = [12, 0]
-MAXIMUM_EXPORT_VERSION = [13, 2**62]
+MAXIMUM_EXPORT_VERSION = [15, 2**62]
 
 
 def load_input_file(filename: str):
@@ -193,7 +193,7 @@ class Event:
         # Parse lodgement_groups
         event.lodgement_groups = [LodgementGroup.from_json(lg_id, lg_data)
                                   for lg_id, lg_data in data['lodgement_groups'].items()]
-        event.lodgement_groups.sort(key=(lambda lg: lg.moniker))
+        event.lodgement_groups.sort(key=(lambda lg: lg.title))
         lodgement_groups_by_id = {lg.id: lg for lg in event.lodgement_groups}
 
         # Get field definitions
@@ -212,7 +212,7 @@ class Event:
         event.lodgements = [Lodgement.from_json(lodgement_id, lodgement_data, field_types, event.parts,
                                                 lodgement_groups_by_id)
                             for lodgement_id, lodgement_data in data['lodgements'].items()]
-        event.lodgements.sort(key=(lambda l: l.moniker))
+        event.lodgements.sort(key=(lambda l: l.title))
         lodgements_by_id = {l.id: l for l in event.lodgements}
         # Add lodgements to lodgement groups
         for lodgement in event.lodgements:
@@ -371,21 +371,21 @@ class CourseTrack:
 class LodgementGroup:
     def __init__(self):
         self.id = 0  # type: int
-        self.moniker = ""  # type: str
+        self.title = ""  # type: str
         self.lodgements = []  # type: List[Lodgement]
 
     @classmethod
     def from_json(cls, lodgement_group_id: str, data: Dict[str, Any]):
         lodgement_group = cls()
         lodgement_group.id = int(lodgement_group_id)
-        lodgement_group.moniker = data['moniker']
+        lodgement_group.title = data['title']
         return lodgement_group
 
 
 class Lodgement:
     def __init__(self):
         self.id = 0  # type: int
-        self.moniker = ""  # type: str
+        self.title = ""  # type: str
         self.group = None  # type: Optional[LodgementGroup]
         self.fields = {}  # type: Dict[str, object]
         self.parts = {}  # type: Dict[EventPart, LodgementPart]
@@ -395,7 +395,7 @@ class Lodgement:
                   event_parts: List[EventPart], lodgement_groups: Dict[int, LodgementGroup]) -> 'Lodgement':
         lodgement = cls()
         lodgement.id = int(lodgement_id)
-        lodgement.moniker = data['moniker']
+        lodgement.title = data['title']
         lodgement.group = lodgement_groups.get(data['group_id'], None)
         # Adding lodgements to group's list is done afterwards to fix the order
         for field, value in data['fields'].items():

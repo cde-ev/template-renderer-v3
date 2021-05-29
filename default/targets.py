@@ -153,7 +153,7 @@ def tnlists_cl(event: Event, _config, _output_dir, _match):
     for part in event.parts:
         # We need to build the rooms_by_name dict new for every part, as the rooms are dependent on the course_rooms of
         # the courses taking place in that part.
-        rooms_by_name = {l.moniker: (l, []) for l in event.lodgements}\
+        rooms_by_name = {l.title: (l, []) for l in event.lodgements}\
             # type: Dict[str, Tuple[Optional[Lodgement], List[Tuple[Course, List[EventTrack]]]]]
         for c in event.courses:
             course_room = c.fields.get(event.course_room_field, None)  # type: Any
@@ -253,7 +253,7 @@ def group_participants(event: Event, config: configparser.ConfigParser, particip
             else:
                 others.append(p)
     return ([("age u{}".format(name), ps) for name, ps in age_groups]
-            + [(lg.moniker, ps) for lg, ps in lodgement_groups]
+            + [(lg.title, ps) for lg, ps in lodgement_groups]
             + [('others', others)])
 
 

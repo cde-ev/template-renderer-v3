@@ -42,7 +42,7 @@
             <<%- endwith %>>
             <<% with lodgement = registration.parts[part].lodgement -%>>
                 <<% if registration.parts[part].status.is_present and lodgement %>>
-                    <<< lodgement.moniker|e >>>
+                    <<< lodgement.title|e >>>
                 <<% endif %>>
             <<%- endwith %>>
         <<% endfor %>>

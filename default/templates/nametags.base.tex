@@ -74,7 +74,7 @@
                                     <<% block nametag_lodgement -%>>
                                         <<% for part in ([part] if part else EVENT.parts[:2]) -%>>
                                             <<% if part in p.parts and p.parts[part].lodgement %>>
-                                                <<< p.parts[part].lodgement.moniker|e >>>
+                                                <<< p.parts[part].lodgement.title|e >>>
                                                 <<% if not loop.last %>>\\<<% endif %>>
                                             <<% endif %>>
                                         <<% endfor %>>
