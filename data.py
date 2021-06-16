@@ -556,7 +556,7 @@ class Address:
         if self.postal_code:
             res += self.postal_code + " "
         res += self.location
-        if self.country and self.country not in ("Germany", "Deutschland"):
+        if self.country and self.country not in ("Germany", "Deutschland", "DE"):
             res += "\n" + self.country
         return res
 
