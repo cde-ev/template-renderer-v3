@@ -5,6 +5,7 @@ import importlib.util
 import multiprocessing
 import os
 import concurrent.futures
+import pathlib
 import re
 import sys
 import traceback
@@ -89,6 +90,10 @@ if os.path.isfile(custom_targets_file):
 
 # read input json file
 event = data.load_input_file(args.input)
+if event is None:
+    filename = pathlib.Path(args.input).absolute()
+    print(f"File '{filename}' not found.\nUse '--input' to specify an alternate file.")
+    sys.exit(1)
 
 # Construct Jinja environment
 timezone = pytz.timezone(config.get('data', 'timezone'))
