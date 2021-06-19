@@ -10,8 +10,8 @@ MINIMUM_EXPORT_VERSION = [12, 0]
 MAXIMUM_EXPORT_VERSION = [15, 2**62]
 
 
-def load_input_file(filename: str):
-    if not pathlib.Path(filename).is_file():
+def load_input_file(filename: pathlib.Path):
+    if not filename.is_file():
         return None
     with open(filename, encoding='utf-8') as f:
         data = json.load(f)

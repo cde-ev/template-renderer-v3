@@ -1,7 +1,7 @@
 import datetime
 import functools
+import pathlib
 import re
-import os
 import subprocess
 from typing import Iterable, Any, Optional
 
@@ -83,7 +83,7 @@ def filter_datetime(value: Optional[datetime.datetime], format='%d.%m.%Y~%H:%M',
     return value.astimezone(timezone).strftime(format)
 
 
-def find_asset(name: str, asset_dirs: Iterable[str]):
+def find_asset(name: str, asset_dirs: Iterable[pathlib.Path]):
     """
     Search the given asset directories for an asset with a given name and return its full path with '/' delimiters (to
     be used in TeX).
@@ -94,9 +94,9 @@ def find_asset(name: str, asset_dirs: Iterable[str]):
     :rtype: str
     """
     for d in asset_dirs:
-        fullname = os.path.join(d, name.replace('/', os.sep))
-        if os.path.exists(fullname):
-            return fullname.replace(os.sep, '/')
+        fullname = d / pathlib.Path(name)
+        if fullname.is_file():
+            return fullname
     return None
 
 
@@ -161,7 +161,7 @@ class RenderTask:
         self.double_tex = double_tex
 
 
-def render_template(task, output_dir, jinja_env, cleanup=True):
+def render_template(task, output_dir: pathlib.Path, jinja_env, cleanup=True):
     """
     Helper method to do the Jinja template rendering and LuaLaTeX execution.
 
@@ -184,7 +184,7 @@ def render_template(task, output_dir, jinja_env, cleanup=True):
 
     # render template
     outfile_name = task.job_name + '.tex'
-    with open(os.path.join(output_dir, outfile_name), 'w', encoding='utf-8') as outfile:
+    with open(output_dir / outfile_name, 'w', encoding='utf-8') as outfile:
         outfile.write(template.render(**task.template_args))
 
     # Execute LuaLaTeX once
@@ -218,9 +218,9 @@ def render_template(task, output_dir, jinja_env, cleanup=True):
     # Clean up
     if cleanup and success:
         exp = re.compile(r'^{}\.(.+)$'.format(re.escape(task.job_name)))
-        for f in os.listdir(output_dir):
-            match = re.match(exp, f)
+        for f in output_dir.iterdir():
+            match = re.match(exp, str(f.name))
             if match and match.group(1) not in ('pdf',):
-                os.remove(os.path.join(output_dir, f))
+                f.unlink()
 
     return success
