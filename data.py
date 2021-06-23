@@ -364,7 +364,7 @@ class CourseTrack:
         self.attendees = []  # type: [Tuple[Registration, bool]]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(course={self.course.shortname}, track={self.track.shortname})"
+        return f"{self.__class__.__name__}(course={self.course.__repr__()}, track={self.track.__repr__()})"
 
     @property
     def regular_attendees(self) -> List['Registration']:
@@ -442,7 +442,7 @@ class LodgementPart:
         self.inhabitants = []  # type: List[Tuple[Registration, bool]]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(lodgement={self.lodgement.title}, part={self.part.shortname})"
+        return f"{self.__class__.__name__}(lodgement={self.lodgement.__repr__()}, part={self.part.__repr__()})"
 
     @property
     def regular_inhabitants(self) -> List['Registration']:
@@ -472,7 +472,7 @@ class Registration:
         self.fields = {}  # type: Dict[str, object]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={self.name.fullname}, id={self.id})"
+        return f"{self.__class__.__name__}(name={self.name.__repr__()}, id={self.id})"
 
     @property
     def is_present(self) -> bool:
@@ -614,7 +614,7 @@ class RegistrationPart:
         self.campingmat = False  # type: bool
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(registration-name={self.registration.name.fullname}, registration-id={self.registration.id}, part={self.part.shortname})"
+        return f"{self.__class__.__name__}(registration={self.registration.__repr__()}, part={self.part.__repr__()})"
 
     @classmethod
     def from_json(cls, data: Dict[str, Any], registration: Registration, part: EventPart,
@@ -640,7 +640,7 @@ class RegistrationTrack:
         self.choices = []  # type: List[Optional[Course]]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(registration-name={self.registration.name.fullname}, registration-id={self.registration.id}, part={self.track.shortname})"
+        return f"{self.__class__.__name__}(registration={self.registration.__repr__()}, track={self.track.__repr__()})"
 
     @property
     def instructor(self) -> bool:
