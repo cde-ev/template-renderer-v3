@@ -66,13 +66,16 @@
     colorlinks=True,
     linkcolor=links,
     pdfencoding=auto,
-    pdfusetitle,
     psdextra,
     urlcolor=links,
 ]{hyperref}
 
-\title{<<< title >>>}
-\author={<<< CONFIG.meta.pdf_author >>>}
+% This has to be set after hyperref is loaded to handle unicode correctly
+% see https://tex.stackexchange.com/a/245969
+\hypersetup{
+    pdftitle={<<< title >>>},
+    pdfauthor={<<< CONFIG.meta.pdf_author >>>},
+}
 
 \newcommand{\custombox}[1]{\fbox{\footnotesize{}#1}}
 

@@ -22,13 +22,16 @@
     colorlinks=True,
     linkcolor=links,
     pdfencoding=auto,
-    pdfusetitle,
     psdextra,
     urlcolor=links,
 ]{hyperref}
 
-\title{Teilnehmerbrief <<< EVENT.title|e >>> – <<< registration.name.fullname|e >>>}
-\author{<<< CONFIG.tnletter.sender >>>}
+% This has to be set after hyperref is loaded to handle unicode correctly
+% see https://tex.stackexchange.com/a/245969
+\hypersetup{
+    pdftitle={Teilnehmerbrief <<< EVENT.title|e >>> – <<< registration.name.fullname|e >>>},
+    pdfauthor={<<< CONFIG.tnletter.sender >>>},
+}
 
 <<# This block should be used to define additional layout settings and macros #>>
 <<% block preamble %>><<% endblock %>>
