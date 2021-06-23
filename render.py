@@ -94,7 +94,7 @@ def find_asset(name: str, asset_dirs: Iterable[pathlib.Path]):
     :rtype: str
     """
     for d in asset_dirs:
-        fullname = d / pathlib.Path(name)
+        fullname = d / name
         if fullname.is_file():
             # make an explict conversion to posix paths, since this is expected by TeX
             return fullname.as_posix()
