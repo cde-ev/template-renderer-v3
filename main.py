@@ -13,12 +13,11 @@ import pytz
 
 
 # define some static paths
-# resolve this to get absolute paths with correct delimiter
+# resolve this to get absolute paths with correct filesystem-specific path delimiter
 THIS_DIR = pathlib.Path(__file__).parent.resolve()
 DEFAULT_DIR = THIS_DIR / "default"
 
 # Make sure the additional modules are found
-print(THIS_DIR)
 sys.path.insert(0, str(THIS_DIR))
 
 import render
@@ -35,7 +34,7 @@ default_output_dir = THIS_DIR / 'output'
 parser = argparse.ArgumentParser(description='Template renderer for CdE Events')
 parser.add_argument('targets', metavar='TARGETS', type=str, nargs='*',
                     help='Specifies which templates to render.')
-parser.add_argument('-c', '--custom-dir', default=THIS_DIR / 'custom',
+parser.add_argument('-c', '--custom-dir', default=THIS_DIR / 'custom', type=pathlib.Path,
                     help="Path of custom directory to find config file, templates and assets. Defaults to the `custom` "
                          "directory in the script's directory.")
 parser.add_argument('-i', '--input', default="partial_export_event.json",
@@ -56,8 +55,8 @@ parser.add_argument('-D', nargs=1, action='append', dest='definitions',
                          'try config options temporily. Might be specified multiple times with different options.')
 args = parser.parse_args()
 
-CUSTOM_DIR = pathlib.Path(args.custom_dir).resolve()
-
+# resolve this to get absolute paths with correct filesystem-specific path delimiter
+CUSTOM_DIR: pathlib.Path = args.custom_dir.resolve()
 
 # Read config (default config and -- if available -- custom config)
 config = configparser.ConfigParser()
