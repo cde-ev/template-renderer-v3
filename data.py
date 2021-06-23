@@ -315,7 +315,7 @@ class Course:
         self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.shortname})"
+        return f"{self.__class__.__name__}({self.nr}. {self.shortname})"
 
     @property
     def instructors(self) -> List['Registration']:
