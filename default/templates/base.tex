@@ -65,11 +65,14 @@
 \usepackage[
     colorlinks=True,
     linkcolor=links,
+    pdfencoding=auto,
+    pdfusetitle,
+    psdextra,
     urlcolor=links,
-    pdftitle={<<< title >>>},
-    pdfauthor={<<< CONFIG.meta.pdf_author >>>},
-    unicode
 ]{hyperref}
+
+\title{<<< title >>>}
+\author={<<< CONFIG.meta.pdf_author >>>}
 
 \newcommand{\custombox}[1]{\fbox{\footnotesize{}#1}}
 
