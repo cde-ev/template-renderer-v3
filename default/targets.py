@@ -18,9 +18,9 @@ target to the user.
 """
 import enum
 import operator
+import pathlib
 import re
 import csv
-import os
 from typing import List, Tuple, Iterable, Dict, Any, Optional
 import configparser
 
@@ -32,7 +32,7 @@ from data import Event, EventPart, RegistrationPartStati, CourseTrackStati, Lodg
 
 
 @target_function
-def tnletters(event: Event, _config, output_dir, match):
+def tnletters(event: Event, _config, output_dir: pathlib.Path, match):
     """Render the "Teilnehmerbrief" for each participant.
 
     This target renders the tnletter.tex template once for every participant of the event. The `--match` parameter may
@@ -49,14 +49,14 @@ def tnletters(event: Event, _config, output_dir, match):
                         if regex.search("{} {}".format(r.name.given_names, r.name.family_name))]
 
     # Create MailMerge CSV file
-    with open(os.path.join(output_dir, 'tnletter_mailmerge.csv'), 'w') as csvfile:
+    with open(output_dir / 'tnletter_mailmerge.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["persona.given_names", "persona.family_name", "persona.username", "attachment"])
         for r in participants:
             writer.writerow([r.name.given_names,
                              r.name.family_name,
                              r.email,
-                             os.path.join(os.path.realpath(output_dir), "tnletter_{}.pdf".format(r.id))])
+                             output_dir.resolve() / f"tnletter_{r.id}.pdf"])
 
     return [RenderTask('tnletter.tex', 'tnletter_{}'.format(r.id), {'registration': r}, False)
             for r in participants if r.is_present]
