@@ -146,6 +146,9 @@ class Event:
 
         self.timestamp = datetime.datetime.now()
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.shortname})"
+
     @property
     def begin(self) -> datetime.date:
         return self.parts[0].begin
@@ -256,6 +259,9 @@ class EventPart:
 
         self.tracks = []  # type: List[EventTrack]
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.shortname})"
+
     @property
     def days(self) -> Iterable[datetime.date]:
         d = self.begin
@@ -286,6 +292,9 @@ class EventTrack:
         self.sortkey = 0  # type: int
         self.num_choices = 0  # type: int
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.shortname})"
+
     @classmethod
     def from_json(cls, track_id: int, data: Dict[str, Any], part: EventPart) -> 'EventTrack':
         track = cls()
@@ -307,6 +316,9 @@ class Course:
         self.shortname = ""  # type: str
         self.fields = {}  # type: Dict[str, object]
         self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.nr}. {self.shortname})"
 
     @property
     def instructors(self) -> List['Registration']:
@@ -354,6 +366,9 @@ class CourseTrack:
         self.status = CourseTrackStati.not_offered  # type: CourseTrackStati
         self.attendees = []  # type: [Tuple[Registration, bool]]
 
+    def __repr__(self):
+        return f"{type(self).__name__}(course={self.course!r}, track={self.track!r})"
+
     @property
     def regular_attendees(self) -> List['Registration']:
         return [p for p, instructor in self.attendees if not instructor]
@@ -377,6 +392,9 @@ class LodgementGroup:
         self.title = ""  # type: str
         self.lodgements = []  # type: List[Lodgement]
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.title})"
+
     @classmethod
     def from_json(cls, lodgement_group_id: str, data: Dict[str, Any]):
         lodgement_group = cls()
@@ -392,6 +410,9 @@ class Lodgement:
         self.group = None  # type: Optional[LodgementGroup]
         self.fields = {}  # type: Dict[str, object]
         self.parts = {}  # type: Dict[EventPart, LodgementPart]
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.title})"
 
     @classmethod
     def from_json(cls, lodgement_id: str, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
@@ -423,6 +444,9 @@ class LodgementPart:
         self.lodgement = None  # type: Lodgement
         self.inhabitants = []  # type: List[Tuple[Registration, bool]]
 
+    def __repr__(self):
+        return f"{type(self).__name__}(lodgement={self.lodgement!r}, part={self.part!r})"
+
     @property
     def regular_inhabitants(self) -> List['Registration']:
         return [p for p, campingmat in self.inhabitants if not campingmat]
@@ -449,6 +473,9 @@ class Registration:
         self.tracks = {}  # type: Dict[EventTrack, RegistrationTrack]
         self.parts = {}  # type: Dict[EventPart, RegistrationPart]
         self.fields = {}  # type: Dict[str, object]
+
+    def __repr__(self):
+        return f"{type(self).__name__}(name={self.name!r}, id={self.id})"
 
     @property
     def is_present(self) -> bool:
@@ -526,6 +553,9 @@ class Name:
         self.name_supplement = ""  # type: str
         self.display_name = ""  # type: str
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.fullname})"
+
     @property
     def fullname(self) -> str:
         return ((self.title + " ") if self.title else "") \
@@ -550,6 +580,10 @@ class Address:
         self.postal_code = ""  # type: str
         self.location = ""  # type: str
         self.country = ""  # type: str
+
+    def __repr__(self):
+        inline_address = self.full_address.replace('\n', ', ')
+        return f"{type(self).__name__}({inline_address})"
 
     @property
     def full_address(self) -> str:
@@ -582,6 +616,9 @@ class RegistrationPart:
         self.lodgement = None  # type: Lodgement
         self.campingmat = False  # type: bool
 
+    def __repr__(self):
+        return f"{type(self).__name__}(registration={self.registration!r}, part={self.part!r})"
+
     @classmethod
     def from_json(cls, data: Dict[str, Any], registration: Registration, part: EventPart,
                   lodgements: Dict[int, Lodgement]) -> 'RegistrationPart':
@@ -604,6 +641,9 @@ class RegistrationTrack:
         self.course = None  # type: Course
         self.offered_course = None  # type: Course
         self.choices = []  # type: List[Optional[Course]]
+
+    def __repr__(self):
+        return f"{type(self).__name__}(registration={self.registration!r}, track={self.track!r})"
 
     @property
     def instructor(self) -> bool:
