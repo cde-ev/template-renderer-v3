@@ -37,7 +37,7 @@ parser.add_argument('targets', metavar='TARGETS', type=str, nargs='*',
 parser.add_argument('-c', '--custom-dir', default=THIS_DIR / 'custom', type=pathlib.Path,
                     help="Path of custom directory to find config file, templates and assets. Defaults to the `custom` "
                          "directory in the script's directory.")
-parser.add_argument('-i', '--input', default="partial_export_event.json",
+parser.add_argument('-i', '--input', default="partial_export_event.json", type=pathlib.Path,
                     help="Path of the input file, exported from the CdEdb. Typically xxx_partial_export_event.json.")
 parser.add_argument('-o', '--output', default=THIS_DIR / 'output',
                     help="Path of the output directory. Defaults to the `output` directory in the script's directory. "
@@ -91,10 +91,9 @@ if custom_targets_file.is_file():
     spec.loader.exec_module(foo)  # type: ignore
 
 # read input json file
-filename = pathlib.Path(args.input)
-event = data.load_input_file(filename)
+event = data.load_input_file(args.input)
 if event is None:
-    print(f"File '{filename}' not found.\nUse '--input' to specify an alternate file.")
+    print(f"File '{args.input}' not found.\nUse '--input' to specify an alternate file.")
     sys.exit(1)
 
 # Construct Jinja environment
