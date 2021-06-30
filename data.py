@@ -11,10 +11,13 @@ MAXIMUM_EXPORT_VERSION = [15, 2**62]
 
 
 def load_input_file(filename: pathlib.Path):
-    if not filename.is_file():
+    try:
+        with open(filename, encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
         return None
-    with open(filename, encoding='utf-8') as f:
-        data = json.load(f)
+    except IsADirectoryError:
+        return None
 
     event = Event.from_json(data)
     print("Parsed event data with {} registrations, {} courses and {} lodgements in {} event parts and {} course "
