@@ -130,6 +130,9 @@ futures = []
 shutter = render.ScheduleShutter()
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_threads) as executor:
+    if not any(target in globals.TARGETS.keys() for target in args.targets):
+        print(f"All given targets ({', '.join(args.targets)}) are unknown.")
+        sys.exit(1)
     # Issue all render tasks to executor
     for target in args.targets:
         if target not in globals.TARGETS.keys():
