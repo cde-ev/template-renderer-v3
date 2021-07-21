@@ -34,8 +34,8 @@
 
 <<% block table_body %>>
     <<% for registration in registrations %>>
-        <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
-        \href{mailto:<<< registration.name.fullname|e >>> <<< '<' + registration.email|e + '>' >>>}{<<< registration.email|e >>>} &
+        <<< registration.name.organizational_forename|e >>> & <<< registration.name.organizational_surname|e >>> &
+        \href{mailto:<<< registration.name.mail|e >>> <<< '<' + registration.email|e + '>' >>>}{<<< registration.email|e >>>} &
         <<< registration.address.postal_code|e >>> <<< registration.address.location|e >>>
         <<% for part in status_parts -%>>
             ~&

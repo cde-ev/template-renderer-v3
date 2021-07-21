@@ -34,7 +34,7 @@
         <<% if registration.age_class.is_minor %>>
             \custombox{<<< registration.age_class.name >>>}
         <<% endif %>>
-        & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>>
+        & <<< registration.name.organizational_forename|e >>> & <<< registration.name.organizational_surname|e >>>
         <<% for part in parts -%>>
             &
             <<# This only displays the guest flag, filtering should happen above. #>>

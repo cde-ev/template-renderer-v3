@@ -31,7 +31,7 @@
         &
         <<% for instructor in course.instructors -%>>
             <<% if not loop.first %>>, <<% endif -%>>
-            <<< instructor.name.given_names|e >>> <<< instructor.name.family_name|e >>>
+            <<< instructor.name.organizational|e >>>
         <<%- endfor %>>
         <<% for track in EVENT.tracks -%>>
             & <<% if course.tracks[track].status.is_active %>><<< course.tracks[track].attendees|length >>><<% endif %>>

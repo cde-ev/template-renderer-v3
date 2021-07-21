@@ -51,9 +51,9 @@ def tnletters(event: Event, _config, output_dir: pathlib.Path, match):
     # Create MailMerge CSV file
     with open(output_dir / 'tnletter_mailmerge.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["persona.given_names", "persona.family_name", "persona.username", "attachment"])
+        writer.writerow(["persona.forename", "persona.family_name", "persona.username", "attachment"])
         for r in participants:
-            writer.writerow([r.name.given_names,
+            writer.writerow([r.name.salutation,
                              r.name.family_name,
                              r.email,
                              output_dir.resolve() / f"tnletter_{r.id}.pdf"])
