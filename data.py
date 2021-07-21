@@ -561,9 +561,61 @@ class Name:
 
     @property
     def fullname(self) -> str:
+        """This is depreciated and is only kept for backward compatibility."""
         return ((self.title + " ") if self.title else "") \
                + self.given_names + " " + self.family_name \
                + ((" " + self.name_supplement) if self.name_supplement else "")
+
+    @property
+    def salutation(self) -> str:
+        """This should be used when a user is directly addressed (saluted)."""
+        return self.display_name if self.display_name else self.given_names
+
+    @property
+    def legal(self) -> str:
+        """This should be used whenever the user is addressed in a legal context."""
+        return f"{self.title} {self.given_names} {self.family_name} {self.name_supplement}".strip()
+
+    @property
+    def mail(self) -> str:
+        """This should be used in 'mailto' links."""
+        return f"{self.display_name if self.display_name in self.given_names else self.given_names} {self.family_name}"
+
+    @property
+    def nametag(self) -> str:
+        """This should be used on nametags only."""
+        return f"{self.nametag_forename} {self.nametag_surname}"
+
+    @property
+    def nametag_forename(self) -> str:
+        """This should be used on nametags only."""
+        return self.display_name
+
+    @property
+    def nametag_surname(self) -> str:
+        """This should be used on nametags only."""
+        return f"{self.given_names if self.display_name not in self.given_names else ''} {self.family_name}".strip()
+
+    @property
+    def organizational(self) -> str:
+        """This should be used for lists."""
+        return f"{self.organizational_forename} {self.organizational_surname}"
+
+    @property
+    def organizational_forename(self) -> str:
+        """This should be used for lists."""
+        if self.display_name == self.given_names:
+            forename = self.display_name
+        elif self.display_name in self.given_names:
+            forename = self.given_names.replace(self.display_name, "\emph{" + self.display_name + "}")
+        else:
+            forename = f"{self.given_names} ({self.display_name})"
+        return forename
+
+    @property
+    def organizational_surname(self) -> str:
+        """This should be used for lists."""
+        return self.family_name
 
     @classmethod
     def from_json_persona(cls, data: Dict[str, Any]) -> 'Name':
