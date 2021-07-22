@@ -549,6 +549,21 @@ class Registration:
 
 
 class Name:
+    """Represent names of personas.
+
+    This holds all parts of a personas name:
+    * title: placed in front of the actual name (like 'Dr.', 'Prof.' etc)
+    * given_names: all forenames of a persona (should be identical to the entry on their ID)
+    * display_name: name by which the persona wants to be called by others ('known as')
+    * family_name: a personas surname
+    * name_supplement: analogous to title, but behind the actual name
+
+    To use the right forename and surname of a persona at the right place, there are some
+    additional properties which construct the name for several purposes.
+
+    This follows the conventions described by
+    https://db.cde-ev.de/doc/Design_UX_Conventions.html
+    """
     def __init__(self):
         self.title = ""  # type: str
         self.given_names = ""  # type: str
@@ -586,18 +601,19 @@ class Name:
 
     @property
     def salutation(self) -> str:
-        """This should be used when a user is directly addressed (saluted)."""
+        """This should be used when a user is directly addressed (saluted).
+
+        Corresponds to `util.persona_name(persona, only_display_name=True, with_family_name=False)`.
+        """
         return self.display_name if self.display_name else self.given_names
 
     @property
     def legal(self) -> str:
-        """This should be used whenever the user is addressed in a legal context."""
-        return f"{self.title or ''} {self.given_names} {self.family_name} {self.name_supplement or ''}".strip()
+        """This should be used whenever the user is addressed in a legal context.
 
-    @property
-    def mail(self) -> str:
-        """This should be used in 'mailto' links."""
-        return f"{self.display_name if self.display_name in self.given_names else self.given_names} {self.family_name}"
+        Corresponds to `util.persona_name(persona, only_given_names=True)`.
+        """
+        return f"{self.title or ''} {self.given_names} {self.family_name} {self.name_supplement or ''}".strip()
 
     @property
     def nametag(self) -> str:
@@ -616,7 +632,10 @@ class Name:
 
     @property
     def organizational(self) -> str:
-        """This should be used for lists."""
+        """This should be used for lists.
+
+        Corresponds to `util.persona_name(persona, given_and_display_names=True)`.
+        """
         return f"{self.organizational_forename} {self.organizational_surname}"
 
     @property
