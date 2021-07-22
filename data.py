@@ -560,6 +560,24 @@ class Name:
         return f"{type(self).__name__}({self.fullname})"
 
     @property
+    def common(self) -> str:
+        """This is should be the default solution if no other fits better.
+
+        Corresponds to `util.persona_name(persona)`.
+        """
+        return f"{self.common_forename} {self.common_surname}"
+
+    @property
+    def common_forename(self) -> str:
+        """This is should be the default solution if no other fits better."""
+        return self.display_name if self.display_name in self.given_names else self.given_names
+
+    @property
+    def common_surname(self) -> str:
+        """This is should be the default solution if no other fits better."""
+        return self.family_name
+
+    @property
     def fullname(self) -> str:
         """This is depreciated and is only kept for backward compatibility."""
         return ((self.title + " ") if self.title else "") \

@@ -75,7 +75,7 @@
         \begin{minipage}[b]{\textwidth-2.5cm}%
             Kursleiter:
             <<% for kl in course.instructors -%>>
-                <<< kl.name.organizational|e >>><<% if not loop.last %>>, <<% endif %>>
+                <<< kl.name.common|e >>><<% if not loop.last %>>, <<% endif %>>
             <<%- endfor %>>\\
             <<% if EVENT.course_room_field -%>>
                 Kursraum: <<< course.fields[EVENT.course_room_field]|e >>>\\
