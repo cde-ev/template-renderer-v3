@@ -247,7 +247,7 @@ def group_participants(event: Event, config: configparser.ConfigParser, particip
                 break
         else:
             for lg, ps in lodgement_groups:
-                if p.parts[part].lodgement.group is lg:
+                if p.parts[part].lodgement and p.parts[part].lodgement.group is lg:
                     ps.append(p)
                     break
             else:
