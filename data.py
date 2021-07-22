@@ -574,7 +574,7 @@ class Name:
     @property
     def legal(self) -> str:
         """This should be used whenever the user is addressed in a legal context."""
-        return f"{self.title} {self.given_names} {self.family_name} {self.name_supplement}".strip()
+        return f"{self.title or ''} {self.given_names} {self.family_name} {self.name_supplement or ''}".strip()
 
     @property
     def mail(self) -> str:
