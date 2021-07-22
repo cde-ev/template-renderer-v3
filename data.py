@@ -643,8 +643,6 @@ class Name:
         """This should be used for lists."""
         if self.display_name == self.given_names:
             forename = self.display_name
-        elif self.display_name in self.given_names:
-            forename = self.given_names.replace(self.display_name, "\emph{" + self.display_name + "}")
         else:
             forename = f"{self.given_names} ({self.display_name})"
         return forename
