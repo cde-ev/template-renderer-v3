@@ -595,8 +595,8 @@ class Name:
 
     @property
     def fullname(self) -> str:
-        """This is depreciated and is only kept for backward compatibility."""
-        warn("Fullname property is depreciated; use the other name properties instead.", FutureWarning)
+        """This is deprecated and is only kept for backward compatibility."""
+        warn("Fullname property is deprecated; use the other name properties instead.", FutureWarning)
         return ((self.title + " ") if self.title else "") \
                + self.given_names + " " + self.family_name \
                + ((" " + self.name_supplement) if self.name_supplement else "")
