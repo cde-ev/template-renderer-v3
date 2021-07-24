@@ -8,3 +8,8 @@ steps:
     commands:
       - pip install -r requirements.txt
       - mypy .
+
+trigger:
+  branch:
+    - master
+    - stable
