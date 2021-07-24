@@ -49,7 +49,12 @@
         <<% for track in tracks -%>>
             & <<% if registration.tracks[track].registration_part.status == ENUMS.RegistrationPartStati.participant -%>>
                 <<% with course = registration.tracks[track].course -%>>
-                    <<% if course %>><<< course.nr|e >>>. <<< course.shortname|e >>><<% endif %>>
+                    <<% if course -%>>
+                        <<< course.nr|e >>>. <<< course.shortname|e >>>
+                        <<% if registration.is_orga %>><<< CONFIG.tnlist.orga_suffix|e >>><<% endif %>>
+                    <<% elif registration.is_orga %>>
+                        Orga
+                    <<% endif %>>
                 <<% endwith -%>>
             <<% endif -%>>
         <<% endfor %>> \\
