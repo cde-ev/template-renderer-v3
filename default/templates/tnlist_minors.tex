@@ -34,7 +34,7 @@
         <<% if registration.age_class.is_minor %>>
             \custombox{<<< registration.age_class.name >>>}
         <<% endif %>>
-        & <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>> &
+        & <<< registration.name.common_forename|e >>> & <<< registration.name.common_surname|e >>> &
         <<% if registration.parts[part].status.is_present -%>>
             <<% with lodgement = registration.parts[part].lodgement -%>>
                 <<% if lodgement -%>><<< lodgement.title|e >>><<%- endif %>>

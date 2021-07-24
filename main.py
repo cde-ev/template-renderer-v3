@@ -3,8 +3,8 @@ import argparse
 import configparser
 import importlib.util
 import multiprocessing
-import os
 import concurrent.futures
+import pathlib
 import re
 import sys
 import traceback
@@ -13,11 +13,12 @@ import pytz
 
 
 # define some static paths
-THIS_DIR = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_DIR = os.path.join(THIS_DIR, 'default')
+# resolve this to get absolute paths with correct filesystem-specific path delimiter
+THIS_DIR = pathlib.Path(__file__).parent.resolve()
+DEFAULT_DIR = THIS_DIR / "default"
 
 # Make sure the additional modules are found
-sys.path.insert(0, THIS_DIR)
+sys.path.insert(0, str(THIS_DIR))
 
 import render
 import data
@@ -27,18 +28,18 @@ import util
 
 # Some info for cli argument defaults
 default_threads = max(1, multiprocessing.cpu_count() - 1)
-default_output_dir = os.path.join(os.path.dirname(__file__), 'output')
+default_output_dir = THIS_DIR / 'output'
 
 # parse CLI arguments
 parser = argparse.ArgumentParser(description='Template renderer for CdE Events')
 parser.add_argument('targets', metavar='TARGETS', type=str, nargs='*',
                     help='Specifies which templates to render.')
-parser.add_argument('-c', '--custom-dir', default=os.path.join(THIS_DIR, 'custom'),
+parser.add_argument('-c', '--custom-dir', default=THIS_DIR / 'custom', type=pathlib.Path,
                     help="Path of custom directory to find config file, templates and assets. Defaults to the `custom` "
                          "directory in the script's directory.")
-parser.add_argument('-i', '--input', default="partial_export_event.json",
+parser.add_argument('-i', '--input', default="partial_export_event.json", type=pathlib.Path,
                     help="Path of the input file, exported from the CdEdb. Typically xxx_partial_export_event.json.")
-parser.add_argument('-o', '--output', default=os.path.join(THIS_DIR, 'output'),
+parser.add_argument('-o', '--output', default=THIS_DIR / 'output',
                     help="Path of the output directory. Defaults to the `output` directory in the script's directory. "
                          "The directory must exist.")
 parser.add_argument('-j', '--max-threads', type=int, default=default_threads,
@@ -54,12 +55,14 @@ parser.add_argument('-D', nargs=1, action='append', dest='definitions',
                          'try config options temporily. Might be specified multiple times with different options.')
 args = parser.parse_args()
 
+# resolve this to get absolute paths with correct filesystem-specific path delimiter
+CUSTOM_DIR: pathlib.Path = args.custom_dir.resolve()
 
 # Read config (default config and -- if available -- custom config)
 config = configparser.ConfigParser()
-with open(os.path.join(DEFAULT_DIR, 'config.ini')) as f:
+with open(DEFAULT_DIR / 'config.ini') as f:
     config.read_file(f)
-config.read((os.path.join(args.custom_dir, 'config.ini'),))
+config.read((CUSTOM_DIR / 'config.ini',))
 
 DEFINITION_RE = re.compile(r'^(.*?)\.(.*?)=(.*)$')
 for definition in args.definitions or []:
@@ -70,25 +73,28 @@ for definition in args.definitions or []:
     config.set(match[1], match[2], match[3])
 
 # Initialize lists of template and asset directories
-template_dirs = [os.path.join(DEFAULT_DIR, 'templates')]
-custom_template_dir = os.path.join(args.custom_dir, 'templates')
-if os.path.isdir(custom_template_dir):
+template_dirs = [DEFAULT_DIR / 'templates']
+custom_template_dir = CUSTOM_DIR / 'templates'
+if custom_template_dir.is_dir():
     template_dirs.insert(0, custom_template_dir)
-asset_dirs = [os.path.join(DEFAULT_DIR, 'assets')]
-custom_asset_dir = os.path.join(args.custom_dir, 'assets')
-if os.path.isdir(custom_asset_dir):
-    asset_dirs.insert(0, os.path.abspath(custom_asset_dir))
+asset_dirs = [DEFAULT_DIR / 'assets']
+custom_asset_dir = CUSTOM_DIR / 'assets'
+if custom_asset_dir.is_dir():
+    asset_dirs.insert(0, custom_asset_dir)
 
 # Import targets specifications
 import default.targets  # type: ignore
-custom_targets_file = os.path.join(args.custom_dir, 'targets.py')
-if os.path.isfile(custom_targets_file):
+custom_targets_file = CUSTOM_DIR / 'targets.py'
+if custom_targets_file.is_file():
     spec = importlib.util.spec_from_file_location("custom.targets", custom_targets_file)
     foo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(foo)  # type: ignore
 
 # read input json file
 event = data.load_input_file(args.input)
+if event is None:
+    print(f"File '{args.input}' not found.\nUse '--input' to specify an alternate file.")
+    sys.exit(1)
 
 # Construct Jinja environment
 timezone = pytz.timezone(config.get('data', 'timezone'))
@@ -124,6 +130,9 @@ futures = []
 shutter = render.ScheduleShutter()
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_threads) as executor:
+    if not any(target in globals.TARGETS.keys() for target in args.targets):
+        print(f"All given targets ({', '.join(args.targets)}) are unknown.")
+        sys.exit(1)
     # Issue all render tasks to executor
     for target in args.targets:
         if target not in globals.TARGETS.keys():

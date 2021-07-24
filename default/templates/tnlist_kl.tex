@@ -57,7 +57,7 @@
                 Teilnehmer:
                 \begin{itemize}
                     <<%- for attendee, attendee_tracks in attendees -%>>
-                        \item <<< attendee.name.fullname|e >>>
+                        \item <<< attendee.name.organizational|e >>>
                               <<% if attendee.age_class.is_minor %>>\fbox{u18}<<% endif %>>
                               <<% if course.tracks|length > 1 %>> <<# FIXME Only count active course tracks #>>
                                 (<<% for t in attendee_tracks -%>>
@@ -75,7 +75,7 @@
         \begin{minipage}[b]{\textwidth-2.5cm}%
             Kursleiter:
             <<% for kl in course.instructors -%>>
-                <<< kl.name.fullname|e >>><<% if not loop.last %>>, <<% endif %>>
+                <<< kl.name.common|e >>><<% if not loop.last %>>, <<% endif %>>
             <<%- endfor %>>\\
             <<% if EVENT.course_room_field -%>>
                 Kursraum: <<< course.fields[EVENT.course_room_field]|e >>>\\

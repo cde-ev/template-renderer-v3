@@ -27,7 +27,7 @@
 % This has to be set after hyperref is loaded to handle unicode correctly
 % see https://tex.stackexchange.com/a/245969
 \hypersetup{
-    pdftitle={Teilnehmerbrief <<< EVENT.title|e >>> – <<< registration.name.fullname|e >>>},
+    pdftitle={Teilnehmerbrief <<< EVENT.title|e >>> – <<< registration.name.common|e >>>},
     pdfauthor={<<< CONFIG.tnletter.sender >>>},
 }
 
@@ -54,13 +54,13 @@
     }
 
     \begin{letter}{
-        <<< registration.name.fullname|e >>>\\
+        <<< registration.name.legal|e >>>\\
         <<< registration.address.full_address|e(linebreaks=True) >>>
     }
 
         \setkomavar{subject}{<<% block subject %>>Teilnehmerbrief <<< EVENT.title|e >>><<% endblock %>>}
 
-        \opening{<<% block opening %>>Hallo <<< registration.name.given_names|e >>>,<<% endblock %>>}
+        \opening{<<% block opening %>>Hallo <<< registration.name.salutation|e >>>,<<% endblock %>>}
 
         <<% block content %>>
             <<# TODO write generic tnletter, which is configurable via config options and blocks #>>

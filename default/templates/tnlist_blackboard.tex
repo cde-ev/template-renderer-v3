@@ -31,7 +31,7 @@
 
 <<% block table_body %>>
     <<% for registration in registrations %>>
-        <<< registration.name.given_names|e >>> & <<< registration.name.family_name|e >>>
+        <<< registration.name.common_forename|e >>> & <<< registration.name.common_surname|e >>>
         <<% for part in parts -%>>
             ~&
             <<# This only displays the guest flag, filtering should happen in target function. #>>

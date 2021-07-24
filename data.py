@@ -3,15 +3,22 @@ import functools
 import itertools
 import json
 import datetime
+import pathlib
 from typing import List, Dict, Tuple, Any, Optional, Iterable
+from warnings import warn
 
 MINIMUM_EXPORT_VERSION = [12, 0]
 MAXIMUM_EXPORT_VERSION = [15, 2**62]
 
 
-def load_input_file(filename: str):
-    with open(filename, encoding='utf-8') as f:
-        data = json.load(f)
+def load_input_file(filename: pathlib.Path):
+    try:
+        with open(filename, encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        return None
+    except IsADirectoryError:
+        return None
 
     event = Event.from_json(data)
     print("Parsed event data with {} registrations, {} courses and {} lodgements in {} event parts and {} course "
@@ -143,6 +150,9 @@ class Event:
 
         self.timestamp = datetime.datetime.now()
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.shortname})"
+
     @property
     def begin(self) -> datetime.date:
         return self.parts[0].begin
@@ -253,6 +263,9 @@ class EventPart:
 
         self.tracks = []  # type: List[EventTrack]
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.shortname})"
+
     @property
     def days(self) -> Iterable[datetime.date]:
         d = self.begin
@@ -283,6 +296,9 @@ class EventTrack:
         self.sortkey = 0  # type: int
         self.num_choices = 0  # type: int
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.shortname})"
+
     @classmethod
     def from_json(cls, track_id: int, data: Dict[str, Any], part: EventPart) -> 'EventTrack':
         track = cls()
@@ -304,6 +320,9 @@ class Course:
         self.shortname = ""  # type: str
         self.fields = {}  # type: Dict[str, object]
         self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.nr}. {self.shortname})"
 
     @property
     def instructors(self) -> List['Registration']:
@@ -351,6 +370,9 @@ class CourseTrack:
         self.status = CourseTrackStati.not_offered  # type: CourseTrackStati
         self.attendees = []  # type: [Tuple[Registration, bool]]
 
+    def __repr__(self):
+        return f"{type(self).__name__}(course={self.course!r}, track={self.track!r})"
+
     @property
     def regular_attendees(self) -> List['Registration']:
         return [p for p, instructor in self.attendees if not instructor]
@@ -374,6 +396,9 @@ class LodgementGroup:
         self.title = ""  # type: str
         self.lodgements = []  # type: List[Lodgement]
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.title})"
+
     @classmethod
     def from_json(cls, lodgement_group_id: str, data: Dict[str, Any]):
         lodgement_group = cls()
@@ -389,6 +414,9 @@ class Lodgement:
         self.group = None  # type: Optional[LodgementGroup]
         self.fields = {}  # type: Dict[str, object]
         self.parts = {}  # type: Dict[EventPart, LodgementPart]
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.title})"
 
     @classmethod
     def from_json(cls, lodgement_id: str, data: Dict[str, Any], field_types: Dict[str, FieldDatatypes],
@@ -420,6 +448,9 @@ class LodgementPart:
         self.lodgement = None  # type: Lodgement
         self.inhabitants = []  # type: List[Tuple[Registration, bool]]
 
+    def __repr__(self):
+        return f"{type(self).__name__}(lodgement={self.lodgement!r}, part={self.part!r})"
+
     @property
     def regular_inhabitants(self) -> List['Registration']:
         return [p for p, campingmat in self.inhabitants if not campingmat]
@@ -446,6 +477,9 @@ class Registration:
         self.tracks = {}  # type: Dict[EventTrack, RegistrationTrack]
         self.parts = {}  # type: Dict[EventPart, RegistrationPart]
         self.fields = {}  # type: Dict[str, object]
+
+    def __repr__(self):
+        return f"{type(self).__name__}(name={self.name!r}, id={self.id})"
 
     @property
     def is_present(self) -> bool:
@@ -516,6 +550,21 @@ class Registration:
 
 
 class Name:
+    """Represent names of personas.
+
+    This holds all parts of a personas name:
+    * title: placed in front of the actual name (like 'Dr.', 'Prof.' etc)
+    * given_names: all forenames of a persona (should be identical to the entry on their ID)
+    * display_name: name by which the persona wants to be called by others ('known as')
+    * family_name: a personas surname
+    * name_supplement: analogous to title, but behind the actual name
+
+    To use the right forename and surname of a persona at the right place, there are some
+    additional properties which construct the name for several purposes.
+
+    This follows the conventions described by
+    https://db.cde-ev.de/doc/Design_UX_Conventions.html
+    """
     def __init__(self):
         self.title = ""  # type: str
         self.given_names = ""  # type: str
@@ -523,11 +572,87 @@ class Name:
         self.name_supplement = ""  # type: str
         self.display_name = ""  # type: str
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.fullname})"
+
+    @property
+    def common(self) -> str:
+        """This is should be the default solution if no other fits better.
+
+        Corresponds to `util.persona_name(persona)`.
+        """
+        return f"{self.common_forename} {self.common_surname}"
+
+    @property
+    def common_forename(self) -> str:
+        """This is should be the default solution if no other fits better."""
+        return self.display_name if self.display_name in self.given_names else self.given_names
+
+    @property
+    def common_surname(self) -> str:
+        """This is should be the default solution if no other fits better."""
+        return self.family_name
+
     @property
     def fullname(self) -> str:
+        """This is deprecated and is only kept for backward compatibility."""
+        warn("Fullname property is deprecated; use the other name properties instead.", FutureWarning)
         return ((self.title + " ") if self.title else "") \
                + self.given_names + " " + self.family_name \
                + ((" " + self.name_supplement) if self.name_supplement else "")
+
+    @property
+    def salutation(self) -> str:
+        """This should be used when a user is directly addressed (saluted).
+
+        Corresponds to `util.persona_name(persona, only_display_name=True, with_family_name=False)`.
+        """
+        return self.display_name if self.display_name else self.given_names
+
+    @property
+    def legal(self) -> str:
+        """This should be used whenever the user is addressed in a legal context.
+
+        Corresponds to `util.persona_name(persona, only_given_names=True)`.
+        """
+        return f"{self.title or ''} {self.given_names} {self.family_name} {self.name_supplement or ''}".strip()
+
+    @property
+    def nametag(self) -> str:
+        """This should be used on nametags only."""
+        return f"{self.nametag_forename} {self.nametag_surname}"
+
+    @property
+    def nametag_forename(self) -> str:
+        """This should be used on nametags only."""
+        return self.display_name
+
+    @property
+    def nametag_surname(self) -> str:
+        """This should be used on nametags only."""
+        return f"{self.given_names if self.display_name not in self.given_names else ''} {self.family_name}".strip()
+
+    @property
+    def organizational(self) -> str:
+        """This should be used for lists.
+
+        Corresponds to `util.persona_name(persona, given_and_display_names=True)`.
+        """
+        return f"{self.organizational_forename} {self.organizational_surname}"
+
+    @property
+    def organizational_forename(self) -> str:
+        """This should be used for lists."""
+        if self.display_name == self.given_names:
+            forename = self.display_name
+        else:
+            forename = f"{self.given_names} ({self.display_name})"
+        return forename
+
+    @property
+    def organizational_surname(self) -> str:
+        """This should be used for lists."""
+        return self.family_name
 
     @classmethod
     def from_json_persona(cls, data: Dict[str, Any]) -> 'Name':
@@ -547,6 +672,10 @@ class Address:
         self.postal_code = ""  # type: str
         self.location = ""  # type: str
         self.country = ""  # type: str
+
+    def __repr__(self):
+        inline_address = self.full_address.replace('\n', ', ')
+        return f"{type(self).__name__}({inline_address})"
 
     @property
     def full_address(self) -> str:
@@ -579,6 +708,9 @@ class RegistrationPart:
         self.lodgement = None  # type: Lodgement
         self.campingmat = False  # type: bool
 
+    def __repr__(self):
+        return f"{type(self).__name__}(registration={self.registration!r}, part={self.part!r})"
+
     @classmethod
     def from_json(cls, data: Dict[str, Any], registration: Registration, part: EventPart,
                   lodgements: Dict[int, Lodgement]) -> 'RegistrationPart':
@@ -601,6 +733,9 @@ class RegistrationTrack:
         self.course = None  # type: Course
         self.offered_course = None  # type: Course
         self.choices = []  # type: List[Optional[Course]]
+
+    def __repr__(self):
+        return f"{type(self).__name__}(registration={self.registration!r}, track={self.track!r})"
 
     @property
     def instructor(self) -> bool:
