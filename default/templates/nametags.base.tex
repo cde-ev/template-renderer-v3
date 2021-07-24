@@ -133,6 +133,7 @@
                                                 <<% endblock %>>
                                             <<%- elif p.is_orga -%>>
                                                 % Use aka logo as orga logo
+                                                <<# This is for layout reasons, to align the orga course with other courses #>>
                                                 <<% if CONFIG.nametags.course_icon_path -%>>
                                                     \parbox[t][17mm][c]{15mm}{
                                                         <<%- with icon = find_asset(CONFIG.layout.logo_file) -%>>
