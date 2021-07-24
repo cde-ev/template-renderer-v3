@@ -22,10 +22,14 @@
     colorlinks=True,
     linkcolor=links,
     urlcolor=links,
-    pdftitle={Teilnehmerbrief <<< EVENT.title|e >>> - <<< registration.name.common|e >>>},
-    pdfauthor={<<< CONFIG.tnletter.sender >>>},
-    unicode
 ]{hyperref}
+
+% This has to be set after hyperref is loaded to handle unicode correctly
+% see https://tex.stackexchange.com/a/245969
+\hypersetup{
+    pdftitle={Teilnehmerbrief <<< EVENT.title|e >>> – <<< registration.name.common|e >>>},
+    pdfauthor={<<< CONFIG.tnletter.sender >>>},
+}
 
 <<# This block should be used to define additional layout settings and macros #>>
 <<% block preamble %>><<% endblock %>>

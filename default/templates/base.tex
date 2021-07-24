@@ -66,10 +66,14 @@
     colorlinks=True,
     linkcolor=links,
     urlcolor=links,
+]{hyperref}
+
+% This has to be set after hyperref is loaded to handle unicode correctly
+% see https://tex.stackexchange.com/a/245969
+\hypersetup{
     pdftitle={<<< title >>>},
     pdfauthor={<<< CONFIG.meta.pdf_author >>>},
-    unicode
-]{hyperref}
+}
 
 \newcommand{\custombox}[1]{\fbox{\footnotesize{}#1}}
 
