@@ -60,7 +60,7 @@
                 \begin{itemize}
                     <<%- for inhabitant, campingmat in lodgement.parts[part].inhabitants
                             if inhabitant.parts[part].status == ENUMS.RegistrationPartStati.participant -%>>
-                        \item <<< inhabitant.name.given_names|e >>> <<< inhabitant.name.family_name|e >>>
+                        \item <<< inhabitant.name.common|e >>>
                             <<% if campingmat %>>{\small (Isomatte)}<<% endif %>>
                     <<% else -%>>
                         \item \textit{Keine Bewohner}
@@ -93,7 +93,7 @@
                         Kursleiter:
                         \begin{itemize}
                             <<%- for instr in course.instructors -%>>
-                                \item <<< instr.name.given_names|e >>> <<< instr.name.family_name|e >>>
+                                \item <<< instr.name.common|e >>>
                             <<% endfor -%>>
                         \end{itemize}
                     <<% endif %>>
@@ -101,14 +101,14 @@
                     Teilnehmer:
                     \begin{itemize}
                         <<%- for attendee, attendee_tracks in attendees[0:ATTENDEES_PER_COLUMN-num_instructors] -%>>
-                            \item <<< attendee.name.given_names|e >>> <<< attendee.name.family_name|e >>>
+                            \item <<< attendee.name.common|e >>>
                         <<% endfor -%>>
                     \end{itemize}
                 \end{minipage}%
                 \begin{minipage}[t]{0.5\textwidth}
                     \begin{itemize}
                         <<%- for attendee, attendee_tracks in attendees[ATTENDEES_PER_COLUMN-num_instructors:] -%>>
-                            \item <<< attendee.name.given_names|e >>> <<< attendee.name.family_name|e >>>
+                            \item <<< attendee.name.common|e >>>
                         <<% endfor -%>>
                     \end{itemize}
                 \end{minipage}
@@ -132,7 +132,7 @@
                         Kursleiter:
                         \begin{itemize}
                             <<%- for instr in course.instructors -%>>
-                                \item <<< instr.name.given_names|e >>> <<< instr.name.family_name|e >>>
+                                \item <<< instr.name.common|e >>>
                             <<% endfor -%>>
                         \end{itemize}
                     <<% endif %>>
@@ -140,7 +140,7 @@
                         Teilnehmer:
                         \begin{itemize}
                         <<%- for attendee, attendee_tracks in attendees -%>>
-                            \item <<< attendee.name.given_names|e >>> <<< attendee.name.family_name|e >>>
+                            \item <<< attendee.name.common|e >>>
                         <<% endfor -%>>
                         \end{itemize}
                     <<% endif %>>

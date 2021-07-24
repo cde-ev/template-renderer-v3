@@ -5,6 +5,7 @@ import json
 import datetime
 import pathlib
 from typing import List, Dict, Tuple, Any, Optional, Iterable
+from warnings import warn
 
 MINIMUM_EXPORT_VERSION = [12, 0]
 MAXIMUM_EXPORT_VERSION = [15, 2**62]
@@ -549,6 +550,21 @@ class Registration:
 
 
 class Name:
+    """Represent names of personas.
+
+    This holds all parts of a personas name:
+    * title: placed in front of the actual name (like 'Dr.', 'Prof.' etc)
+    * given_names: all forenames of a persona (should be identical to the entry on their ID)
+    * display_name: name by which the persona wants to be called by others ('known as')
+    * family_name: a personas surname
+    * name_supplement: analogous to title, but behind the actual name
+
+    To use the right forename and surname of a persona at the right place, there are some
+    additional properties which construct the name for several purposes.
+
+    This follows the conventions described by
+    https://db.cde-ev.de/doc/Design_UX_Conventions.html
+    """
     def __init__(self):
         self.title = ""  # type: str
         self.given_names = ""  # type: str
@@ -560,10 +576,83 @@ class Name:
         return f"{type(self).__name__}({self.fullname})"
 
     @property
+    def common(self) -> str:
+        """This is should be the default solution if no other fits better.
+
+        Corresponds to `util.persona_name(persona)`.
+        """
+        return f"{self.common_forename} {self.common_surname}"
+
+    @property
+    def common_forename(self) -> str:
+        """This is should be the default solution if no other fits better."""
+        return self.display_name if self.display_name in self.given_names else self.given_names
+
+    @property
+    def common_surname(self) -> str:
+        """This is should be the default solution if no other fits better."""
+        return self.family_name
+
+    @property
     def fullname(self) -> str:
+        """This is deprecated and is only kept for backward compatibility."""
+        warn("Fullname property is deprecated; use the other name properties instead.", FutureWarning)
         return ((self.title + " ") if self.title else "") \
                + self.given_names + " " + self.family_name \
                + ((" " + self.name_supplement) if self.name_supplement else "")
+
+    @property
+    def salutation(self) -> str:
+        """This should be used when a user is directly addressed (saluted).
+
+        Corresponds to `util.persona_name(persona, only_display_name=True, with_family_name=False)`.
+        """
+        return self.display_name if self.display_name else self.given_names
+
+    @property
+    def legal(self) -> str:
+        """This should be used whenever the user is addressed in a legal context.
+
+        Corresponds to `util.persona_name(persona, only_given_names=True)`.
+        """
+        return f"{self.title or ''} {self.given_names} {self.family_name} {self.name_supplement or ''}".strip()
+
+    @property
+    def nametag(self) -> str:
+        """This should be used on nametags only."""
+        return f"{self.nametag_forename} {self.nametag_surname}"
+
+    @property
+    def nametag_forename(self) -> str:
+        """This should be used on nametags only."""
+        return self.display_name
+
+    @property
+    def nametag_surname(self) -> str:
+        """This should be used on nametags only."""
+        return f"{self.given_names if self.display_name not in self.given_names else ''} {self.family_name}".strip()
+
+    @property
+    def organizational(self) -> str:
+        """This should be used for lists.
+
+        Corresponds to `util.persona_name(persona, given_and_display_names=True)`.
+        """
+        return f"{self.organizational_forename} {self.organizational_surname}"
+
+    @property
+    def organizational_forename(self) -> str:
+        """This should be used for lists."""
+        if self.display_name == self.given_names:
+            forename = self.display_name
+        else:
+            forename = f"{self.given_names} ({self.display_name})"
+        return forename
+
+    @property
+    def organizational_surname(self) -> str:
+        """This should be used for lists."""
+        return self.family_name
 
     @classmethod
     def from_json_persona(cls, data: Dict[str, Any]) -> 'Name':
