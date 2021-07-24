@@ -6,7 +6,7 @@ steps:
   - name: mypy
     image: python
     commands:
-      - pip install -r requirements.txt
+      - pip install jinja2 pytz
       - mypy .
 
 trigger:
