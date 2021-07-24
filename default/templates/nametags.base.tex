@@ -123,14 +123,44 @@
                                                         \begin{flushleft}
                                                             {<<<course.shortname|e>>>
                                                                 <<% if p in course.instructors %>><<<CONFIG.nametags.course_instructor_suffix|e>>><<% endif %>>
+                                                                <<% if p.is_orga %>><<<CONFIG.nametags.orga_suffix|e>>><<% endif %>>
                                                                 <<% if merged %>><<<CONFIG.nametags.merge_courses_suffix|e>>><<% endif %>>}
                                                         \end{flushleft}
                                                     }%
                                                 <<% endblock %>>
                                             <<%- else -%>>
-                                                \hspace*{40.4mm}
+                                                <<% if p.is_orga %>>
+                                                    % Use aka logo as orga logo
+                                                    <<% if CONFIG.nametags.course_icon_path -%>>
+                                                        \parbox[t][17mm][c]{15mm}{
+                                                            <<%- with icon = find_asset(CONFIG.layout.logo_file) -%>>
+                                                                <<% if icon -%>>
+                                                                    \includegraphics[keepaspectratio=true, width=1.2cm, height=1.2cm]{<<< icon >>>}
+                                                                <<% else %>>
+                                                                    \
+                                                                <<% endif -%>>
+                                                            <<% endwith -%>>
+                                                        }%
+                                                    <<% endif -%>>
+                                                    % Use 'Orga' as course name
+                                                    \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
+                                                        \begin{flushleft}
+                                                            Orga
+                                                        \end{flushleft}
+                                                    }%
+                                                <<% else %>>
+                                                  \hspace*{40.4mm}
+                                                <<% endif %>>
                                             <<%- endif %>>
                                             <<%- if not loop.last %>>\hspace{3mm}<<% endif %>>%
+                                        <<% else %>>
+                                            <<% if registration.is_orga %>>
+                                                \parbox[t][17mm][c]{58.9mm}{
+                                                        \begin{flushleft}
+                                                            Orga
+                                                        \end{flushleft}
+                                                    }%
+                                            <<% endif %>>
                                         <<% endfor -%>>
                                     <<% endwith -%>>
                                 <<% endblock -%>>
