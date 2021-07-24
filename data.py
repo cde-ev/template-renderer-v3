@@ -136,15 +136,15 @@ ALL_ENUMS = (Genders, RegistrationPartStati, CourseTrackStati, FieldDatatypes, A
 
 class Event:
     def __init__(self):
-        self.title = ""  # type: str
-        self.shortname = ""  # type: str
-        self.parts = []  # type: List[EventPart]
-        self.tracks = []  # type: List[EventTrack]
+        self.title: str = ""
+        self.shortname: str = ""
+        self.parts: List[EventPart] = []
+        self.tracks: List[EventTrack] = []
 
-        self.registrations = []  # type: List[Registration]
-        self.courses = []  # type: List[Course]
-        self.lodgement_groups = []  # type: List[LodgementGroup]
-        self.lodgements = []  # type: List[Lodgement]
+        self.registrations: List[Registration] = []
+        self.courses: List[Course] = []
+        self.lodgement_groups: List[LodgementGroup] = []
+        self.lodgements: List[Lodgement] = []
 
         self.course_room_field = None
 
@@ -255,13 +255,13 @@ class Event:
 
 class EventPart:
     def __init__(self):
-        self.id = 0  # type: int
-        self.title = ""  # type: str
-        self.shortname = ""  # type: str
-        self.begin = datetime.date.today()  # type: datetime.date
-        self.end = datetime.date.today()  # type: datetime.date
+        self.id: int = 0
+        self.title: str = ""
+        self.shortname: str = ""
+        self.begin: datetime.date = datetime.date.today()
+        self.end: datetime.date = datetime.date.today()
 
-        self.tracks = []  # type: List[EventTrack]
+        self.tracks: List[EventTrack] = []
 
     def __repr__(self):
         return f"{type(self).__name__}({self.shortname})"
@@ -288,13 +288,13 @@ class EventPart:
 
 class EventTrack:
     def __init__(self):
-        self.id = 0  # type: int
-        self.part = None  # type: EventPart
+        self.id: int = 0
+        self.part: EventPart = None
 
-        self.title = ""  # type: str
-        self.shortname = ""  # type: str
-        self.sortkey = 0  # type: int
-        self.num_choices = 0  # type: int
+        self.title: str = ""
+        self.shortname: str = ""
+        self.sortkey: int = 0
+        self.num_choices: int = 0
 
     def __repr__(self):
         return f"{type(self).__name__}({self.shortname})"
@@ -314,12 +314,12 @@ class EventTrack:
 
 class Course:
     def __init__(self):
-        self.id = 0  # type: int
-        self.nr = ""  # type: str
-        self.title = ""  # type: str
-        self.shortname = ""  # type: str
-        self.fields = {}  # type: Dict[str, object]
-        self.tracks = {}  # type: Dict[EventTrack, CourseTrack]
+        self.id: int = 0
+        self.nr: str = ""
+        self.title: str = ""
+        self.shortname: str = ""
+        self.fields: Dict[str, object] = {}
+        self.tracks: Dict[EventTrack, CourseTrack] = {}
 
     def __repr__(self):
         return f"{type(self).__name__}({self.nr}. {self.shortname})"
@@ -365,10 +365,10 @@ class Course:
 
 class CourseTrack:
     def __init__(self):
-        self.track = None  # type: EventTrack
-        self.course = None  # type: Course
-        self.status = CourseTrackStati.not_offered  # type: CourseTrackStati
-        self.attendees = []  # type: [Tuple[Registration, bool]]
+        self.track: EventTrack = None
+        self.course: Course = None
+        self.status: CourseTrackStati = CourseTrackStati.not_offered
+        self.attendees: [Tuple[Registration, bool]] = []
 
     def __repr__(self):
         return f"{type(self).__name__}(course={self.course!r}, track={self.track!r})"
@@ -392,9 +392,9 @@ class CourseTrack:
 
 class LodgementGroup:
     def __init__(self):
-        self.id = 0  # type: int
-        self.title = ""  # type: str
-        self.lodgements = []  # type: List[Lodgement]
+        self.id: int = 0
+        self.title: str = ""
+        self.lodgements: List[Lodgement] = []
 
     def __repr__(self):
         return f"{type(self).__name__}({self.title})"
@@ -409,11 +409,11 @@ class LodgementGroup:
 
 class Lodgement:
     def __init__(self):
-        self.id = 0  # type: int
-        self.title = ""  # type: str
-        self.group = None  # type: Optional[LodgementGroup]
-        self.fields = {}  # type: Dict[str, object]
-        self.parts = {}  # type: Dict[EventPart, LodgementPart]
+        self.id: int = 0
+        self.title: str = ""
+        self.group: Optional[LodgementGroup] = None
+        self.fields: Dict[str, object] = {}
+        self.parts: Dict[EventPart, LodgementPart] = {}
 
     def __repr__(self):
         return f"{type(self).__name__}({self.title})"
@@ -444,9 +444,9 @@ class Lodgement:
 
 class LodgementPart:
     def __init__(self):
-        self.part = None  # type: EventPart
-        self.lodgement = None  # type: Lodgement
-        self.inhabitants = []  # type: List[Tuple[Registration, bool]]
+        self.part: EventPart = None
+        self.lodgement: Lodgement = None
+        self.inhabitants: List[Tuple[Registration, bool]] = []
 
     def __repr__(self):
         return f"{type(self).__name__}(lodgement={self.lodgement!r}, part={self.part!r})"
@@ -462,21 +462,21 @@ class LodgementPart:
 
 class Registration:
     def __init__(self):
-        self.id = 0  # type: int
-        self.cdedbid = 0  # type: int
-        self.name = Name()  # type: Name
-        self.gender = Genders.not_specified  # type: Genders
-        self.birthday = datetime.datetime.today()  # type: datetime.date
-        self.age = 0  # type: int
-        self.email = ""  # type: str
-        self.telephone = ""  # type: str
-        self.mobile = ""  # type: str
-        self.address = Address()  # type: Address
+        self.id: int = 0
+        self.cdedbid: int = 0
+        self.name: Name = Name()
+        self.gender: Genders = Genders.not_specified
+        self.birthday: datetime.date = datetime.datetime.today()
+        self.age: int = 0
+        self.email: str = ""
+        self.telephone: str = ""
+        self.mobile: str = ""
+        self.address: Address = Address()
 
-        self.list_consent = False  # type: bool
-        self.tracks = {}  # type: Dict[EventTrack, RegistrationTrack]
-        self.parts = {}  # type: Dict[EventPart, RegistrationPart]
-        self.fields = {}  # type: Dict[str, object]
+        self.list_consent: bool = False
+        self.tracks: Dict[EventTrack, RegistrationTrack] = {}
+        self.parts: Dict[EventPart, RegistrationPart] = {}
+        self.fields: Dict[str, object] = {}
 
     def __repr__(self):
         return f"{type(self).__name__}(name={self.name!r}, id={self.id})"
@@ -566,11 +566,11 @@ class Name:
     https://db.cde-ev.de/doc/Design_UX_Conventions.html
     """
     def __init__(self):
-        self.title = ""  # type: str
-        self.given_names = ""  # type: str
-        self.family_name = ""  # type: str
-        self.name_supplement = ""  # type: str
-        self.display_name = ""  # type: str
+        self.title: str = ""
+        self.given_names: str = ""
+        self.family_name: str = ""
+        self.name_supplement: str = ""
+        self.display_name: str = ""
 
     def __repr__(self):
         return f"{type(self).__name__}({self.fullname})"
@@ -667,11 +667,11 @@ class Name:
 
 class Address:
     def __init__(self):
-        self.address = ""  # type: str
-        self.address_supplement = ""  # type: str
-        self.postal_code = ""  # type: str
-        self.location = ""  # type: str
-        self.country = ""  # type: str
+        self.address: str = ""
+        self.address_supplement: str = ""
+        self.postal_code: str = ""
+        self.location: str = ""
+        self.country: str = ""
 
     def __repr__(self):
         inline_address = self.full_address.replace('\n', ', ')
@@ -702,11 +702,11 @@ class Address:
 
 class RegistrationPart:
     def __init__(self):
-        self.part = None  # type: EventPart
-        self.registration = None  # type: Registration
-        self.status = RegistrationPartStati.not_applied  # type: RegistrationPartStati
-        self.lodgement = None  # type: Lodgement
-        self.campingmat = False  # type: bool
+        self.part: EventPart = None
+        self.registration: Registration = None
+        self.status: RegistrationPartStati = RegistrationPartStati.not_applied
+        self.lodgement: Lodgement = None
+        self.campingmat: bool = False
 
     def __repr__(self):
         return f"{type(self).__name__}(registration={self.registration!r}, part={self.part!r})"
@@ -727,12 +727,12 @@ class RegistrationPart:
 
 class RegistrationTrack:
     def __init__(self):
-        self.track = None  # type: EventTrack
-        self.registration = None  # type: Registration
-        self.registration_part = None  # type: RegistrationPart
-        self.course = None  # type: Course
-        self.offered_course = None  # type: Course
-        self.choices = []  # type: List[Optional[Course]]
+        self.track: EventTrack = None
+        self.registration: Registration = None
+        self.registration_part: RegistrationPart = None
+        self.course: Course = None
+        self.offered_course: Course = None
+        self.choices: List[Optional[Course]] = []
 
     def __repr__(self):
         return f"{type(self).__name__}(registration={self.registration!r}, track={self.track!r})"
