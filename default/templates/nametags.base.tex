@@ -94,6 +94,11 @@
                                             \hspace{3mm}%
                                             \includegraphics[keepaspectratio=true, height=0.8cm]{<<< find_asset('nametag_minor.pdf') >>>}
                                         <<% endif %>>
+                                        <<% if p.is_orga -%>>
+                                            \hspace{3mm}%
+                                            <<# Maybe replace with a fitting icon #>>
+                                            Orga
+                                        <<% endif %>>
                                     <<% endblock %>>
                                 }%
                                 \\[1mm]%
@@ -123,7 +128,6 @@
                                                         \begin{flushleft}
                                                             {<<<course.shortname|e>>>
                                                                 <<% if p in course.instructors %>><<<CONFIG.nametags.course_instructor_suffix|e>>><<% endif %>>
-                                                                <<% if p.is_orga %>><<<CONFIG.nametags.orga_suffix|e>>><<% endif %>>
                                                                 <<% if merged %>><<<CONFIG.nametags.merge_courses_suffix|e>>><<% endif %>>}
                                                         \end{flushleft}
                                                     }%
