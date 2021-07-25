@@ -29,7 +29,7 @@ def get_active_registrations(event: Event, parts: Iterable[EventPart] = None, in
 
 
 def get_nametag_courses(registration: Registration, tracks: Iterable[EventTrack], merge=True,
-                        second_always_right=False) -> Tuple[List[Optional[Course]], bool]:
+                        second_always_right=False) -> Tuple[List[Optional[Course]], bool, bool]:
     """Get the courses to be printed on the nametag from a list of the event tracks and the registration
 
     :param registration: The registration to get its courses
@@ -37,7 +37,8 @@ def get_nametag_courses(registration: Registration, tracks: Iterable[EventTrack]
     :param merge: Merge equal courses of the first and second track
     :param second_always_right: Return a None value to push the second course to the right, if the participant is
         not present in the first track's part
-    :returns The reduced list of courses and a flag to indicate if the courses have been merged
+    :returns The reduced list of courses, a flag to indicate if the courses have been merged and a flag to indicate
+        if the persona attends at at least one course.
     """
     courses = []  # type: List[Optional[Course]]
     for t in tracks:
@@ -47,13 +48,15 @@ def get_nametag_courses(registration: Registration, tracks: Iterable[EventTrack]
         elif second_always_right:
             courses.append(None)
 
+    attends_any_course = any(course is not None for course in courses)
+
     if merge:
         if len(courses) > 1 and courses[0] is courses[1] and courses[0] is not None:
-            return [courses[0]], True
+            return [courses[0]], True, attends_any_course
         else:
-            return courses, False
+            return courses, False, attends_any_course
     else:
-        return courses, False
+        return courses, False, attends_any_course
 
 
 def gather_course_attendees(course: Course, part: EventPart = None)\

@@ -103,7 +103,7 @@
                                 \\[1mm]%
                                 % Course(s)
                                 <<% block nametag_courses -%>>
-                                    <<% with courses, merged = UTIL.get_nametag_courses(
+                                    <<% with courses, merged, attends_any_course = UTIL.get_nametag_courses(
                                             p, part.tracks[:2] if part else EVENT.tracks[:2],
                                             CONFIG.getboolean('nametags', 'merge_courses'), CONFIG.nametags.second_track_always_right) -%>>
                                         <<% for course in courses -%>>
@@ -185,7 +185,7 @@
                         \vspace{6mm}
                         <<%- block nametag_rearside scoped %>>
                             <<%- block nametag_reartext scoped %>>
-                                <<% with courses, merged = UTIL.get_nametag_courses(
+                                <<% with courses, merged, attends_any_course = UTIL.get_nametag_courses(
                                         p, part.tracks[:2] if part else EVENT.tracks[:2], True, False) -%>>
                                     <<% if EVENT.course_room_field and courses %>>
                                         <<% if courses|length > 1 %>>Kursräume<<% else %>>Kursraum<<% endif %>>:
