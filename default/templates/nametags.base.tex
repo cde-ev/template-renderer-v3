@@ -131,38 +131,35 @@
                                                         \end{flushleft}
                                                     }%
                                                 <<% endblock %>>
-                                            <<%- elif p.is_orga -%>>
-                                                % Use aka logo as orga logo
-                                                <<# This is for layout reasons, to align the orga course with other courses #>>
-                                                <<% if CONFIG.nametags.course_icon_path -%>>
-                                                    \parbox[t][17mm][c]{15mm}{
-                                                        <<%- with icon = find_asset(CONFIG.layout.logo_file) -%>>
-                                                            <<% if icon -%>>
-                                                                \includegraphics[keepaspectratio=true, width=1.2cm, height=1.2cm]{<<< icon >>>}
-                                                            <<% else %>>
-                                                                \
-                                                            <<% endif -%>>
-                                                        <<% endwith -%>>
+                                            <<#- print an explicit 'Orga' course note.
+                                                 If the orga attends a course in any track, we print this note for each track where he does not attend a course.
+                                                 If the orga does not attend any course, we print this only once (at the first iteration). -#>>
+                                            <<%- elif p.is_orga and (attends_any_course or loop.first) -%>>
+                                                <<% block nametag_orga_course scoped %>>
+                                                    % Use aka logo as orga logo
+                                                    <<# This is for layout reasons, to align the orga course with other courses #>>
+                                                    <<% if CONFIG.nametags.course_icon_path -%>>
+                                                        \parbox[t][17mm][c]{15mm}{
+                                                            <<%- with icon = find_asset(CONFIG.layout.logo_file) -%>>
+                                                                <<% if icon -%>>
+                                                                    \includegraphics[keepaspectratio=true, width=1.2cm, height=1.2cm]{<<< icon >>>}
+                                                                <<% else %>>
+                                                                    \
+                                                                <<% endif -%>>
+                                                            <<% endwith -%>>
+                                                        }%
+                                                    <<% endif -%>>
+                                                    % Use 'Orga' as course name
+                                                    \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
+                                                        \begin{flushleft}
+                                                            Orga
+                                                        \end{flushleft}
                                                     }%
-                                                <<% endif -%>>
-                                                % Use 'Orga' as course name
-                                                \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
-                                                    \begin{flushleft}
-                                                        Orga
-                                                    \end{flushleft}
-                                                }%
+                                                <<% endblock %>>
                                             <<% else %>>
                                               \hspace*{40.4mm}
                                             <<%- endif %>>
                                             <<%- if not loop.last %>>\hspace{3mm}<<% endif %>>%
-                                        <<% else %>>
-                                            <<% if registration.is_orga %>>
-                                                \parbox[t][17mm][c]{58.9mm}{
-                                                    \begin{flushleft}
-                                                        Orga
-                                                    \end{flushleft}
-                                                }%
-                                            <<% endif %>>
                                         <<% endfor -%>>
                                     <<% endwith -%>>
                                 <<% endblock -%>>
