@@ -153,10 +153,10 @@ def tnlists_cl(event: Event, _config: ConfigParser, _output_dir: pathlib.Path, _
     for part in event.parts:
         # We need to build the rooms_by_name dict new for every part, as the rooms are dependent on the course_rooms of
         # the courses taking place in that part.
-        rooms_by_name = {l.title: (l, []) for l in event.lodgements}\
-            # type: Dict[str, Tuple[Optional[Lodgement], List[Tuple[Course, List[EventTrack]]]]]
+        rooms_by_name: Dict[str, Tuple[Optional[Lodgement], List[Tuple[Course, List[EventTrack]]]]]
+        rooms_by_name = {l.title: (l, []) for l in event.lodgements}
         for c in event.courses:
-            course_room = c.fields.get(event.course_room_field, None)  # type: Any
+            course_room = c.fields.get(event.course_room_field, None)
             course_tracks = [t for t in part.tracks if c.tracks[t].status == CourseTrackStati.active]
             if course_room and course_tracks:
                 if course_room in rooms_by_name:
@@ -234,11 +234,10 @@ def group_participants(event: Event, config: ConfigParser, participants: Iterabl
     :return: List of groups as tuple of group name and list of participants
     :rtype: [(str, [Registration])]
     """
-    age_groups = [(int(x), [])
-                  for x in config.get('nametags', 'age_groups', fallback="").split(',')]\
-        # type: List[Tuple[int, List[Registration]]]
-    lodgement_groups = [(lg, [])
-                        for lg in event.lodgement_groups]  # type: List[Tuple[LodgementGroup, List[Registration]]]
+    age_groups: List[Tuple[int, List[Registration]]]
+    age_groups = [(int(x), []) for x in config.get('nametags', 'age_groups', fallback="").split(',')]
+    lodgement_groups: List[Tuple[LodgementGroup, List[Registration]]]
+    lodgement_groups = [(lg, []) for lg in event.lodgement_groups]
     others = []
     for p in participants:
         for max_age, l in age_groups:
@@ -272,8 +271,8 @@ def get_meals(config: ConfigParser, registrations: Iterable[Registration])\
         return {r: None
                 for r in registrations}
 
-    meal_map = {alias: Meals(i)
-                for i, alias in enumerate(config['data']['meal_values'].split(','))}  # type: Dict[Any, Meals]
+    meal_map: Dict[Any, Meals] = {
+        alias: Meals(i) for i, alias in enumerate(config['data']['meal_values'].split(','))}
 
     result = {}
     for r in registrations:
