@@ -156,7 +156,8 @@ def tnlists_cl(event: Event, _config: ConfigParser, _output_dir: pathlib.Path, _
         rooms_by_name: Dict[str, Tuple[Optional[Lodgement], List[Tuple[Course, List[EventTrack]]]]]
         rooms_by_name = {l.title: (l, []) for l in event.lodgements}
         for c in event.courses:
-            course_room = c.fields.get(event.course_room_field, None)
+            # TODO rework storage of fields
+            course_room = c.fields.get(event.course_room_field, None)  # type: Any
             course_tracks = [t for t in part.tracks if c.tracks[t].status == CourseTrackStati.active]
             if course_room and course_tracks:
                 if course_room in rooms_by_name:
