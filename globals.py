@@ -1,13 +1,14 @@
+import pathlib
 
 from typing import Dict, Callable, Any, Optional
 from data import Event
 from configparser import ConfigParser
 
 # The dictionary of render targets and a decorator to add those
-TARGETS = {}  # type: Dict[str, Callable[[Event, ConfigParser, str, str], Any]]
+TARGETS: Dict[str, Callable[[Event, ConfigParser, pathlib.Path, str], Any]] = {}
 
 
-def target_function(fun: Callable[[Event, ConfigParser, str, str], Any], name: Optional[str] = None):
+def target_function(fun: Callable[[Event, ConfigParser, pathlib.Path, str], Any], name: Optional[str] = None):
     """
     Decorator to apply to a function to make it a target function
     """

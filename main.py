@@ -87,8 +87,9 @@ import default.targets  # type: ignore
 custom_targets_file = CUSTOM_DIR / 'targets.py'
 if custom_targets_file.is_file():
     spec = importlib.util.spec_from_file_location("custom.targets", custom_targets_file)
-    foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)  # type: ignore
+    if spec:
+        foo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(foo)  # type: ignore
 
 # read input json file
 event = data.load_input_file(args.input)
