@@ -6,7 +6,7 @@ steps:
   - name: mypy
     image: python
     commands:
-      - pip install jinja2 pytz mypy==0.910
+      - pip install jinja2 pytz types-pytz mypy==0.910
       - mypy .
 
 trigger:
