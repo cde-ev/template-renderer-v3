@@ -1,0 +1,15 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: mypy
+    image: python
+    commands:
+      - pip install jinja2 pytz types-pytz mypy==0.910
+      - mypy .
+
+trigger:
+  branch:
+    - master
+    - stable

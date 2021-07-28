@@ -40,7 +40,7 @@ def get_nametag_courses(registration: Registration, tracks: Iterable[EventTrack]
     :returns The reduced list of courses, a flag to indicate if the courses have been merged and a flag to indicate
         if the persona attends at at least one course.
     """
-    courses = []  # type: List[Optional[Course]]
+    courses: List[Optional[Course]] = []
     for t in tracks:
         reg_track = registration.tracks[t]
         if reg_track.registration_part.status.is_present:
@@ -69,7 +69,7 @@ def gather_course_attendees(course: Course, part: EventPart = None)\
     :return: A list of tuples, each representing a unique attendee of the course:
         (Registration: list of EventTracks, in which they attend the course)
     """
-    regs = {}  # type: Dict[Registration, List[EventTrack]]
+    regs: Dict[Registration, List[EventTrack]] = {}
     for event_track, course_track in course.tracks.items():
         if not part or event_track in part.tracks:
             for reg, instr in course_track.attendees:
@@ -96,7 +96,7 @@ def generate_part_jobnames(event: Event) -> Dict[EventPart, str]:
               for part in event.parts}
 
     # Find ambiguous suffixes
-    reverse_result = {}  # type: Dict[str, EventPart]
+    reverse_result: Dict[str, EventPart] = {}
     ambiguous_parts = set()
     for part, suffix in result.items():
         if suffix in reverse_result:
