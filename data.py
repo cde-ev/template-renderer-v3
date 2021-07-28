@@ -573,7 +573,7 @@ class Name:
         self.display_name: str = ""
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.fullname})"
+        return f"{type(self).__name__}({self.common})"
 
     @property
     def common(self) -> str:
