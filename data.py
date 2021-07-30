@@ -478,6 +478,8 @@ class Registration:
         self.parts: Dict[EventPart, RegistrationPart] = {}
         self.fields: Dict[str, object] = {}
 
+        self.is_orga: bool = False
+
     def __repr__(self):
         return f"{type(self).__name__}(name={self.name!r}, id={self.id})"
 
@@ -515,6 +517,7 @@ class Registration:
         registration.mobile = data['persona']['mobile']
         registration.address = Address.from_json_persona(data['persona'])
         registration.list_consent = data['list_consent']
+        registration.is_orga = data['persona']['is_orga']
 
         for field, value in data['fields'].items():
             if field not in field_types:

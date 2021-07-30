@@ -94,12 +94,16 @@
                                             \hspace{3mm}%
                                             \includegraphics[keepaspectratio=true, height=0.8cm]{<<< find_asset('nametag_minor.pdf') >>>}
                                         <<% endif %>>
+                                        <<% if p.is_orga -%>>
+                                            \hspace{3mm}%
+                                            \includegraphics[keepaspectratio=true, height=0.8cm]{<<< find_asset('nametag_orga.pdf') >>>}
+                                        <<% endif %>>
                                     <<% endblock %>>
                                 }%
                                 \\[1mm]%
                                 % Course(s)
                                 <<% block nametag_courses -%>>
-                                    <<% with courses, merged = UTIL.get_nametag_courses(
+                                    <<% with courses, merged, attends_any_course = UTIL.get_nametag_courses(
                                             p, part.tracks[:2] if part else EVENT.tracks[:2],
                                             CONFIG.getboolean('nametags', 'merge_courses'), CONFIG.nametags.second_track_always_right) -%>>
                                         <<% for course in courses -%>>
@@ -127,8 +131,33 @@
                                                         \end{flushleft}
                                                     }%
                                                 <<% endblock %>>
-                                            <<%- else -%>>
-                                                \hspace*{40.4mm}
+                                            <<#- print an explicit 'Orga' course note.
+                                                 If the orga attends a course in any track, we print this note for each track where he does not attend a course.
+                                                 If the orga does not attend any course, we print this only once (at the first iteration). -#>>
+                                            <<%- elif p.is_orga and (attends_any_course or loop.first) -%>>
+                                                <<% block nametag_orga_course scoped %>>
+                                                    % Use aka logo as orga logo
+                                                    <<# This is for layout reasons, to align the orga course with other courses #>>
+                                                    <<% if CONFIG.nametags.course_icon_path -%>>
+                                                        \parbox[t][17mm][c]{15mm}{
+                                                            <<%- with icon = find_asset(CONFIG.layout.logo_file) -%>>
+                                                                <<% if icon -%>>
+                                                                    \includegraphics[keepaspectratio=true, width=1.2cm, height=1.2cm]{<<< icon >>>}
+                                                                <<% else %>>
+                                                                    \
+                                                                <<% endif -%>>
+                                                            <<% endwith -%>>
+                                                        }%
+                                                    <<% endif -%>>
+                                                    % Use 'Orga' as course name
+                                                    \parbox[t][17mm][c]{<<% if courses|length > 1 %>>25.4mm<<% else %>>58.9mm<<% endif %>>}{
+                                                        \begin{flushleft}
+                                                            Orga
+                                                        \end{flushleft}
+                                                    }%
+                                                <<% endblock %>>
+                                            <<% else %>>
+                                              \hspace*{40.4mm}
                                             <<%- endif %>>
                                             <<%- if not loop.last %>>\hspace{3mm}<<% endif %>>%
                                         <<% endfor -%>>
@@ -153,7 +182,7 @@
                         \vspace{6mm}
                         <<%- block nametag_rearside scoped %>>
                             <<%- block nametag_reartext scoped %>>
-                                <<% with courses, merged = UTIL.get_nametag_courses(
+                                <<% with courses, merged, attends_any_course = UTIL.get_nametag_courses(
                                         p, part.tracks[:2] if part else EVENT.tracks[:2], True, False) -%>>
                                     <<% if EVENT.course_room_field and courses %>>
                                         <<% if courses|length > 1 %>>Kursräume<<% else %>>Kursraum<<% endif %>>:
