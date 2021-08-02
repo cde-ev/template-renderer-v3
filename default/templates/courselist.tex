@@ -1,14 +1,16 @@
-<<# List of all courses to be used in the orga office or at the blackboard. With shortname, course instructors, course
-    room and participant count for each track.
+<<# List of all courses to be used in the orga office or at the blackboard.
+    With shortname, course instructors, course room and participant count for each track.
 
-    Required template variables: None.
+    Required template variables:
+    * tracks: All tracks which should be taken into account.
+    * courses: All courses which should be taken into account.
 #>>
 <<% extends "lists.base.tex" %>>
 
 <<% set title = "Kursliste " + EVENT.title|e %>>
 <<% set num_columns = 3
                       + (1 if EVENT.course_room_field else 0)
-                      + EVENT.tracks|length %>>
+                      + tracks|length %>>
 <<% set hide_header = True %>>
 
 <<% block table_head %>>
@@ -17,13 +19,13 @@
         & \head{Kursraum}
     <<% endif %>>
     & \head{Kursleiter}
-    <<% for track in EVENT.tracks -%>>
-        & \head{Teilnehmer<<% if EVENT.tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
+    <<% for track in tracks -%>>
+        & \head{Teilnehmer<<% if tracks|length > 1 %>> <<< track.shortname|e >>><<% endif %>>}
     <<% endfor %>>
 <<% endblock %>>
 
 <<% block table_body %>>
-    <<% for course in EVENT.courses if course.is_active %>>
+    <<% for course in courses if course.is_active %>>
         <<< course.nr|e >>>. & <<< course.shortname|e >>>
         <<% if EVENT.course_room_field %>>
             & <<< course.fields[EVENT.course_room_field]|e >>>
@@ -33,7 +35,7 @@
             <<% if not loop.first %>>, <<% endif -%>>
             <<< instructor.name.common|e >>>
         <<%- endfor %>>
-        <<% for track in EVENT.tracks -%>>
+        <<% for track in tracks -%>>
             & <<% if course.tracks[track].status.is_active %>><<< course.tracks[track].attendees|length >>><<% endif %>>
         <<% endfor %>> \\
         \hline
