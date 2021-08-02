@@ -179,10 +179,28 @@ def tnlists_cl(event: Event, _config: ConfigParser, _output_dir: pathlib.Path, _
 
 
 @target_function
-def courselist(_event: Event, _config: ConfigParser, _output_dir: pathlib.Path, _match):
+def courselist(event: Event, _config: ConfigParser, _output_dir: pathlib.Path, _match):
     """Render the courselists"""
+    tracks = event.tracks
+    courses = event.courses
 
-    return [RenderTask('courselist.tex', 'courselist', {}, True)]
+    return [RenderTask('courselist.tex', 'courselist', {'tracks': tracks, 'courses': courses}, True)]
+
+
+@target_function
+def courselist_per_part(event: Event, _config: ConfigParser, _output_dir: pathlib.Path, _match):
+    """Render an individual courselist for each part of the event."""
+    return [
+        RenderTask(
+            'courselist.tex',
+            f'courselist_{part.shortname}',
+            {
+                'tracks': part.tracks,
+                'courses': [course for course in event.courses if any(course.tracks[track].status.is_active for track in part.tracks)]
+            },
+            True)
+        for part in event.parts
+    ]
 
 
 @target_function
