@@ -57,6 +57,9 @@ args = parser.parse_args()
 
 # resolve this to get absolute paths with correct filesystem-specific path delimiter
 CUSTOM_DIR: pathlib.Path = args.custom_dir.resolve()
+if not CUSTOM_DIR.is_dir():
+    print(f"The specified custom directory '{args.custom_dir}' either does not exist or is no directory.")
+    sys.exit(1)
 
 # Read config (default config and -- if available -- custom config)
 config = configparser.ConfigParser()
