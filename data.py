@@ -46,7 +46,7 @@ def calculate_age(reference: datetime.date, born: datetime.date) -> int:
 
 def registration_sort_key(r: 'Registration'):
     """ Sort key function for registrations. Should be used whenever sorting a list of registrations"""
-    return r.name.given_names, r.name.family_name
+    return r.name.common_forename, r.name.common_surname
 
 
 class Genders(enum.IntEnum):
