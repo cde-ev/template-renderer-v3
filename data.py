@@ -213,9 +213,10 @@ class Event:
         # Parse courses and course_segments
         event.courses = [Course.from_json(course_id, course_data, field_types, tracks_by_id)
                          for course_id, course_data in data['courses'].items()]
-        max_course_nr_len = max(len(c.nr) if c.nr else 0
-                                for c in event.courses)
-        event.courses.sort(key=(lambda c: c.nr.rjust(max_course_nr_len, '\0')))
+        if event.courses:
+            max_course_nr_len = max(len(c.nr) if c.nr else 0
+                                    for c in event.courses)
+            event.courses.sort(key=(lambda c: c.nr.rjust(max_course_nr_len, '\0')))
         courses_by_id = {c.id: c for c in event.courses}
 
         # Parse lodgements
