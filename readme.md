@@ -73,18 +73,18 @@ https://backports.debian.org/ for instructions to add the backports package repo
 ### Installation
 
 You can receive this template rendering script either by cloning the git repository or downloading and extracting the
-zip file of the latest stable branch.
+zip file of the latest master branch.
 
-The zip file can be downloaded from https://tracker.cde-ev.de/gitea/orgas/cde_template_renderer_v3/archive/stable.zip
+The zip file can be downloaded from https://tracker.cde-ev.de/gitea/orgas/cde_template_renderer_v3/archive/master.zip
 
 Alternatively, using Git, open up a terminal (on Windows preferably a *Git Bash*) and type:
 ```
 $ git clone https://tracker.cde-ev.de/gitea/orgas/cde_template_renderer_v3.git
 $ cd cde_template_renderer_v3/
-$ git checkout stable
+$ git checkout master
 ```
 
-To upgrade to the latest stable version, open a terminal within the template renderer's directory and type:
+To upgrade to the latest master version, open a terminal within the template renderer's directory and type:
 ```
 $ git pull
 ```
